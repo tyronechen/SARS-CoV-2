@@ -1,0 +1,25 @@
+	0
+0	Control 2h
+1	Control 2h
+2	Control 2h
+3	Control 6h
+4	Control 6h
+5	Control 6h
+6	Control 10h
+7	Control 10h
+8	Control 10h
+9	Control 24h
+10	Control 24h
+11	Control 24h
+12	Virus 2h
+13	Virus 2h
+14	Virus 2h
+15	Virus 6h
+16	Virus 6h
+17	Virus 6h
+18	Virus 10h
+19	Virus 10h
+20	Virus 10h
+21	Virus 24h
+22	Virus 24h
+23	Virus 24h
