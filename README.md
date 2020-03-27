@@ -22,4 +22,4 @@ Software libraries involved are:
 - R 3.6.2
   - argparser 0.6
   - BiocManager 1.30.10
-  - mixOmics 6.10.8
+  - mixOmics 6.11.11
