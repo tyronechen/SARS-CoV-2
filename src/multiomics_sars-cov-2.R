@@ -1,7 +1,6 @@
 #!/usr/bin/Rscript
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
-library(argparser, quietly=TRUE)
 library(mixOmics)
 
 parse_data = function(infile_path) {
@@ -120,22 +119,4 @@ predict_diablo = function(data, test, classes) {
     truth=classes, predicted=predict.diablo$WeightedVote$max.dist[,2])
   print(confusion_matrix)
   print(get.BER(confusion_matrix))
-}
-
-parse_argv = function() {
-  p = arg_parser("Run DIABLO on multi-omics data")
-
-  # Add command line arguments
-  p = add_argument(p, "proteome", help="proteome path", type="character")
-  p = add_argument(p, "translatome", help="translatome path", type="character")
-  p = add_argument(p, "classes", help="classes path", type="character")
-  p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--out", help="write RData object", type="character")
-  p = add_argument(p, "--dist", help="distance metric to use", type="character")
-
-  # Parse the command line arguments
-  argv = parse_args(p)
-
-  # Do work based on the passed arguments
-  return(argv)
 }
