@@ -13,6 +13,18 @@ Method reference:
 
 - [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
 
+Experimental design:
+
+| Design        |              |             |             |          |          |           |           |
+|---------------|--------------|-------------|-------------|----------|----------|-----------|-----------|
+| Control       | Virus        |             |             |          |          |           |           |
+| 12            | 12           |             |             |          |          |           |           |
+| Control early | Control late | Virus early | Virus late  |          |          |           |           |
+| 6             | 6            | 6           | 6           |          |          |           |           |
+| Control_2h    | Control_6h   | Control_10h | Control_24h | Virus_2h | Virus_6h | Virus_10h | Virus_24h |
+| 3             | 3            | 3           | 3           | 3        | 3        | 3         | 3         |
+|               |              |             |             |          |          |           |           |
+
 Software libraries involved are:
 
 - python 3.8.2
