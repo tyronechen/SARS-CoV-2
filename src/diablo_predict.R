@@ -1,7 +1,7 @@
 #!/usr/bin/R
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
-# library(argparser, quietly=TRUE)
+library(argparser, quietly=TRUE)
 # library(mixOmics)
 source(file="multiomics_sars-cov-2.R")
 
