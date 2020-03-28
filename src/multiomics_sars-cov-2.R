@@ -1,12 +1,19 @@
 #!/usr/bin/Rscript
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
+library(argparser, quietly=TRUE)
 library(mixOmics)
 
-parse_data = function(infile_path) {
+parse_data = function(infile_path, offset=0) {
   # load in omics data into a diablo-compatible format
+  print("Parsing file:")
   print(infile_path)
-  return(read.table(infile_path, sep="\t", header=TRUE, row.names=1))
+  return(read.table(infile_path, sep="\t", header=TRUE, row.names=1) + offset)
+}
+
+remove_novar = function(data) {
+  # samples with zero variance are meaningless for PCA
+  return(data[, which(apply(data, 2, var) != 0)])
 }
 
 parse_classes = function(infile_path) {
@@ -20,6 +27,36 @@ create_design = function(data) {
                   dimnames = list(names(data), names(data)))
   diag(design) = 0
   return(design)
+}
+
+plot_individual_blocks = function(data, classes) {
+  # do pca on individual classes before proceeding
+  names = names(data)
+
+  print("Removing 0 variance columns from data...")
+  data = lapply(data, remove_novar)
+
+  print("Showing PCA component contribution...")
+  data_pca = lapply(data, pca, ncomp=dim(classes)[1], center=TRUE, scale=TRUE)
+
+  print("Plotting PCA component contribution...")
+  # lapply(data_pca, plot, title="Screeplot")
+  mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
+
+  print("Plotting PCA...")
+  # lapply(data_pca, plotIndiv, comp=c(1,2), ind.names=TRUE, group=classes,
+  #   legend=TRUE, title="PCA 1/2")
+  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
+    legend=TRUE, title=paste(y, "PCA 1/2")), data_pca, names)
+
+  print("Plotting correlation circle plots...")
+  # lapply(data_pca, plotVar, comp=c(1, 2), var.names=TRUE, title="PCA 1/2")
+  mapply(function(x, y) plotVar(x, comp=c(1, 2), title=paste(y, "PCA 1/2")),
+    data_pca, names)
+
+  print("Plotting biplots...")
+  mapply(function(x, y, z) biplot(y, cex=0.7, xlabs=paste(classes, 1:nrow(x)),
+    main=paste(z, "Biplot")), data, data_pca, names)
 }
 
 tune_ncomp = function(data, classes, design) {
