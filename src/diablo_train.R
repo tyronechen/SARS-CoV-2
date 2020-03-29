@@ -2,7 +2,7 @@
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
 library(argparser, quietly=TRUE)
-# library(mixOmics)
+library(parallel)
 source(file="multiomics_sars-cov-2.R")
 
 parse_argv = function() {
@@ -10,12 +10,11 @@ parse_argv = function() {
   p = arg_parser("Run DIABLO on multi-omics data")
 
   # Add command line arguments
-  p = add_argument(p, "proteome", help="proteome path", type="character")
-  p = add_argument(p, "translatome", help="translatome path", type="character")
-  p = add_argument(p, "classes", help="classes path", type="character")
+  p = add_argument(p, "classes", help="sample information", type="character")
+  p = add_argument(p, "--omics", help="paths to omics data", type="character", nargs=Inf)
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--out", help="write RData object", type="character")
-  p = add_argument(p, "--dist", help="distance metric to use", type="character")
+  p = add_argument(p, "--out", help="write RData object here", type="character")
+  p = add_argument(p, "--dist", help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]", type="character")
 
   # Parse the command line arguments
   argv = parse_args(p)
@@ -31,18 +30,39 @@ main = function() {
   } else {
     dist = "centroids.dist"
   }
+
+  print("Available cpus:")
+  print(detectCores())
+  print("Using cpus (change with --cpus):")
+  print(argv$cpus)
+  # q()
   print("Distance measure:")
   print(dist)
+
   options(warn=1)
-  # "../data/proteome_diablo.txt"
-  # "../data/translatome_diablo.txt"
-  # "../data/classes_diablo.txt"
-  prot = parse_data(argv$proteome)# + 1
-  tran = parse_data(argv$translatome)# + 1
-  print(dim(prot))
-  print(dim(tran))
+
+  paths = argv$omics
+
+  print("Paths to data:")
+  print(paths)
+
+  print("Parsing classes")
   classes = parse_classes(argv$classes)
-  data = list(proteome = prot, translatome = tran)
+
+  # parse out identifiers coded within the file paths
+  names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
+  names = unname(lapply(sapply(names, strsplit, ".", fixed=TRUE), head, 1))
+  names = unname(sapply(sapply(names, head, 1), strsplit, "_"))
+  names = unlist(lapply(lapply(names, tail, -1), paste, collapse="_"))
+  print("Omics data types (names follow SAMPLEID_OMICTYPE_OPTIONALFIELDS):")
+  print(names)
+
+  data = lapply(paths, parse_data)
+  names(data) = names
+  print("Data dimensions:")
+  dimensions = lapply(data, dim)
+  print(dimensions)
+
   design = create_design(data)
 
   # check dimension
@@ -52,12 +72,15 @@ main = function() {
   print("Design:")
   print(design)
 
-  # NOTE: if you get tuning errors, disable this block and set ncomp manually
-  tuned = tune_ncomp(data, classes, design)
-  print("Parameters with lowest error rate:")
-  tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
-  ncomp = tuned[which.max(tuned)]
+  plot_individual_blocks(data, classes)
 
+  # NOTE: if you get tuning errors, disable this block and set ncomp manually
+  # tuned = tune_ncomp(data, classes, design)
+  # print("Parameters with lowest error rate:")
+  # tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
+  # ncomp = tuned[which.max(tuned)]
+  ncomp = 10
+  dist = "centroids.dist"
   # ncomp = length(unique(classes))
   # ncomp = 10
   print("Components:")
