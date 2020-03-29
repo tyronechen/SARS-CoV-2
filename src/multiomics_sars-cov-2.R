@@ -87,8 +87,12 @@ tune_keepx = function(data, classes, ncomp, design, cpus=2, dist="centroids.dist
   # sufficient number of variables for downstream validation / interpretation.
   # See ?tune.block.splsda.
   print("Tuning keepX parameter...")
-  test_keepX = list(proteome = c(5:9, seq(10, 18, 2), seq(20,30,5)),
-                    translatome = c(5:9, seq(10, 18, 2), seq(20,30,5)))
+  # test_keepX = list(proteome = c(5:9, seq(10, 18, 2), seq(20,30,5)),
+  #                   translatome = c(5:9, seq(10, 18, 2), seq(20,30,5)))
+  test_keepX = mapply(function(name, dims) list(name=dims), names(data),
+    rep(list(c(5:9, seq(10, 18, 2), seq(20,30,5))))
+  )
+
   tune_data = tune.block.splsda(X = data, Y = classes, ncomp = ncomp,
                                 test.keepX = test_keepX, design = design,
                                 validation = 'Mfold', folds = 10, nrepeat = 1,
