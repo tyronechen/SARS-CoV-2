@@ -100,7 +100,7 @@ main = function() {
     print(paste("Saving diablo data to:", argv$out))
     save(classes, data, diablo, distance, file=argv$out)
   } else {
-    print(paste("Saving diablo data to:", "./diablo.RData"))
+    print(paste("Saving diablo data to:", "./diablo.RData")
     save(classes, data, diablo, distance, file="./diablo.RData")
   }
 }
