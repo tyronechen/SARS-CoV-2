@@ -11,11 +11,18 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--data", help="paths to omics data", type="character", nargs=Inf)
+  p = add_argument(p, "--data", help="paths to omics data", type="character",
+    nargs=Inf
+  )
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--ncomp", help="number of components", type="int", default=0)
-  p = add_argument(p, "--out", help="write RData object here", type="character")
-  p = add_argument(p, "--distance", help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]", type="character", default="max.dist")
+  p = add_argument(p, "--ncomp", help="component number", type="int", default=0)
+  p = add_argument(p, "--out", help="write RData object here", type="character",
+    default="./diablo.RData"
+  )
+  p = add_argument(p, "--distance",
+    help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]",
+    type="character", default="max.dist"
+  )
 
   # Parse the command line arguments
   argv = parse_args(p)
@@ -96,13 +103,8 @@ main = function() {
   assess_performance(diablo, dist=distance)
   predict_diablo(diablo, data, classes)
 
-  if (! exists(argv$out)) {
-    print(paste("Saving diablo data to:", argv$out))
-    save(classes, data, diablo, distance, file=argv$out)
-  } else {
-    print(paste("Saving diablo data to:", "./diablo.RData")
-    save(classes, data, diablo, distance, file="./diablo.RData")
-  }
+  print(paste("Saving diablo data to:", argv$out))
+  save(classes, data, diablo, distance, file=argv$out)
 }
 
 main()
