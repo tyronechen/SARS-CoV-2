@@ -34,6 +34,7 @@ main = function() {
   # q()
   print("Distance measure:")
   print(argv$distance)
+  distance = argv$distance
 
   options(warn=1)
 
@@ -81,6 +82,8 @@ main = function() {
   }
   print("Number of components:")
   print(ncomp)
+
+  data = lapply(data, remove_novar)
 
   keepx = tune_keepx(data, classes, ncomp, design, cpus=argv$cpus, dist=distance)
   print("keepx:")
