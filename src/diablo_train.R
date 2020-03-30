@@ -11,8 +11,9 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--omics", help="paths to omics data", type="character", nargs=Inf)
+  p = add_argument(p, "--data", help="paths to omics data", type="character", nargs=Inf)
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
+  p = add_argument(p, "--ncomp", help="number of components", type="int", default=10)
   p = add_argument(p, "--out", help="write RData object here", type="character")
   p = add_argument(p, "--dist", help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]", type="character")
 
@@ -25,10 +26,10 @@ parse_argv = function() {
 
 main = function() {
   argv = parse_argv()
-  if (! exists(argv$dist)) {
+  if (exists(argv$dist)) {
     dist = argv$dist
   } else {
-    dist = "centroids.dist"
+    dist = "max.dist"
   }
 
   print("Available cpus:")
@@ -41,7 +42,7 @@ main = function() {
 
   options(warn=1)
 
-  paths = argv$omics
+  paths = argv$data
 
   print("Paths to data:")
   print(paths)
@@ -75,11 +76,12 @@ main = function() {
   plot_individual_blocks(data, classes)
 
   # NOTE: if you get tuning errors, disable this block and set ncomp manually
-  # tuned = tune_ncomp(data, classes, design)
-  # print("Parameters with lowest error rate:")
-  # tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
-  # ncomp = tuned[which.max(tuned)]
-  ncomp = 10
+  tuned = tune_ncomp(data, classes, design)
+  print("Parameters with lowest error rate:")
+  tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
+  ncomp = tuned[which.max(tuned)]
+  # ncomp = 10
+
   dist = "centroids.dist"
   # ncomp = length(unique(classes))
   # ncomp = 10
