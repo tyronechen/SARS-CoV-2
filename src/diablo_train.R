@@ -82,7 +82,7 @@ main = function() {
   print("Number of components:")
   print(ncomp)
 
-  keepx = tune_keepx(data, classes, ncomp, design, cpus=argv$cpus, dist=dist)
+  keepx = tune_keepx(data, classes, ncomp, design, cpus=argv$cpus, dist=distance)
   print("keepx:")
   print(keepx)
   diablo = run_diablo(data, classes, ncomp, keepx, design)
