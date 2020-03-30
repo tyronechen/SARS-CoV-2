@@ -13,9 +13,9 @@ parse_argv = function() {
   p = add_argument(p, "classes", help="sample information", type="character")
   p = add_argument(p, "--data", help="paths to omics data", type="character", nargs=Inf)
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--ncomp", help="number of components", type="int", default=10)
+  p = add_argument(p, "--ncomp", help="number of components", type="int", default=0)
   p = add_argument(p, "--out", help="write RData object here", type="character")
-  p = add_argument(p, "--dist", help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]", type="character")
+  p = add_argument(p, "--distance", help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]", type="character", default="max.dist")
 
   # Parse the command line arguments
   argv = parse_args(p)
@@ -26,11 +26,6 @@ parse_argv = function() {
 
 main = function() {
   argv = parse_argv()
-  if (exists(argv$dist)) {
-    dist = argv$dist
-  } else {
-    dist = "max.dist"
-  }
 
   print("Available cpus:")
   print(detectCores())
@@ -38,7 +33,7 @@ main = function() {
   print(argv$cpus)
   # q()
   print("Distance measure:")
-  print(dist)
+  print(argv$distance)
 
   options(warn=1)
 
@@ -75,18 +70,18 @@ main = function() {
 
   plot_individual_blocks(data, classes)
 
-  # NOTE: if you get tuning errors, disable this block and set ncomp manually
-  tuned = tune_ncomp(data, classes, design)
-  print("Parameters with lowest error rate:")
-  tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
-  ncomp = tuned[which.max(tuned)]
-  # ncomp = 10
-
-  dist = "centroids.dist"
-  # ncomp = length(unique(classes))
-  # ncomp = 10
-  print("Components:")
+  # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
+  if (argv$ncomp == 0) {
+    tuned = tune_ncomp(data, classes, design)
+    print("Parameters with lowest error rate:")
+    tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
+    ncomp = tuned[which.max(tuned)]
+  } else {
+    ncomp = argv$ncomp
+  }
+  print("Number of components:")
   print(ncomp)
+
   keepx = tune_keepx(data, classes, ncomp, design, cpus=argv$cpus, dist=dist)
   print("keepx:")
   print(keepx)
@@ -95,15 +90,15 @@ main = function() {
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
   plot_diablo(diablo)
-  assess_performance(diablo, dist=dist)
+  assess_performance(diablo, dist=distance)
   predict_diablo(diablo, data, classes)
 
   if (! exists(argv$out)) {
     print(paste("Saving diablo data to:", argv$out))
-    save(classes, data, diablo, dist, file=argv$out)
+    save(classes, data, diablo, distance, file=argv$out)
   } else {
     print(paste("Saving diablo data to:", "./diablo.RData"))
-    save(classes, data, diablo, dist, file="./diablo.RData")
+    save(classes, data, diablo, distance, file="./diablo.RData")
   }
 }
 
