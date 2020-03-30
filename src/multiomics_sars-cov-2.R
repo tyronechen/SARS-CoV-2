@@ -13,7 +13,12 @@ parse_data = function(infile_path, offset=0) {
 
 remove_novar = function(data) {
   # samples with zero variance are meaningless for PCA
-  return(data[, which(apply(data, 2, var) != 0)])
+  print("Dimensions before removing invariant columns:")
+  print(dim(data))
+  data = data[, which(apply(data, 2, var) != 0)]
+  print("Dimensions after removing invariant columns:")
+  print(dim(data))
+  return(data)
 }
 
 parse_classes = function(infile_path) {
@@ -42,12 +47,16 @@ plot_individual_blocks = function(data, classes) {
   print("Plotting PCA component contribution...")
   # lapply(data_pca, plot, title="Screeplot")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
+  mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
 
-  print("Plotting PCA...")
+  print("Plotting PCA by groups...")
   # lapply(data_pca, plotIndiv, comp=c(1,2), ind.names=TRUE, group=classes,
   #   legend=TRUE, title="PCA 1/2")
   mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
-    legend=TRUE, title=paste(y, "PCA 1/2")), data_pca, names)
+    legend=TRUE, title=paste(y, "PCA 1/2 Groups")), data_pca, names)
+  print("Plotting PCA by samples...")
+  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
+    legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
 
   print("Plotting correlation circle plots...")
   # lapply(data_pca, plotVar, comp=c(1, 2), var.names=TRUE, title="PCA 1/2")
