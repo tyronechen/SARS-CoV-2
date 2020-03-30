@@ -17,11 +17,11 @@ Experimental design:
 
 | Design  |               |              |             |             |          |          |           |           |
 |---------|---------------|--------------|-------------|-------------|----------|----------|-----------|-----------|
-| Group 1 | Control       | Virus        |             |             |          |          |           |           |
+| Analysis 1 | Control       | Virus        |             |             |          |          |           |           |
 |         | 12            | 12           |             |             |          |          |           |           |
-| Group 2 | Control early | Control late | Virus early | Virus late  |          |          |           |           |
+| Analysis 2 | Control early | Control late | Virus early | Virus late  |          |          |           |           |
 |         | 6             | 6            | 6           | 6           |          |          |           |           |
-| Group 3 | Control_2h    | Control_6h   | Control_10h | Control_24h | Virus_2h | Virus_6h | Virus_10h | Virus_24h |
+| Analysis 3 | Control_2h    | Control_6h   | Control_10h | Control_24h | Virus_2h | Virus_6h | Virus_10h | Virus_24h |
 |         | 3             | 3            | 3           | 3           | 3        | 3        | 3         | 3         |
 |         |               |              |             |             |          |          |           |           |
 
