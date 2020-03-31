@@ -11,6 +11,9 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
+  p = add_argument(p, "--classes_secondary", help="secondary class",
+    type="character", default=NA
+  )
   p = add_argument(p, "--data", help="paths to omics data", type="character",
     nargs=Inf
   )
@@ -56,6 +59,13 @@ main = function() {
   print("Parsing classes")
   classes = parse_classes(argv$classes)
 
+  if (!is.na(argv$classes_secondary)) {
+    print("Parsing secondary classes")
+    pch = parse_classes(argv$classes_secondary)
+  } else {
+    pch = NA
+  }
+
   # parse out identifiers coded within the file paths
   names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
   names = unname(lapply(sapply(names, strsplit, ".", fixed=TRUE), head, 1))
@@ -80,8 +90,8 @@ main = function() {
   print(design)
   print(paste("Saving plots to:", argv$out_plot))
   pdf(argv$out_plot)
-  plot_individual_blocks(data, classes)
-
+  plot_individual_blocks(data, classes, pch)
+  q()
   # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
   if (argv$ncomp == 0) {
     tuned = tune_ncomp(data, classes, design)
