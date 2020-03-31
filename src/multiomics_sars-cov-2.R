@@ -40,7 +40,7 @@ create_design = function(data) {
   return(design)
 }
 
-plot_individual_blocks = function(data, classes) {
+plot_individual_blocks = function(data, classes, pch=NA) {
   # do pca on individual classes before proceeding
   names = names(data)
 
@@ -55,14 +55,21 @@ plot_individual_blocks = function(data, classes) {
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
 
-  print("Plotting PCA by groups...")
-  # lapply(data_pca, plotIndiv, comp=c(1,2), ind.names=TRUE, group=classes,
-  #   legend=TRUE, title="PCA 1/2")
-  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
-    legend=TRUE, title=paste(y, "PCA 1/2 Groups")), data_pca, names)
-  print("Plotting PCA by samples...")
-  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
-    legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
+  if (!is.na(pch)) {
+    print("Plotting PCA by groups...")
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
+      legend=TRUE, title=paste(y, "PCA 1/2 Groups"), pch=pch), data_pca, names)
+    print("Plotting PCA by samples...")
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
+      legend=TRUE, title=paste(y, "PCA 1/2 Samples"), pch=pch), data_pca, names)
+  } else {
+    print("Plotting PCA by groups...")
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
+      legend=TRUE, title=paste(y, "PCA 1/2 Groups")), data_pca, names)
+    print("Plotting PCA by samples...")
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
+      legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
+  }
 
   print("Plotting correlation circle plots...")
   # lapply(data_pca, plotVar, comp=c(1, 2), var.names=TRUE, title="PCA 1/2")
