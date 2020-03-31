@@ -16,8 +16,11 @@ parse_argv = function() {
   )
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
   p = add_argument(p, "--ncomp", help="component number", type="int", default=0)
-  p = add_argument(p, "--out", help="write RData object here", type="character",
-    default="./diablo.RData"
+  p = add_argument(p, "--out_data", help="write RData object here",
+    type="character", default="./diablo.RData"
+  )
+  p = add_argument(p, "--out_plot", help="write R plots here", type="character",
+    default="./Rplots.pdf"
   )
   p = add_argument(p, "--distance",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]",
@@ -75,7 +78,8 @@ main = function() {
   print(classes)
   print("Design:")
   print(design)
-
+  print(paste("Saving plots to:", argv$out_plot))
+  pdf(argv$out_plot)
   plot_individual_blocks(data, classes)
 
   # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
@@ -103,8 +107,10 @@ main = function() {
   assess_performance(diablo, dist=distance)
   predict_diablo(diablo, data, classes)
 
-  print(paste("Saving diablo data to:", argv$out))
-  save(classes, data, diablo, distance, file=argv$out)
+  print(paste("Saving diablo data to:", argv$out_data))
+  save(classes, data, diablo, distance, file=argv$out_data)
+  print(paste("Saved plots to:", argv$out_plot))
+  dev.off()
 }
 
 main()
