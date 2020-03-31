@@ -5,7 +5,7 @@ library(argparser, quietly=TRUE)
 library(mixOmics)
 
 parse_data = function(infile_path, offset=0, missing_as=NA) {
-  # load in omics data into a diablo-compatible format
+  # load in omics data into a diablo-compatible format: infile_path -> dataframe
   print("Parsing file:")
   print(infile_path)
   data = read.table(infile_path, sep="\t", header=TRUE, row.names=1) + offset
@@ -18,7 +18,7 @@ parse_data = function(infile_path, offset=0, missing_as=NA) {
 }
 
 remove_novar = function(data) {
-  # samples with zero variance are meaningless for PCA
+  # samples with zero variance are meaningless for PCA: dataframe -> dataframe
   print("Dimensions before removing invariant columns:")
   print(dim(data))
   data = data[, which(apply(data, 2, var) != 0)]
@@ -28,12 +28,13 @@ remove_novar = function(data) {
 }
 
 parse_classes = function(infile_path) {
-  # load in class data for diablo
+  # load in class data for diablo: infile_path -> vector (of strings)
   data = read.table(infile_path, sep="\t", header=TRUE, row.names=1)
   return(unlist(as.vector(t(data))))
 }
 
 create_design = function(data) {
+  # create design matrix from data: dataframe -> matrix (design)
   design = matrix(0.1, ncol = length(data), nrow = length(data),
                   dimnames = list(names(data), names(data)))
   diag(design) = 0
@@ -41,7 +42,7 @@ create_design = function(data) {
 }
 
 plot_individual_blocks = function(data, classes, pch=NA) {
-  # do pca on individual classes before proceeding
+  # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
   names = names(data)
 
   print("Removing 0 variance columns from data...")
@@ -72,7 +73,6 @@ plot_individual_blocks = function(data, classes, pch=NA) {
   }
 
   print("Plotting correlation circle plots...")
-  # lapply(data_pca, plotVar, comp=c(1, 2), var.names=TRUE, title="PCA 1/2")
   mapply(function(x, y) plotVar(x, comp=c(1, 2), title=paste(y, "PCA 1/2")),
     data_pca, names)
 
@@ -124,6 +124,7 @@ tune_keepx = function(data, classes, ncomp, design, cpus=2, dist="centroids.dist
 }
 
 run_diablo = function(data, classes, ncomp, keepx, design) {
+  # this is the actual part where diablo is run
   print("Running DIABLO...")
   sgccda_res = block.splsda(X = data, Y = classes, ncomp = ncomp,
                             keepX = keepx, design = design)
@@ -131,6 +132,7 @@ run_diablo = function(data, classes, ncomp, keepx, design) {
 }
 
 plot_diablo = function(data) {
+  # plot the diablo data with a series of diagnostic plots
   print("Plotting correlation betweem components...")
   plotDiablo(data, ncomp = 1)
   print("Plotting individual samples into space spanned by block components...")
@@ -155,7 +157,8 @@ plot_diablo = function(data) {
 }
 
 assess_performance = function(data, dist) {
-  # remember to use the same distance metric which had the max value
+  # review performance of diablo
+  # remember to use the same distance metric which had the max value!
   print("Assessing performance...")
   perf_diablo = perf(data, validation='Mfold', M=10, nrepeat=10, dist=dist)
   #perf.diablo  # lists the different outputs
