@@ -19,6 +19,9 @@ parse_argv = function() {
   )
   p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
   p = add_argument(p, "--ncomp", help="component number", type="int", default=0)
+  p = add_argument(p, "--impute_comp", help="component number for imputing",
+    type="int", default=10
+  )
   p = add_argument(p, "--out_data", help="write RData object here",
     type="character", default="./diablo.RData"
   )
@@ -44,7 +47,6 @@ main = function() {
   print(detectCores())
   print("Using cpus (change with --cpus):")
   print(argv$cpus)
-  # q()
   print("Distance measure:")
   print(argv$distance)
   distance = argv$distance
@@ -90,8 +92,12 @@ main = function() {
   print(design)
   print(paste("Saving plots to:", argv$out_plot))
   pdf(argv$out_plot)
+
+  data = lapply(data, zero_to_na)
+  lapply(data, count_missing)
+  # data = impute_missing(data, rep(argv$impute_comp, length(data)))
   plot_individual_blocks(data, classes, pch)
-  q()
+
   # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
   if (argv$ncomp == 0) {
     tuned = tune_ncomp(data, classes, design)
