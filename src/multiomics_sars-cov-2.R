@@ -41,6 +41,36 @@ create_design = function(data) {
   return(design)
 }
 
+zero_to_na = function(data) {
+  data[which(data == 0, arr.ind=TRUE)] = NA
+  return(data)
+}
+
+count_missing = function(data) {
+  # show missing values in data: dataframe -> list(dataframe, double)
+  # return 0 values to NA
+  ids_na = is.na(data)
+  pct_na = sum(is.na(data)) / (nrow(data) * ncol(data))
+  print("Percentage of missing values in data:")
+  print(pct_na)
+  return(list(ids_na=ids_na, pct_na=pct_na))
+}
+
+impute_missing_ = function(data, ncomp=10, block_name="") {
+  # impute missing values with nipals: dataframe (with NA) -> dataframe
+  print("Number of components:")
+  print(ncomp)
+  nipals_tune = nipals(data, reconst=TRUE, ncomp=ncomp)
+  barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
+    xlab="Number of components", ylab="Explained variance"
+  )
+  return(nipals_tune$rec)
+}
+
+impute_missing = function(data, ncomps) {
+  mapply(function(x, y, z) impute_missing_(x, y, z), data, ncomps, names(data))
+}
+
 plot_individual_blocks = function(data, classes, pch=NA) {
   # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
   names = names(data)
