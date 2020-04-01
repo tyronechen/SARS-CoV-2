@@ -76,8 +76,10 @@ main = function() {
   print("Omics data types (names follow SAMPLEID_OMICTYPE_OPTIONALFIELDS):")
   print(names)
 
-  data = lapply(paths, parse_data)
+  data = lapply(paths, parse_data, rmna=TRUE)
   names(data) = names
+  data = lapply(data, remove_na_class, classes)
+
   print("Data dimensions:")
   dimensions = lapply(data, dim)
   print(dimensions)
@@ -93,11 +95,10 @@ main = function() {
   print(paste("Saving plots to:", argv$out_plot))
   pdf(argv$out_plot)
 
-  data = lapply(data, zero_to_na)
-  lapply(data, count_missing)
-  # data = impute_missing(data, rep(argv$impute_comp, length(data)))
+  missing = lapply(data, count_missing)
+  data = impute_missing(data, rep(argv$impute_comp, length(data)))
   plot_individual_blocks(data, classes, pch)
-
+  
   # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
   if (argv$ncomp == 0) {
     tuned = tune_ncomp(data, classes, design)

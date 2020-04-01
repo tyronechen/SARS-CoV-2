@@ -4,11 +4,48 @@
 library(argparser, quietly=TRUE)
 library(mixOmics)
 
-parse_data = function(infile_path, offset=0, missing_as=NA) {
+parse_data = function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
   # load in omics data into a diablo-compatible format: infile_path -> dataframe
   print("Parsing file:")
   print(infile_path)
   data = read.table(infile_path, sep="\t", header=TRUE, row.names=1) + offset
+  if (is.na(missing_as)) {
+    data[which(data == 0, arr.ind=TRUE)] = NA
+  } else {
+    data[which(data == 0, arr.ind=TRUE)] = missing_as
+  }
+  if (rmna == TRUE) {
+    print("Dropping features where all values are NA")
+    data = data[, unlist(lapply(data, function(x) !all(is.na(x))))]
+  }
+  return(data)
+}
+
+remove_na_class = function(data, classes, missing_as=NA) {
+  # where there is NA for a whole class of features, remove feature column
+  if (is.na(missing_as)) {
+    data[is.na(data)] = 0
+  } else {
+    data[which(data == missing_as, arr.ind=TRUE)] = 0
+  }
+  print(dim(data))
+  print("Dropping features where at least one class is NA")
+  uniq = unique(classes)
+  subsets = list()
+  for (i in uniq) {subsets[[i]] = data[grep(i, rownames(data)), ]}
+  subsets = lapply(lapply(lapply(subsets, colSums), data.frame), t)
+  subsets = do.call("rbind", subsets)
+  rownames(subsets) = uniq
+
+  if (is.na(missing_as)) {
+    subsets[which(subsets == 0, arr.ind=TRUE)] = NA
+  } else {
+    subsets[which(subsets == 0, arr.ind=TRUE)] = missing_as
+  }
+
+  subsets = t(na.omit(t(subsets)))
+  data = data[, c(colnames(subsets))]
+
   if (is.na(missing_as)) {
     data[which(data == 0, arr.ind=TRUE)] = NA
   } else {
