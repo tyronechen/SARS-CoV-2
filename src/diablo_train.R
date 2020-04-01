@@ -7,30 +7,34 @@ source(file="multiomics_sars-cov-2.R")
 
 parse_argv = function() {
   library(argparser, quietly=TRUE)
-  p = arg_parser("Run DIABLO on multi-omics data")
+  p = arg_parser("Run DIABLO on multi-omics data. Take tsv file of classes, \
+  tsv files of omics data (at least 2!) and identify correlation between \
+  features. For more information refer to \
+  http://mixomics.org/mixdiablo/case-study-tcga/")
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--classes_secondary", help="secondary class",
-    type="character", default=NA
+  p = add_argument(p, "--classes_secondary", type="character", default=NA,
+    help="secondary sample information (same format as classes)"
   )
-  p = add_argument(p, "--data", help="paths to omics data", type="character",
-    nargs=Inf
+  p = add_argument(p, "--data", type="character", nargs=Inf,
+    help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
   )
-  p = add_argument(p, "--cpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--ncomp", help="component number", type="int", default=0)
-  p = add_argument(p, "--impute_comp", help="component number for imputing",
-    type="int", default=10
+  p = add_argument(p, "--ncpus", help="number of cpus", type="int", default=2)
+  p = add_argument(p, "--dcomp", type="int", default=0,
+    help="number of diablo components (set manually if you get inference error)"
   )
-  p = add_argument(p, "--out_data", help="write RData object here",
-    type="character", default="./diablo.RData"
+  p = add_argument(p, "--icomp", type="int", default=10,
+    help="component number for imputing (set 0 for no imputation)"
   )
-  p = add_argument(p, "--out_plot", help="write R plots here", type="character",
+  p = add_argument(p, "--rdata", type="character", default="./diablo.RData",
+    help="write RData object here, has (classes, data, diablo, mdist)"
+  )
+  p = add_argument(p, "--plot", help="write R plots here", type="character",
     default="./Rplots.pdf"
   )
-  p = add_argument(p, "--distance",
-    help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]",
-    type="character", default="max.dist"
+  p = add_argument(p, "--mdist", type="character", default="max.dist",
+    help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
   )
 
   # Parse the command line arguments
@@ -43,21 +47,20 @@ parse_argv = function() {
 main = function() {
   argv = parse_argv()
 
+  # print some diagnostics for debugging
   print("Available cpus:")
   print(detectCores())
-  print("Using cpus (change with --cpus):")
-  print(argv$cpus)
+  print("Using cpus (change with --ncpus):")
+  print(argv$ncpus)
   print("Distance measure:")
-  print(argv$distance)
-  distance = argv$distance
+  print(argv$mdist)
+  mdist = argv$mdist
 
   options(warn=1)
 
   paths = argv$data
-
   print("Paths to data:")
   print(paths)
-
   print("Parsing classes")
   classes = parse_classes(argv$classes)
 
@@ -76,57 +79,70 @@ main = function() {
   print("Omics data types (names follow SAMPLEID_OMICTYPE_OPTIONALFIELDS):")
   print(names)
 
+  # load data and drop cols with all NA
   data = lapply(paths, parse_data, rmna=TRUE)
   names(data) = names
+  # drop cols where >= 1 class is not represented
   data = lapply(data, remove_na_class, classes)
 
+  # check dimensions
   print("Data dimensions:")
   dimensions = lapply(data, dim)
   print(dimensions)
 
   design = create_design(data)
 
-  # check dimension
+  # check classes
   print(summary(classes))
   print("Y (classes):")
   print(classes)
   print("Design:")
   print(design)
-  print(paste("Saving plots to:", argv$out_plot))
-  pdf(argv$out_plot)
+  print(paste("Saving plots to:", argv$plot))
+  pdf(argv$plot)
 
+  # count missing data
   missing = lapply(data, count_missing)
-  data = impute_missing(data, rep(argv$impute_comp, length(data)))
+
+  # impute data if components given
+  if (argv$icomp > 0) {
+    data = impute_missing(data, rep(argv$icomp, length(data)))
+  }
+
+  # plot pcas for each block
   plot_individual_blocks(data, classes, pch)
-  
-  # NOTE: if you get tuning errors, set ncomp manually with --ncomp N
-  if (argv$ncomp == 0) {
+
+  # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
+  if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
     print("Parameters with lowest error rate:")
     tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
-    ncomp = tuned[which.max(tuned)]
+    dcomp = tuned[which.max(tuned)]
   } else {
-    ncomp = argv$ncomp
+    dcomp = argv$dcomp
   }
   print("Number of components:")
-  print(ncomp)
+  print(dcomp)
 
+  # remove invariant columns
   data = lapply(data, remove_novar)
 
-  keepx = tune_keepx(data, classes, ncomp, design, cpus=argv$cpus, dist=distance)
+  # tune diablo parameters and run diablo
+  keepx = tune_keepx(data, classes, dcomp, design, cpus=argv$ncpus, dist=mdist)
   print("keepx:")
   print(keepx)
-  diablo = run_diablo(data, classes, ncomp, keepx, design)
+  diablo = run_diablo(data, classes, dcomp, keepx, design)
   print("diablo design:")
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
   plot_diablo(diablo)
-  assess_performance(diablo, dist=distance)
+  assess_performance(diablo, dist=mdist)
   predict_diablo(diablo, data, classes)
 
-  print(paste("Saving diablo data to:", argv$out_data))
-  save(classes, data, diablo, distance, file=argv$out_data)
-  print(paste("Saved plots to:", argv$out_plot))
+  # save RData object for future reference
+  print(paste("Saving diablo data to:", argv$rdata))
+  save(classes, data, diablo, mdist, file=argv$rdata)
+  print(paste("Saved plots to:", argv$plot))
   dev.off()
 }
 
