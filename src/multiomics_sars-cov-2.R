@@ -127,16 +127,16 @@ plot_individual_blocks = function(data, classes, pch=NA) {
     print("Plotting PCA by groups...")
     mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
       legend=TRUE, title=paste(y, "PCA 1/2 Groups"), pch=pch), data_pca, names)
-    print("Plotting PCA by samples...")
-    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
-      legend=TRUE, title=paste(y, "PCA 1/2 Samples"), pch=pch), data_pca, names)
+    # print("Plotting PCA by samples...")
+    # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
+    #   legend=TRUE, title=paste(y, "PCA 1/2 Samples"), pch=pch), data_pca, names)
   } else {
     print("Plotting PCA by groups...")
     mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
       legend=TRUE, title=paste(y, "PCA 1/2 Groups")), data_pca, names)
-    print("Plotting PCA by samples...")
-    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
-      legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
+    # print("Plotting PCA by samples...")
+    # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
+    #   legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
   }
 
   print("Plotting correlation circle plots...")
@@ -146,6 +146,8 @@ plot_individual_blocks = function(data, classes, pch=NA) {
   print("Plotting biplots...")
   mapply(function(x, y, z) biplot(y, cex=0.7, xlabs=paste(classes, 1:nrow(x)),
     main=paste(z, "Biplot")), data, data_pca, names)
+
+  return(data_pca)
 }
 
 tune_ncomp = function(data, classes, design) {
