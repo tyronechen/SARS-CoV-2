@@ -56,11 +56,11 @@ remove_na_class = function(data, classes, missing_as=NA) {
 
 remove_novar = function(data) {
   # samples with zero variance are meaningless for PCA: dataframe -> dataframe
-  print("Dimensions before removing invariant columns:")
-  print(dim(data))
+  # print("Dimensions before removing invariant columns:")
+  # print(dim(data))
   data = data[, which(apply(data, 2, var) != 0)]
-  print("Dimensions after removing invariant columns:")
-  print(dim(data))
+  # print("Dimensions after removing invariant columns:")
+  # print(dim(data))
   return(data)
 }
 
@@ -108,7 +108,17 @@ impute_missing = function(data, ncomps) {
   mapply(function(x, y, z) impute_missing_(x, y, z), data, ncomps, names(data))
 }
 
-plot_individual_blocks = function(data, classes, pch=NA) {
+replace_missing_ = function(data, imputed) {
+  mask = is.na(data)
+  imputed[!mask] = data[!mask]
+  return(imputed)
+}
+
+replace_missing = function(data, imputed) {
+  mapply(function(x, y) replace_missing_(x, y), data, imputed)
+}
+
+plot_individual_blocks = function(data, classes, pch=NA, title="") {
   # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
   names = names(data)
 
@@ -121,22 +131,17 @@ plot_individual_blocks = function(data, classes, pch=NA) {
   print("Plotting PCA component contribution...")
   # lapply(data_pca, plot, title="Screeplot")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
-  mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
 
   if (!is.na(pch)) {
     print("Plotting PCA by groups...")
-    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
-      legend=TRUE, title=paste(y, "PCA 1/2 Groups"), pch=pch), data_pca, names)
-    # print("Plotting PCA by samples...")
-    # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
-    #   legend=TRUE, title=paste(y, "PCA 1/2 Samples"), pch=pch), data_pca, names)
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+      group=classes, legend=TRUE,
+      title=paste(title, y, "PCA 1/2 Groups"), pch=pch), data_pca, names)
   } else {
     print("Plotting PCA by groups...")
-    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=classes,
-      legend=TRUE, title=paste(y, "PCA 1/2 Groups")), data_pca, names)
-    # print("Plotting PCA by samples...")
-    # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE, group=row.names(data[[1]]),
-    #   legend=TRUE, title=paste(y, "PCA 1/2 Samples")), data_pca, names)
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+      group=classes, legend=TRUE,
+      title=paste(title, y, "PCA 1/2 Groups")), data_pca, names)
   }
 
   print("Plotting correlation circle plots...")
