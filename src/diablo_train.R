@@ -17,6 +17,9 @@ parse_argv = function() {
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information (same format as classes)"
   )
+  p = add_argument(p, "--classes_dropna", type="character", default=TRUE,
+    help="where all replicates for >= 1 class are unreported, drop that feature"
+  )
   p = add_argument(p, "--data", type="character", nargs=Inf,
     help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
   )
@@ -80,10 +83,14 @@ main = function() {
   print(names)
 
   # load data and drop cols with all NA
-  data = lapply(paths, parse_data, rmna=TRUE)
+  data = lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
   names(data) = names
+
   # drop cols where >= 1 class is not represented
-  data = lapply(data, remove_na_class, classes)
+  if (argv$classes_dropna == TRUE) {
+    data = lapply(data, remove_na_class, classes)
+  }
+  save(classes, data, mdist, file=argv$rdata)
 
   # check dimensions
   print("Data dimensions:")
@@ -103,14 +110,21 @@ main = function() {
 
   # count missing data
   missing = lapply(data, count_missing)
+  data_pca = plot_individual_blocks(data, classes, pch=pch, title="Not imputed")
 
   # impute data if components given
+  print(argv$icomp)
   if (argv$icomp > 0) {
-    data = impute_missing(data, rep(argv$icomp, length(data)))
+    print("Impute components set, imputing NA values (set -i 0 to disable)")
+    data_imp = impute_missing(data, rep(argv$icomp, length(data)))
+    data = replace_missing(data, data_imp)
+    data_pca = plot_individual_blocks(data, classes, pch=pch, title="Imputed")
   }
 
   # plot pcas for each block
-  plot_individual_blocks(data, classes, pch)
+  # save(classes, data, mdist, file=argv$rdata)
+  # data_pca = plot_individual_blocks(data, classes, pch, title="Imputed")
+  save(classes, data, data_pca, mdist, file=argv$rdata)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
@@ -126,6 +140,7 @@ main = function() {
 
   # remove invariant columns
   data = lapply(data, remove_novar)
+  save(classes, data, data_pca, mdist, file=argv$rdata)
 
   # tune diablo parameters and run diablo
   keepx = tune_keepx(data, classes, dcomp, design, cpus=argv$ncpus, dist=mdist)
@@ -141,7 +156,7 @@ main = function() {
 
   # save RData object for future reference
   print(paste("Saving diablo data to:", argv$rdata))
-  save(classes, data, diablo, mdist, file=argv$rdata)
+  save(classes, data, data_pca, diablo, mdist, file=argv$rdata)
   print(paste("Saved plots to:", argv$plot))
   dev.off()
 }
