@@ -21,6 +21,72 @@ parse_data = function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
   return(data)
 }
 
+show_na_prop = function(data_na, name) {
+  # first, sum the number of missing values per variable
+  sum_na_per_var = apply(data_na, 2, function(x) {sum(is.na(x))})
+  ​
+  # simple plot shows that some variable have an NA rate greater than 30%
+  plot(sum_na_per_var/ncol(data_na), type='h', xlab='variable index',
+    ylab='NA rate', main=paste(name, 'NA rate per variable on unfiltered data'))
+}
+
+remove_na_prop = function(data, class, pch=NA, na_prop=0.3) {
+  mapply(function(x) remove_na_prop_(x, class, pch, na_prop), data)
+}
+
+remove_na_prop_ = function(data, class, pch=NA, na_prop=0.3) {
+  # we want to compare dimensions later to see how many features were dropped
+  data_na = data
+
+  # first, sum the number of missing values per variable
+  sum_na_per_var = apply(data_na, 2, function(x){sum(is.na(x))})
+
+  # these variables could be removed
+  remove_var = which(sum_na_per_var/ncol(data_na) >= na_prop)
+  if (length(remove_var) > 0) {
+    print("Removing this many columns from data:")
+    print(length(remove_var))
+    data_na = data_na[, -c(remove_var)]
+  } else {
+    print("No columns removed from data")
+  }
+
+  print("Data dimensions (original):")
+  print(dim(data))
+  print("Data dimensions (filtered):")
+  print(dim(data_na))
+
+  print("Proportion of missing values (original):")
+  print(sum(is.na(data)) / (nrow(data) * ncol(data)))
+  print("Proportion of missing values (filtered):")
+  print(sum(is.na(data_na)) / (nrow(data_na) * ncol(data_na)))
+
+  return(data_na)
+  q()
+  # do imputation
+  nipals_X = nipals(data_na, reconst = TRUE, ncomp = 3)$rec
+
+  # replace NA values only with imputed values
+  id_na = is.na(data_na)
+  nipals_X[!id_na] = data_na[!id_na]
+
+  # compare pcas before and after imputation
+  if (!is.na(pch)) {
+    pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+    pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  } else {
+    pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+    pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  }
+
+  print(pca_with_na$cum.var)
+  print(pca_no_na$cum.var)
+  plotIndiv(pca_with_na, group = class, legend = TRUE)
+  plotIndiv(pca_no_na, group = class, legend = TRUE)
+
+  plot(cor(pca_with_na$variates$X, pca_no_na$variates$X))
+}
+
 remove_na_class = function(data, classes, missing_as=NA) {
   # where there is NA for a whole class of features, remove feature column
   if (is.na(missing_as)) {

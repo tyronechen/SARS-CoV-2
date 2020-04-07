@@ -35,3 +35,7 @@ Software libraries involved are:
   - argparser 0.6
   - BiocManager 1.30.10
   - mixOmics 6.11.11
+
+Acknowledgements:
+
+[We thank Kim-Anh Lê Cao](https://lecao-lab.science.unimelb.edu.au/) for contributions to the code and analysis.

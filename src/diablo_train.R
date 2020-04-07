@@ -17,24 +17,31 @@ parse_argv = function() {
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information (same format as classes)"
   )
-  p = add_argument(p, "--classes_dropna", type="character", default=TRUE,
-    help="where all replicates for >= 1 class are unreported, drop that feature"
-  )
   p = add_argument(p, "--data", type="character", nargs=Inf,
     help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
   )
-  p = add_argument(p, "--ncpus", help="number of cpus", type="int", default=2)
-  p = add_argument(p, "--dcomp", type="int", default=0,
+  p = add_argument(p, "--dropna_classes", type="character", default=TRUE,
+    help="where all replicates for >= 1 class are NA, drop that feature. \
+    If both --dropna_classes and --dropna_prop are enabled, perform \
+    --dropna_classes and then --dropna_prop."
+  )
+  p = add_argument(p, "--dropna_prop", type="integer", default=0,
+    help="drop feature that does not meet NA proportion threshold, eg if 0.3, \
+    drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
+    --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
+  )
+  p = add_argument(p, "--ncpus", help="number of cpus", type="integer", default=2)
+  p = add_argument(p, "--dcomp", type="integer", default=0,
     help="number of diablo components (set manually if you get inference error)"
   )
-  p = add_argument(p, "--icomp", type="int", default=10,
+  p = add_argument(p, "--icomp", type="integer", default=10,
     help="component number for imputing (set 0 for no imputation)"
   )
   p = add_argument(p, "--rdata", type="character", default="./diablo.RData",
     help="write RData object here, has (classes, data, diablo, mdist)"
   )
-  p = add_argument(p, "--plot", help="write R plots here", type="character",
-    default="./Rplots.pdf"
+  p = add_argument(p, "--plot", type="character", default="./Rplots.pdf",
+    help="write R plots here (will overwrite existing!)"
   )
   p = add_argument(p, "--mdist", type="character", default="max.dist",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
@@ -79,18 +86,30 @@ main = function() {
   names = unname(lapply(sapply(names, strsplit, ".", fixed=TRUE), head, 1))
   names = unname(sapply(sapply(names, head, 1), strsplit, "_"))
   names = unlist(lapply(lapply(names, tail, -1), paste, collapse="_"))
-  print("Omics data types (names follow SAMPLEID_OMICTYPE_OPTIONALFIELDS):")
+  print("Omics data types")
   print(names)
 
-  # load data and drop cols with all NA
+  print(paste("Saving plots to (overwriting existing):", argv$plot))
+  pdf(argv$plot)
+
+  # load data and drop features / columns with all NA
   data = lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
   names(data) = names
 
-  # drop cols where >= 1 class is not represented
-  if (argv$classes_dropna == TRUE) {
+  # show proportion of NA values in unfiltered data
+  mapply(function(x, y) show_na_prop(x, y), data, names)
+
+  # drop features / columns where >= 1 class is not represented
+  if (argv$dropna_classes == TRUE) {
     data = lapply(data, remove_na_class, classes)
+    save(classes, data, mdist, file=argv$rdata)
   }
-  save(classes, data, mdist, file=argv$rdata)
+
+  # drop features / columns >= a threshold of NA values
+  if (argv$dropna_prop > 0) {
+    data = remove_na_prop(data, classes, pch=pch, na_prop=argv$dropna_prop)
+    save(classes, data, mdist, file=argv$rdata)
+  }
 
   # check dimensions
   print("Data dimensions:")
@@ -105,12 +124,11 @@ main = function() {
   print(classes)
   print("Design:")
   print(design)
-  print(paste("Saving plots to:", argv$plot))
-  pdf(argv$plot)
 
-  # count missing data
+  # count missing data after all filtering
   missing = lapply(data, count_missing)
-  data_pca = plot_individual_blocks(data, classes, pch=pch, title="Not imputed")
+  pca_withna = plot_individual_blocks(data, classes, pch=pch, title="With NA")
+  save(classes, data, pca_withna, mdist, file=argv$rdata)
 
   # impute data if components given
   print(argv$icomp)
@@ -118,13 +136,12 @@ main = function() {
     print("Impute components set, imputing NA values (set -i 0 to disable)")
     data_imp = impute_missing(data, rep(argv$icomp, length(data)))
     data = replace_missing(data, data_imp)
-    data_pca = plot_individual_blocks(data, classes, pch=pch, title="Imputed")
+    pca_impute = plot_individual_blocks(data, classes, pch=pch, title="Imputed")
+    save(classes, data, pca_withna, pca_impute, mdist, file=argv$rdata)
   }
 
-  # plot pcas for each block
-  # save(classes, data, mdist, file=argv$rdata)
-  # data_pca = plot_individual_blocks(data, classes, pch, title="Imputed")
-  save(classes, data, data_pca, mdist, file=argv$rdata)
+  mapply(function(x, y, z) plot(cor(x$variates$X, y$variates$X), main=z),
+    pca_withna, pca_impute, names)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
