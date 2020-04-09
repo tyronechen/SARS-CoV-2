@@ -205,24 +205,24 @@ plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
     print("Plotting PCA by groups...")
     mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/2 Groups"), pch=pch), data_pca, names)
+      title=paste(title, y, "PCA 1/2"), pch=pch), data_pca, names)
     mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/3 Groups"), pch=pch), data_pca, names)
+      title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
     mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 2/3 Groups"), pch=pch), data_pca, names)
+      title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
   } else {
     print("Plotting PCA by groups...")
     mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/2 Groups")), data_pca, names)
+      title=paste(title, y, "PCA 1/2")), data_pca, names)
     mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/3 Groups"), pch=pch), data_pca, names)
+      title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
     mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
       group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 2/3 Groups"), pch=pch), data_pca, names)
+      title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
   }
 
   print("Plotting correlation circle plots...")
@@ -234,6 +234,19 @@ plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
     main=paste(z, "Biplot")), data, data_pca, names)
 
   return(data_pca)
+}
+
+cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
+  # plots a heatmap of correlations: -> list of df, list of df, vector of names
+  print("Plotting correlation between unimputed and imputed components")
+  mapply(function(x, y, z) print(ggplot(melt(cor(x$variates$X, y$variates$X)),
+    aes(Var1, Var2, fill=value)) +
+    ggtitle(paste(z, "Correlation between imputed and unimputed data")) +
+    geom_tile() +
+    scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
+      limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
+    theme_minimal()),
+  pca_withna, pca_impute, names)
 }
 
 tune_ncomp = function(data, classes, design) {

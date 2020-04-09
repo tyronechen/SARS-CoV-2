@@ -2,7 +2,9 @@
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
 library(argparser, quietly=TRUE)
+library(ggplot2)
 library(parallel)
+library(reshape2)
 source(file="multiomics_sars-cov-2.R")
 
 parse_argv = function() {
@@ -42,6 +44,9 @@ parse_argv = function() {
   )
   p = add_argument(p, "--plot", type="character", default="./Rplots.pdf",
     help="write R plots here (will overwrite existing!)"
+  )
+  p = add_argument(p, "--pcomp", type="integer", default=0,
+    help="number of principal components (defaults to number of samples)"
   )
   p = add_argument(p, "--mdist", type="character", default="max.dist",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
@@ -127,7 +132,10 @@ main = function() {
 
   # count missing data after all filtering
   missing = lapply(data, count_missing)
-  pca_withna = plot_individual_blocks(data, classes, pch=pch, title="With NA")
+  pca_withna = plot_individual_blocks(
+    data, classes, pch=pch, ncomp=argv$pcomp,
+    title=paste("With NA. PC:", argv$pcomp)
+  )
   save(classes, data, pca_withna, mdist, file=argv$rdata)
 
   # impute data if components given
@@ -136,12 +144,16 @@ main = function() {
     print("Impute components set, imputing NA values (set -i 0 to disable)")
     data_imp = impute_missing(data, rep(argv$icomp, length(data)))
     data = replace_missing(data, data_imp)
-    pca_impute = plot_individual_blocks(data, classes, pch=pch, title="Imputed")
+    pca_impute = plot_individual_blocks(
+      data_imp, classes, pch=pch, ncomp=argv$pcomp,
+      title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+    )
     save(classes, data, pca_withna, pca_impute, mdist, file=argv$rdata)
+    heatmaps = cor_imputed_unimputed(pca_withna, pca_impute, names)
+  } else {
+    print("Impute components unset, not imputing NA (set -i > 0 to enable)")
+    pca_impute = NA
   }
-
-  mapply(function(x, y, z) plot(cor(x$variates$X, y$variates$X), main=z),
-    pca_withna, pca_impute, names)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
@@ -157,7 +169,7 @@ main = function() {
 
   # remove invariant columns
   data = lapply(data, remove_novar)
-  save(classes, data, data_pca, mdist, file=argv$rdata)
+  save(classes, data, pca_withna, pca_impute, mdist, file=argv$rdata)
 
   # tune diablo parameters and run diablo
   keepx = tune_keepx(data, classes, dcomp, design, cpus=argv$ncpus, dist=mdist)
@@ -173,7 +185,7 @@ main = function() {
 
   # save RData object for future reference
   print(paste("Saving diablo data to:", argv$rdata))
-  save(classes, data, data_pca, diablo, mdist, file=argv$rdata)
+  save(classes, data, diablo, pca_withna, pca_impute, mdist, file=argv$rdata)
   print(paste("Saved plots to:", argv$plot))
   dev.off()
 }
