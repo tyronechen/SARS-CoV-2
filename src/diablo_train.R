@@ -9,9 +9,10 @@ source(file="multiomics_sars-cov-2.R")
 
 parse_argv = function() {
   library(argparser, quietly=TRUE)
-  p = arg_parser("Run DIABLO on multi-omics data. Take tsv file of classes, \
+  p = arg_parser("Assess the quality of individual omics data modality blocks, \
+  Imputes data, Run DIABLO on multi-omics data. Take tsv file of classes, \
   tsv files of omics data (at least 2!) and identify correlation between \
-  features. For more information refer to \
+  features. For more information please refer to mixOmics and case studies at \
   http://mixomics.org/mixdiablo/case-study-tcga/")
 
   # Add command line arguments
@@ -86,7 +87,7 @@ main = function() {
     pch = NA
   }
 
-  # parse out identifiers coded within the file paths
+  # parse out identifiers coded within the file paths (hardcoded)
   names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
   names = unname(lapply(sapply(names, strsplit, ".", fixed=TRUE), head, 1))
   names = unname(sapply(sapply(names, head, 1), strsplit, "_"))
@@ -132,19 +133,20 @@ main = function() {
 
   # count missing data after all filtering
   missing = lapply(data, count_missing)
-  pca_withna = plot_individual_blocks(
+  pca_withna = plot_pca_single(
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
   save(classes, data, pca_withna, mdist, file=argv$rdata)
 
   # impute data if components given
+  # refer to http://mixomics.org/methods/missing-values/
   print(argv$icomp)
   if (argv$icomp > 0) {
     print("Impute components set, imputing NA values (set -i 0 to disable)")
     data_imp = impute_missing(data, rep(argv$icomp, length(data)))
     data = replace_missing(data, data_imp)
-    pca_impute = plot_individual_blocks(
+    pca_impute = plot_pca_single(
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
       title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
     )
@@ -153,6 +155,19 @@ main = function() {
   } else {
     print("Impute components unset, not imputing NA (set -i > 0 to enable)")
     pca_impute = NA
+  }
+
+  # multilevel decomposition if secondary variables are specified
+  # refer to http://mixomics.org/case-studies/multilevel-vac18/
+  if (!is.na(pch)) {
+    plot_pca_multilevel(data, classes, pch=pch, ncomp=argv$pcomp,
+      title=paste("With NA. PC:", argv$pcomp)
+    )
+    if (exists("data_imp")) {
+      plot_pca_multilevel(data_imp, classes, pch=pch, ncomp=argv$pcomp,
+        title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+      )
+    }
   }
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
