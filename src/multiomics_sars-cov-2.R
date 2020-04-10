@@ -184,7 +184,7 @@ replace_missing = function(data, imputed) {
   mapply(function(x, y) replace_missing_(x, y), data, imputed)
 }
 
-plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
+plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0) {
   # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
   names = names(data)
 
@@ -198,7 +198,6 @@ plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
   print(data_pca)
 
   print("Plotting PCA component contribution...")
-  # lapply(data_pca, plot, title="Screeplot")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
 
   if (!is.na(pch)) {
@@ -224,7 +223,11 @@ plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
       group=classes, legend=TRUE, ncomp=ncomp,
       title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
   }
+  return(data_pca)
+}
 
+plot_additional = function(data, data_pca, names) {
+  # correlation circle and biplots: dataframe, list, vector -> outfile_path.pdf
   print("Plotting correlation circle plots...")
   mapply(function(x, y) plotVar(x, comp=c(1, 2), title=paste(y, "PCA 1/2")),
     data_pca, names)
@@ -232,7 +235,34 @@ plot_individual_blocks = function(data, classes, pch=NA, title="", ncomp=0) {
   print("Plotting biplots...")
   mapply(function(x, y, z) biplot(y, cex=0.7, xlabs=paste(classes, 1:nrow(x)),
     main=paste(z, "Biplot")), data, data_pca, names)
+}
 
+plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0) {
+  names = names(data)
+
+  print("Removing 0 variance columns from data...")
+  data = lapply(data, remove_novar)
+
+  if (ncomp == 0) {ncomp = dim(classes)[1]}
+
+  print("Showing PCA multilevel component contribution...")
+  data_pca = lapply(data,pca,ncomp=ncomp,center=TRUE,scale=TRUE,multilevel=pch)
+  print(data_pca)
+
+  print("Plotting PCA multilevel component contribution...")
+  mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
+    data_pca, names)
+
+  print("Plotting PCA multilevel...")
+  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
+  mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
+  mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
   return(data_pca)
 }
 
