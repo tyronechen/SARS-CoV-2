@@ -266,6 +266,48 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0) {
   return(data_pca)
 }
 
+splsda_classify = function(data, classes, pch=NA, title="", ncomp=0) {
+  mapply(function(x, y) splsda_classify_(x, classes, pch, y, ncomp), data, title)
+}
+
+splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
+  # discriminate samples: list, vector, bool, integer -> list
+  # single or multilevel PLS-DA
+  if (!is.na(pch)) {
+    print("Plotting single level partial least squares discriminant analysis")
+    data_pls = plsda(data, Y=classes, multilevel=pch, ncomp=ncomp)
+    plotIndiv(data_pls, ind.names=TRUE, group=classes, legend=TRUE, pch=pch,
+      title=paste(title, "PCA PLS 1/2")
+    )
+  } else {
+    print("Plotting multiple level partial least squares discriminant analysis")
+    data_pls = plsda(data, Y=classes, ncomp=ncomp)
+    plotIndiv(data_pls, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PCA MPLS 1/2")
+    )
+  }
+  return(data_pls)
+}
+
+plot_pca_splsda = function(data, classes, pch, title="", ncomp=0) {
+  names = names(data)
+  print("Plotting PCA splsda component contribution...")
+  mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
+    data, names)
+
+  print("Plotting PCA splsda...")
+  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
+  mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
+  mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+    group=classes, legend=TRUE, ncomp=ncomp,
+    title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
+  return(data_pca)
+}
+
 cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
   # plots a heatmap of correlations: -> list of df, list of df, vector of names
   print("Plotting correlation between unimputed and imputed components")

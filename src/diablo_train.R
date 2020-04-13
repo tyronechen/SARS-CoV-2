@@ -49,6 +49,12 @@ parse_argv = function() {
   p = add_argument(p, "--pcomp", type="integer", default=0,
     help="number of principal components (defaults to number of samples)"
   )
+  p = add_argument(p, "--plscomp", type="integer", default=0,
+    help="number of components for plsda (defaults to number of samples)"
+  )
+  p = add_argument(p, "--splscomp", type="integer", default=0,
+    help="number of components for splsda (defaults to number of samples)"
+  )
   p = add_argument(p, "--mdist", type="character", default="max.dist",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
   )
@@ -168,6 +174,12 @@ main = function() {
         title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
       )
     }
+  }
+
+  if (!is.na(pch)) {
+    splsda_classify(data_imp, classes, pch, title=names, argv$plscomp)
+  } else {
+    splsda_classify(data_imp, classes, pch=NA, title=names, argv$plscomp)
   }
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
