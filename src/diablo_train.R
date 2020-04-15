@@ -18,7 +18,7 @@ parse_argv = function() {
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
-    help="secondary sample information (same format as classes)"
+    help="secondary sample information eg individual (same format as classes)"
   )
   p = add_argument(p, "--data", type="character", nargs=Inf,
     help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
@@ -49,10 +49,13 @@ parse_argv = function() {
   p = add_argument(p, "--pcomp", type="integer", default=0,
     help="number of principal components (defaults to number of samples)"
   )
-  p = add_argument(p, "--plscomp", type="integer", default=0,
+  p = add_argument(p, "--plsdacomp", type="integer", default=0,
     help="number of components for plsda (defaults to number of samples)"
   )
-  p = add_argument(p, "--splscomp", type="integer", default=0,
+  p = add_argument(p, "--splsdacomp", type="integer", default=0,
+    help="number of components for splsda (defaults to number of samples)"
+  )
+  p = add_argument(p, "--splsda_keepx", type="vector", default=NA,
     help="number of components for splsda (defaults to number of samples)"
   )
   p = add_argument(p, "--mdist", type="character", default="max.dist",
@@ -101,6 +104,7 @@ main = function() {
   print("Omics data types")
   print(names)
 
+  # initialise plots
   print(paste("Saving plots to (overwriting existing):", argv$plot))
   pdf(argv$plot)
 
@@ -156,31 +160,135 @@ main = function() {
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
       title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
     )
-    save(classes, data, pca_withna, pca_impute, mdist, file=argv$rdata)
     heatmaps = cor_imputed_unimputed(pca_withna, pca_impute, names)
   } else {
     print("Impute components unset, not imputing NA (set -i > 0 to enable)")
+    data_imp = NA
     pca_impute = NA
   }
+  save(classes, data, data_imp, pca_withna, pca_impute, mdist, file=argv$rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
-  if (!is.na(pch)) {
-    plot_pca_multilevel(data, classes, pch=pch, ncomp=argv$pcomp,
-      title=paste("With NA. PC:", argv$pcomp)
-    )
-    if (exists("data_imp")) {
-      plot_pca_multilevel(data_imp, classes, pch=pch, ncomp=argv$pcomp,
-        title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
-      )
-    }
+  # multilevel pca
+  if (!is.na(data_imp)) {
+    input_data = data_imp
+  } else {
+    input_data = data
   }
 
   if (!is.na(pch)) {
-    splsda_classify(data_imp, classes, pch, title=names, argv$plscomp)
+    data_pca_multilevel = plot_pca_multilevel(
+      input_data, classes, pch=pch, ncomp=argv$pcomp,
+      title=paste("With NA. PC:", argv$pcomp)
+    )
+    if (exists("data_imp")) {
+      data_pca_multilevel = plot_pca_multilevel(
+        input_data, classes, pch=pch, ncomp=argv$pcomp,
+        title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+      )
+    }
+  } else { data_pca_multilevel = NA }
+  save(classes, data, data_imp, data_pca_multilevel,
+    pca_withna, pca_impute, mdist, file=argv$rdata
+  )
+
+  # partial least squares discriminant analysis
+  if (argv$plsdacomp > 0) {
+    if (!is.na(pch)) {
+      data_plsda = plsda_classify(
+        input_data, classes, pch, title=names, argv$plsdacomp
+      )
+    } else {
+      data_plsda = plsda_classify(
+        input_data, classes, pch=NA, title=names, argv$plsdacomp
+      )
+    }
+  } else { data_plsda = NA }
+
+  save(classes, data, input_data, data_pca_multilevel, data_plsda, pca_withna,
+    pca_impute, mdist, file=argv$rdata
+  )
+
+  # data(vac18)
+  # X = vac18$genes
+  # Y = vac18$stimulation
+  # # sample indicates the repeated measurements
+  # design = data.frame(sample = vac18$sample)
+  #
+  # tune = tune.splsda(X, Y, ncomp = 1, nrepeat = 10, logratio = "none",
+  # test.keepX = c(5, 10, 15), folds = 10, dist = "max.dist", multilevel=design,
+  # progressBar = TRUE, validation="loo")
+  # print("keepx")
+  # print(tune$choice.keepX)
+  # print("ncomp")
+  # print(tune$choice.ncomp)
+  # print("=====")
+  # tune = tune.splsda(data$translatome, classes, ncomp = 10, nrepeat = 10, logratio = "none",
+  #   test.keepX = c(5,10,15), validation="loo", folds=10, dist = "max.dist", multilevel=data.frame(pch),
+  #   progressBar = TRUE)
+  # print("keepx")
+  # print(tune$choice.keepX)
+  # print("ncomp")
+  # print(tune$choice.ncomp)
+  # print("=====")
+  # tune = tune.splsda(data$proteome, classes, ncomp = 10, nrepeat = 10, logratio = "none",
+  #   test.keepX = c(5,10,15), validation="loo", folds=10, dist = "max.dist", multilevel=data.frame(pch),
+  #   progressBar = TRUE)
+  # print("keepx")
+  # print(tune$choice.keepX)
+  # print("ncomp")
+  # print(tune$choice.ncomp)
+  # print("=====")
+  # q()
+  # # print(pch)
+
+  # splsda_tune_(data$translatome, classes, data.frame(pch), ncomp=argv$splsdacomp,
+  #   nrepeat=10, logratio="none", test_keepX=c(5,10,15), validation="loo",
+  #   folds=10, dist=argv$mdist, cpus=argv$ncpus, progressBar=TRUE)
+
+  # splsda_tune(data, classes, data.frame(pch), ncomp=argv$splsdacomp,
+  #   nrepeat=10, logratio="none", test_keepX=c(5,10,15), validation="loo",
+  #   folds=10, dist=argv$mdist, cpus=argv$ncpus, progressBar=TRUE)
+  #
+  # q()
+
+  # sparse partial least squares discriminant analysis
+  if (argv$splsdacomp > 0) {
+    if (!is.na(pch)) {
+      print("Tuning splsda components and selected variables")
+      tuned = splsda_tune(input_data, classes, data.frame(pch),
+        ncomp=argv$splsdacomp, nrepeat=10, logratio="none",
+        test_keepX=c(5, 10), validation="loo", folds=10, dist=argv$mdist,
+        cpus=argv$ncpus, progressBar=TRUE)
+
+      splsda_keepx = lapply(tuned, `[`, "choice.keepX")
+      splsda_ncomp = lapply(tuned, `[`, "choice.ncomp")
+
+      print("Tuned splsda to use number of components:")
+      splsda_ncomp = lapply(splsda_ncomp, `[`, "ncomp")
+      splsda_ncomp = unlist(splsda_ncomp, recursive = FALSE)
+      names(splsda_ncomp) = names
+      print(splsda_ncomp)
+
+      print("Tuned the number of variables selected on each component to:")
+      print(splsda_keepx)
+      splsda_keepx = unlist(splsda_keepx, recursive = FALSE)
+      names(splsda_keepx) = names
+      print(splsda_keepx)
+
+      data_splsda = splsda_classify(
+        data_imp, classes, pch, title=names, splsda_ncomp, splsda_keepx
+      )
+    }
   } else {
-    splsda_classify(data_imp, classes, pch=NA, title=names, argv$plscomp)
+    data_splsda = NA
+    tuned = NA
   }
+
+  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
+    tuned, pca_withna, pca_impute, mdist, file=argv$rdata
+  )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {

@@ -161,7 +161,7 @@ count_missing = function(data) {
 
 impute_missing_ = function(data, ncomp=10, block_name="") {
   # impute missing values with nipals: dataframe (with NA) -> dataframe
-  print("Number of components:")
+  print("Number of components for imputation:")
   print(ncomp)
   nipals_tune = nipals(data, reconst=TRUE, ncomp=ncomp)
   barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
@@ -184,7 +184,7 @@ replace_missing = function(data, imputed) {
   mapply(function(x, y) replace_missing_(x, y), data, imputed)
 }
 
-plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0) {
+plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0, show=FALSE) {
   # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
   names = names(data)
 
@@ -193,9 +193,12 @@ plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0) {
 
   if (ncomp == 0) {ncomp = dim(classes)[1]}
 
-  print("Showing PCA component contribution...")
   data_pca = lapply(data, pca, ncomp=ncomp, center=TRUE, scale=TRUE)
-  print(data_pca)
+
+  if (show == TRUE) {
+    print("Showing PCA component contribution...")
+    print(data_pca)
+  }
 
   print("Plotting PCA component contribution...")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
@@ -237,7 +240,7 @@ plot_additional = function(data, data_pca, names) {
     main=paste(z, "Biplot")), data, data_pca, names)
 }
 
-plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0) {
+plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE) {
   names = names(data)
 
   print("Removing 0 variance columns from data...")
@@ -245,9 +248,11 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0) {
 
   if (ncomp == 0) {ncomp = dim(classes)[1]}
 
-  print("Showing PCA multilevel component contribution...")
   data_pca = lapply(data,pca,ncomp=ncomp,center=TRUE,scale=TRUE,multilevel=pch)
-  print(data_pca)
+  if (show == TRUE) {
+    print("Showing PCA multilevel component contribution...")
+    print(data_pca)
+  }
 
   print("Plotting PCA multilevel component contribution...")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
@@ -266,36 +271,89 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0) {
   return(data_pca)
 }
 
-splsda_classify = function(data, classes, pch=NA, title="", ncomp=0) {
-  mapply(function(x, y) splsda_classify_(x, classes, pch, y, ncomp), data, title)
+plsda_classify = function(data, classes, pch=NA, title="", ncomp=0) {
+  mapply(function(x, y) plsda_classify_(x, classes, pch, y, ncomp), data, title)
 }
 
-splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
+plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (!is.na(pch)) {
     print("Plotting single level partial least squares discriminant analysis")
-    data_pls = plsda(data, Y=classes, multilevel=pch, ncomp=ncomp)
-    plotIndiv(data_pls, ind.names=TRUE, group=classes, legend=TRUE, pch=pch,
-      title=paste(title, "PCA PLS 1/2")
+    data_plsda = plsda(data, Y=classes, multilevel=pch, ncomp=ncomp)
+    data_pca = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "PCA PLSDA")
     )
   } else {
     print("Plotting multiple level partial least squares discriminant analysis")
-    data_pls = plsda(data, Y=classes, ncomp=ncomp)
-    plotIndiv(data_pls, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PCA MPLS 1/2")
+    data_plsda = plsda(data, Y=classes, ncomp=ncomp)
+    data_pca = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PCA MPLSDA")
     )
   }
-  return(data_pls)
+  return(list(data_plsda=data_plsda, data_pca_plsda=data_pca))
 }
 
-plot_pca_splsda = function(data, classes, pch, title="", ncomp=0) {
+splsda_tune = function(data, classes, multilevel, ncomp=3, nrepeat=10,
+  logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
+  dist="max.dist", cpus=2, progressBar=TRUE) {
+    mapply(function(x) splsda_tune_(x, classes, multilevel, ncomp, nrepeat,
+      logratio, test_keepX, validation, folds, dist, cpus, progressBar),
+      data, SIMPLIFY=FALSE)
+  }
+
+splsda_tune_ = function(data, classes, multilevel, ncomp=3, nrepeat=10,
+  logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
+  dist="max.dist", cpus=2, progressBar=TRUE) {
+  # tune splsda components
+  tuned = tune.splsda(data, Y=classes, multilevel=multilevel, ncomp=ncomp,
+    nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
+    validation=validation, folds=folds, dist=dist, cpus=cpus,
+    progressBar=progressBar
+  )
+  plot(tuned)
+  return(tuned)
+}
+
+splsda_classify = function(data, classes, pch=NA, title="", ncomp=0, keepX=NULL) {
+  mapply(function(x, y, c, k) splsda_classify_(
+    x, classes, pch, y, c, k
+  ), data, title, ncomp, keepX)
+}
+
+splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0, keepX=NULL) {
+  # discriminate samples: list, vector, bool, integer, vector -> list
+  # single or multilevel sPLS-DA
+  if (is.null(keepX)) {
+    print("The number of variables selected on each component is not selected!")
+    q(status=1)
+  }
+  if (is.null(ncomp)) {
+    print("Invalid number of components, inferring from keepX")
+    ncomp = length(keepX)
+    print(ncomp)
+  }
+  print("splsda components:")
+  print(ncomp)
+  print("number of variables on each component:")
+  print(keepX)
+  data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
+  data_pca = plotIndiv(data_splsda, ind.names=TRUE, group=classes, pch=pch,
+    # col=color.mixo(c(as.factor(classes))),
+    legend=TRUE, title=paste(title, "PCA SPLSDA")
+  )
+
+  return(list(data_splsda=data_splsda, data_pca_splsda=data_pca))
+}
+
+
+plot_pca_plsda = function(data, classes, pch, title="", ncomp=0) {
   names = names(data)
-  print("Plotting PCA splsda component contribution...")
+  print("Plotting PCA plsda component contribution...")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
     data, names)
 
-  print("Plotting PCA splsda...")
+  print("Plotting PCA plsda...")
   mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
     group=classes, legend=TRUE, ncomp=ncomp,
     title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
