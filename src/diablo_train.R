@@ -118,13 +118,13 @@ main = function() {
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data = lapply(data, remove_na_class, classes)
-    save(classes, data, mdist, file=argv$rdata)
+    save(classes, data, mdist, argv, file=argv$rdata)
   }
 
   # drop features / columns >= a threshold of NA values
   if (argv$dropna_prop > 0) {
     data = remove_na_prop(data, classes, pch=pch, na_prop=argv$dropna_prop)
-    save(classes, data, mdist, file=argv$rdata)
+    save(classes, data, mdist, argv, file=argv$rdata)
   }
 
   # check dimensions
@@ -147,7 +147,7 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, data, pca_withna, mdist, file=argv$rdata)
+  save(classes, data, pca_withna, mdist, argv, file=argv$rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -166,7 +166,9 @@ main = function() {
     data_imp = NA
     pca_impute = NA
   }
-  save(classes, data, data_imp, pca_withna, pca_impute, mdist, file=argv$rdata)
+  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv,
+    file=argv$rdata
+  )
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -190,7 +192,7 @@ main = function() {
     }
   } else { data_pca_multilevel = NA }
   save(classes, data, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, mdist, file=argv$rdata
+    pca_withna, pca_impute, mdist, argv, file=argv$rdata
   )
 
   # partial least squares discriminant analysis
@@ -207,51 +209,8 @@ main = function() {
   } else { data_plsda = NA }
 
   save(classes, data, input_data, data_pca_multilevel, data_plsda, pca_withna,
-    pca_impute, mdist, file=argv$rdata
+    pca_impute, mdist, argv, file=argv$rdata
   )
-
-  # data(vac18)
-  # X = vac18$genes
-  # Y = vac18$stimulation
-  # # sample indicates the repeated measurements
-  # design = data.frame(sample = vac18$sample)
-  #
-  # tune = tune.splsda(X, Y, ncomp = 1, nrepeat = 10, logratio = "none",
-  # test.keepX = c(5, 10, 15), folds = 10, dist = "max.dist", multilevel=design,
-  # progressBar = TRUE, validation="loo")
-  # print("keepx")
-  # print(tune$choice.keepX)
-  # print("ncomp")
-  # print(tune$choice.ncomp)
-  # print("=====")
-  # tune = tune.splsda(data$translatome, classes, ncomp = 10, nrepeat = 10, logratio = "none",
-  #   test.keepX = c(5,10,15), validation="loo", folds=10, dist = "max.dist", multilevel=data.frame(pch),
-  #   progressBar = TRUE)
-  # print("keepx")
-  # print(tune$choice.keepX)
-  # print("ncomp")
-  # print(tune$choice.ncomp)
-  # print("=====")
-  # tune = tune.splsda(data$proteome, classes, ncomp = 10, nrepeat = 10, logratio = "none",
-  #   test.keepX = c(5,10,15), validation="loo", folds=10, dist = "max.dist", multilevel=data.frame(pch),
-  #   progressBar = TRUE)
-  # print("keepx")
-  # print(tune$choice.keepX)
-  # print("ncomp")
-  # print(tune$choice.ncomp)
-  # print("=====")
-  # q()
-  # # print(pch)
-
-  # splsda_tune_(data$translatome, classes, data.frame(pch), ncomp=argv$splsdacomp,
-  #   nrepeat=10, logratio="none", test_keepX=c(5,10,15), validation="loo",
-  #   folds=10, dist=argv$mdist, cpus=argv$ncpus, progressBar=TRUE)
-
-  # splsda_tune(data, classes, data.frame(pch), ncomp=argv$splsdacomp,
-  #   nrepeat=10, logratio="none", test_keepX=c(5,10,15), validation="loo",
-  #   folds=10, dist=argv$mdist, cpus=argv$ncpus, progressBar=TRUE)
-  #
-  # q()
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
@@ -259,7 +218,7 @@ main = function() {
       print("Tuning splsda components and selected variables")
       tuned = splsda_tune(input_data, classes, data.frame(pch),
         ncomp=argv$splsdacomp, nrepeat=10, logratio="none",
-        test_keepX=c(5, 10), validation="loo", folds=10, dist=argv$mdist,
+        test_keepX=c(5, 10, 15), validation="loo", folds=10, dist=argv$mdist,
         cpus=argv$ncpus, progressBar=TRUE)
 
       splsda_keepx = lapply(tuned, `[`, "choice.keepX")
@@ -287,9 +246,9 @@ main = function() {
   }
 
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, file=argv$rdata
+    tuned, pca_withna, pca_impute, mdist, argv, file=argv$rdata
   )
-
+  
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)

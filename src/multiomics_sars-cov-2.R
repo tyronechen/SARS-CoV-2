@@ -321,7 +321,7 @@ splsda_classify = function(data, classes, pch=NA, title="", ncomp=0, keepX=NULL)
   ), data, title, ncomp, keepX)
 }
 
-splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0, keepX=NULL) {
+splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=NULL) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
