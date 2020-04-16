@@ -342,7 +342,7 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
     # col=color.mixo(c(as.factor(classes))),
     legend=TRUE, title=paste(title, "PCA SPLSDA")
   )
-
+  auroc(data_splsda, roc.comp=ncomp)
   return(list(data_splsda=data_splsda, data_pca_splsda=data_pca))
 }
 
