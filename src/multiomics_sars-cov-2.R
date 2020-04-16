@@ -294,15 +294,15 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
   return(list(data_plsda=data_plsda, data_pca_plsda=data_pca))
 }
 
-splsda_tune = function(data, classes, multilevel, ncomp=3, nrepeat=10,
+splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
-    mapply(function(x) splsda_tune_(x, classes, multilevel, ncomp, nrepeat,
-      logratio, test_keepX, validation, folds, dist, cpus, progressBar),
-      data, SIMPLIFY=FALSE)
+    mapply(function(x, y) splsda_tune_(x, classes, names, multilevel, ncomp,
+      nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
+      data, names, SIMPLIFY=FALSE)
   }
 
-splsda_tune_ = function(data, classes, multilevel, ncomp=3, nrepeat=10,
+splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
   # tune splsda components
@@ -311,7 +311,7 @@ splsda_tune_ = function(data, classes, multilevel, ncomp=3, nrepeat=10,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
     progressBar=progressBar
   )
-  plot(tuned)
+  print(plot(tuned, main=names))
   return(tuned)
 }
 
