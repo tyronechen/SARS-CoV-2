@@ -216,7 +216,7 @@ main = function() {
   if (argv$splsdacomp > 0) {
     if (!is.na(pch)) {
       print("Tuning splsda components and selected variables")
-      tuned = splsda_tune(input_data, classes, data.frame(pch),
+      tuned = splsda_tune(input_data, classes, names, data.frame(pch),
         ncomp=argv$splsdacomp, nrepeat=10, logratio="none",
         test_keepX=c(5, 10, 15), validation="loo", folds=10, dist=argv$mdist,
         cpus=argv$ncpus, progressBar=TRUE)
