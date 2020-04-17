@@ -55,8 +55,8 @@ parse_argv = function() {
   p = add_argument(p, "--splsdacomp", type="integer", default=0,
     help="number of components for splsda (defaults to number of samples)"
   )
-  p = add_argument(p, "--splsda_keepx", type="vector", default=NA,
-    help="number of components for splsda (defaults to number of samples)"
+  p = add_argument(p, "--splsda_keepx", type="vector", default=NA, nargs="+",
+    help="variables to keep for splsda"
   )
   p = add_argument(p, "--mdist", type="character", default="max.dist",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
@@ -216,9 +216,22 @@ main = function() {
   if (argv$splsdacomp > 0) {
     if (!is.na(pch)) {
       print("Tuning splsda components and selected variables")
+      if (is.na(argv$splsda_keepx)) {
+        splsda_keepx = c(1,2,3)
+        splsda_ncomp = length(splsda_keepx)
+      } else {
+        splsda_keepx = lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
+        splsda_ncomp = length(splsda_keepx)
+      }
+
+      print("sPLSDA keepX:")
+      print(splsda_keepx)
+      print("sPLSDA ncomp:")
+      print(splsda_ncomp)
+
       tuned = splsda_tune(input_data, classes, names, data.frame(pch),
-        ncomp=argv$splsdacomp, nrepeat=10, logratio="none",
-        test_keepX=c(5, 10, 15), validation="loo", folds=10, dist=argv$mdist,
+        ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+        test_keepX=splsda_keepx, validation="loo", folds=10, dist=argv$mdist,
         cpus=argv$ncpus, progressBar=TRUE)
 
       splsda_keepx = lapply(tuned, `[`, "choice.keepX")
@@ -248,7 +261,7 @@ main = function() {
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
     tuned, pca_withna, pca_impute, mdist, argv, file=argv$rdata
   )
-  
+  q()
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
