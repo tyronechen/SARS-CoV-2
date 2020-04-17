@@ -282,16 +282,16 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     print("Plotting single level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, multilevel=pch, ncomp=ncomp)
     data_pca = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "PCA PLSDA")
+      pch=pch, title=paste(title, "PLSDA Single")
     )
   } else {
     print("Plotting multiple level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
-    data_pca = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PCA MPLSDA")
+    plot_plsda = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PLSDA Multi")
     )
   }
-  return(list(data_plsda=data_plsda, data_pca_plsda=data_pca))
+  return(list(data_plsda=data_plsda, plot_plsda=plot_plsda))
 }
 
 splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
@@ -340,29 +340,29 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
   data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
   data_pca = plotIndiv(data_splsda, ind.names=TRUE, group=classes, pch=pch,
     # col=color.mixo(c(as.factor(classes))),
-    legend=TRUE, title=paste(title, "PCA SPLSDA")
+    legend=TRUE, title=paste(title, "SPLSDA")
   )
   auroc(data_splsda, roc.comp=ncomp)
   return(list(data_splsda=data_splsda, data_pca_splsda=data_pca))
 }
 
 
-plot_pca_plsda = function(data, classes, pch, title="", ncomp=0) {
+plot_plsda = function(data, classes, pch, title="", ncomp=0) {
   names = names(data)
-  print("Plotting PCA plsda component contribution...")
+  print("Plotting PLSDA component contribution...")
   mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
     data, names)
 
-  print("Plotting PCA plsda...")
+  print("Plotting plsda...")
   mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
     group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
+    title=paste(title, y, "PLSDA 1/2"), pch=pch), data_pca, names)
   mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
     group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
+    title=paste(title, y, "PLSDA 1/3"), pch=pch), data_pca, names)
   mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
     group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
+    title=paste(title, y, "PLSDA 2/3"), pch=pch), data_pca, names)
   return(data_pca)
 }
 
