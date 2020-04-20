@@ -358,12 +358,17 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
   print("number of variables on each component:")
   print(keepX)
   data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
-  data_pca = plotIndiv(data_splsda, ind.names=TRUE, group=classes, pch=pch,
-    # col=color.mixo(c(as.factor(classes))),
-    legend=TRUE, title=paste(title, "SPLSDA")
+  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+    pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2)
+  )
+  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+    pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3)
+  )
+  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+    pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
   )
   mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
-  return(list(data_splsda=data_splsda, data_pca_splsda=data_pca))
+  return(data_splsda)
 }
 
 
