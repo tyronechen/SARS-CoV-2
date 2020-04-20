@@ -17,6 +17,9 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
+  p = add_argument(p, "--args", type="character", default="args.txt",
+    help="command line options for script are saved here as a tsv file"
+  )
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information eg individual (same format as classes)"
   )
@@ -71,6 +74,9 @@ parse_argv = function() {
 
 main = function() {
   argv = parse_argv()
+  print("Writing command line arguments to:")
+  print(argv$args)
+  write.table(unlist(argv)[-4:-1], file=argv$args, sep="\t")
 
   # print some diagnostics for debugging
   print("Available cpus:")
@@ -261,7 +267,7 @@ main = function() {
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
     tuned, pca_withna, pca_impute, mdist, argv, file=argv$rdata
   )
-  
+
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
