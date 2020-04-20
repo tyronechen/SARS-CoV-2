@@ -279,19 +279,39 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (!is.na(pch)) {
-    print("Plotting single level partial least squares discriminant analysis")
-    data_plsda = plsda(data, Y=classes, multilevel=pch, ncomp=ncomp)
-    data_pca = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "PLSDA Single")
+    print("Plotting multi level partial least squares discriminant analysis")
+    data_plsda = plsda(data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp)
+    # plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+    #   pch=pch, title=paste(title, "PLSDA multi 123"), comp=c(1,2,3), style='3d'
+    #   # col=color.mixo(c(classes))
+    # )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "PLSDA multi 1/2"), comp=c(1,2)
+    )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "PLSDA multi 1/3"), comp=c(1,3)
+    )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "PLSDA multi 2/3"), comp=c(2,3)
     )
   } else {
-    print("Plotting multiple level partial least squares discriminant analysis")
+    print("Plotting single level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
-    plot_plsda = plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PLSDA Multi")
+    # plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+    #   title=paste(title, "PLSDA single 123"), comp=c(1,2,3), style='3d'
+    #   # col=color.mixo(c(classes))
+    # )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PLSDA single 1/2"), comp=c(1,2)
+    )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PLSDA single 1/3"), comp=c(1,3)
+    )
+    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+      title=paste(title, "PLSDA single 2/3"), comp=c(2,3)
     )
   }
-  return(list(data_plsda=data_plsda, plot_plsda=plot_plsda))
+  return(data_plsda)#, plot_plsda=plot_plsda))
 }
 
 splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
@@ -342,7 +362,7 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
     # col=color.mixo(c(as.factor(classes))),
     legend=TRUE, title=paste(title, "SPLSDA")
   )
-  auroc(data_splsda, roc.comp=ncomp)
+  mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   return(list(data_splsda=data_splsda, data_pca_splsda=data_pca))
 }
 
