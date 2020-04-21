@@ -290,9 +290,6 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 2/3"), comp=c(2,3)
     )
-    plotLoadings(data_plsda, contrib='max', comp=ncomp, method='median',
-      ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
-    )
   } else {
     print("Plotting single level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
@@ -305,10 +302,14 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       title=paste(title, "PLSDA single 2/3"), comp=c(2,3)
     )
-    plotLoadings(data_plsda, contrib='max', comp=ncomp, method='median',
-      ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
-    )
   }
+  mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
+  loadings = plotLoadings(data_plsda,contrib='max',comp=ncomp,method='median',
+    ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
+  )
+  print(loadings)
+  path = paste(title, "_PLSDA", ".txt", sep="")
+  write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
   return(data_plsda)
 }
 
@@ -365,13 +366,15 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
   plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
   )
-  plotLoadings(data_splsda, contrib='max', comp=ncomp, method='median',
+  mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
+  loadings = plotLoadings(data_splsda,contrib='max',comp=ncomp,method='median',
     ndisplay=50, name.var=colnames(data), title=paste(title, "sPLSDA loadings")
   )
-  mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
+  print(loadings)
+  path = paste(title, "_sPLSDA", ".txt", sep="")
+  write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
   return(data_splsda)
 }
-
 
 plot_plsda = function(data, classes, pch, title="", ncomp=0) {
   names = names(data)
@@ -390,6 +393,23 @@ plot_plsda = function(data, classes, pch, title="", ncomp=0) {
     group=classes, legend=TRUE, ncomp=ncomp,
     title=paste(title, y, "PLSDA 2/3"), pch=pch), data_pca, names)
   return(data_pca)
+}
+
+plot_loadings = function(data, contrib="max", ncomp=2, method="median",
+  ndisplay=50, title="Loadings") {
+  mapply(function(x, y) plot_loadings_(x, contrib, ncomp, method, ndisplay,
+    y), data, title)
+}
+
+plot_loadings_ = function(data, contrib="max", ncomp=2, method="median",
+  ndisplay=50, title="Loadings") {
+  name_var = names(data)
+  loadings=plotLoadings(data, contrib, ncomp, method, ndisplay, name_var, title)
+  print(loadings)
+  path = paste(title, "txt", sep=".")
+  print(path)
+  write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
+  return(loadings)
 }
 
 cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
