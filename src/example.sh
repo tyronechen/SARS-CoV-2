@@ -12,4 +12,4 @@ Rscript diablo_train.R ../data/classes_diablo.txt \
 	--splsdacomp 5 \
 	--mdist mahalanobis \
 	--ncpus 6 \
-	--splsda_keepx 5 10 15 20 25
+	--splsda_keepx 10 50 100 250
