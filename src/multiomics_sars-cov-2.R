@@ -281,10 +281,6 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
   if (!is.na(pch)) {
     print("Plotting multi level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp)
-    # plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-    #   pch=pch, title=paste(title, "PLSDA multi 123"), comp=c(1,2,3), style='3d'
-    #   # col=color.mixo(c(classes))
-    # )
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 1/2"), comp=c(1,2)
     )
@@ -294,13 +290,12 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 2/3"), comp=c(2,3)
     )
+    plotLoadings(data_plsda, contrib='max', comp=ncomp, method='median',
+      ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
+    )
   } else {
     print("Plotting single level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
-    # plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-    #   title=paste(title, "PLSDA single 123"), comp=c(1,2,3), style='3d'
-    #   # col=color.mixo(c(classes))
-    # )
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       title=paste(title, "PLSDA single 1/2"), comp=c(1,2)
     )
@@ -310,8 +305,11 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
       title=paste(title, "PLSDA single 2/3"), comp=c(2,3)
     )
+    plotLoadings(data_plsda, contrib='max', comp=ncomp, method='median',
+      ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
+    )
   }
-  return(data_plsda)#, plot_plsda=plot_plsda))
+  return(data_plsda)
 }
 
 splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
@@ -366,6 +364,9 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
   )
   plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
+  )
+  plotLoadings(data_splsda, contrib='max', comp=ncomp, method='median',
+    ndisplay=50, name.var=colnames(data), title=paste(title, "sPLSDA loadings")
   )
   mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   return(data_splsda)
