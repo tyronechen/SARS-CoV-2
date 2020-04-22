@@ -271,11 +271,14 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
   return(data_pca)
 }
 
-plsda_classify = function(data, classes, pch=NA, title="", ncomp=0) {
-  mapply(function(x, y) plsda_classify_(x, classes, pch, y, ncomp), data, title)
+plsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
+  contrib="max", outdir="./") {
+  mapply(function(x, y) plsda_classify_(
+    x, classes, pch, y, ncomp, contrib, outdir), data, title)
 }
 
-plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
+plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
+  contrib="max", outdir="./") {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (!is.na(pch)) {
@@ -304,17 +307,19 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0) {
     )
   }
   mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
-  loadings = plotLoadings(data_plsda,contrib='max',comp=ncomp,method='median',
+  loadings = plotLoadings(data_plsda,contrib=contrib,comp=ncomp,method='median',
     ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
   )
-  print(loadings)
-  path = paste(title, "_PLSDA", ".txt", sep="")
+  title = gsub(" ", "_", title)
+  path = paste(outdir, "/", title, "_PLSDA", ".txt", sep="")
+  print("Writing PLSDA loadings to:")
+  print(path)
   write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
   return(data_plsda)
 }
 
 splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
-  logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
+  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
     mapply(function(x, y) splsda_tune_(x, classes, names, multilevel, ncomp,
       nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
@@ -322,7 +327,7 @@ splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   }
 
 splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
-  logratio="none", test_keepX=c(5,50,100), validation="loo", folds=10,
+  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
   # tune splsda components
   tuned = tune.splsda(data, Y=classes, multilevel=multilevel, ncomp=ncomp,
@@ -334,13 +339,15 @@ splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   return(tuned)
 }
 
-splsda_classify = function(data, classes, pch=NA, title="", ncomp=0, keepX=NULL) {
+splsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
+  keepX=NULL, contrib="max", outdir="./") {
   mapply(function(x, y, c, k) splsda_classify_(
-    x, classes, pch, y, c, k
+    x, classes, pch, y, c, k, contrib, outdir
   ), data, title, ncomp, keepX)
 }
 
-splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=NULL) {
+splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
+  keepX=NULL, contrib="max", outdir="./") {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
@@ -367,11 +374,15 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL, keepX=N
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
   )
   mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
-  loadings = plotLoadings(data_splsda,contrib='max',comp=ncomp,method='median',
-    ndisplay=50, name.var=colnames(data), title=paste(title, "sPLSDA loadings")
+  loadings = plotLoadings(data_splsda, contrib=contrib, comp=ncomp,
+    method='median', ndisplay=50, name.var=colnames(data),
+    title=paste(title, "sPLSDA loadings")
   )
-  print(loadings)
-  path = paste(title, "_sPLSDA", ".txt", sep="")
+  title = gsub(" ", "_", title)
+  print(outdir)
+  path = paste(outdir, "/", title, "_sPLSDA", ".txt", sep="")
+  print("Writing sPLSDA loadings to:")
+  print(path)
   write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
   return(data_splsda)
 }

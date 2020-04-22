@@ -43,11 +43,14 @@ parse_argv = function() {
   p = add_argument(p, "--icomp", type="integer", default=10,
     help="component number for imputing (set 0 for no imputation)"
   )
-  p = add_argument(p, "--rdata", type="character", default="./diablo.RData",
+  p = add_argument(p, "--rdata", type="character", default="./data.RData",
     help="write RData object here, has (classes, data, diablo, mdist)"
   )
   p = add_argument(p, "--plot", type="character", default="./Rplots.pdf",
     help="write R plots here (will overwrite existing!)"
+  )
+  p = add_argument(p, "--outfile_dir", type="character", default="./",
+    help="write args, R plots and RData here (will overwrite existing!)"
   )
   p = add_argument(p, "--pcomp", type="integer", default=0,
     help="number of principal components (defaults to number of samples)"
@@ -64,7 +67,9 @@ parse_argv = function() {
   p = add_argument(p, "--mdist", type="character", default="max.dist",
     help="distance metric to use [max.dist, centroids.dist, mahalanobis.dist]"
   )
-
+  p = add_argument(p, "--contrib", type="character", default="max",
+    help="contribution type for plotting loadings of s/PLSDA [max|min]"
+  )
   # Parse the command line arguments
   argv = parse_args(p)
 
@@ -74,9 +79,18 @@ parse_argv = function() {
 
 main = function() {
   argv = parse_argv()
+  print("Creating output files directory (will overwrite existing data!)")
+  outdir = argv$outfile_dir
+  dir.create(file.path(outdir))
+
   print("Writing command line arguments to:")
-  print(argv$args)
-  write.table(unlist(argv)[-4:-1], file=argv$args, sep="\t")
+  argpath = paste(outdir, argv$args, sep="/")
+  print(argpath)
+  write.table(unlist(argv)[-4:-1], file=argpath, sep="\t")
+
+  rdata = paste(outdir, argv$rdata, sep="/")
+  plot = paste(outdir, argv$plot, sep="/")
+  contrib = argv$contrib
 
   # print some diagnostics for debugging
   print("Available cpus:")
@@ -111,8 +125,8 @@ main = function() {
   print(names)
 
   # initialise plots
-  print(paste("Saving plots to (overwriting existing):", argv$plot))
-  pdf(argv$plot)
+  print(paste("Saving plots to (overwriting existing):", plot))
+  pdf(plot)
 
   # load data and drop features / columns with all NA
   data = lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
@@ -124,13 +138,13 @@ main = function() {
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data = lapply(data, remove_na_class, classes)
-    save(classes, data, mdist, argv, file=argv$rdata)
+    save(classes, data, mdist, argv, file=rdata)
   }
 
   # drop features / columns >= a threshold of NA values
   if (argv$dropna_prop > 0) {
     data = remove_na_prop(data, classes, pch=pch, na_prop=argv$dropna_prop)
-    save(classes, data, mdist, argv, file=argv$rdata)
+    save(classes, data, mdist, argv, file=rdata)
   }
 
   # check dimensions
@@ -153,7 +167,7 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, data, pca_withna, mdist, argv, file=argv$rdata)
+  save(classes, data, pca_withna, mdist, argv, file=rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -172,9 +186,7 @@ main = function() {
     data_imp = NA
     pca_impute = NA
   }
-  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv,
-    file=argv$rdata
-  )
+  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv, file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -198,24 +210,24 @@ main = function() {
     }
   } else { data_pca_multilevel = NA }
   save(classes, data, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, mdist, argv, file=argv$rdata
+    pca_withna, pca_impute, mdist, argv, file=rdata
   )
 
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
     if (!is.na(pch)) {
-      data_plsda = plsda_classify(
-        input_data, classes, pch, title=names, argv$plsdacomp
+      data_plsda = plsda_classify(input_data, classes, pch,
+        title=names, argv$plsdacomp, contrib, outdir
       )
     } else {
-      data_plsda = plsda_classify(
-        input_data, classes, pch=NA, title=names, argv$plsdacomp
+      data_plsda = plsda_classify(input_data, classes, pch=NA,
+        title=names, argv$plsdacomp, contrib, outdir
       )
     }
   } else { data_plsda = NA }
 
   save(classes, data, input_data, data_pca_multilevel, data_plsda, pca_withna,
-    pca_impute, mdist, argv, file=argv$rdata
+    pca_impute, mdist, argv, file=rdata
   )
 
   # sparse partial least squares discriminant analysis
@@ -256,7 +268,8 @@ main = function() {
       print(splsda_keepx)
 
       data_splsda = splsda_classify(
-        data_imp, classes, pch, title=names, splsda_ncomp, splsda_keepx
+        data_imp, classes, pch, title=names, splsda_ncomp,
+        splsda_keepx, contrib, outdir
       )
     }
   } else {
@@ -265,7 +278,7 @@ main = function() {
   }
 
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, file=argv$rdata
+    tuned, pca_withna, pca_impute, mdist, argv, file=rdata
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
@@ -282,7 +295,9 @@ main = function() {
 
   # remove invariant columns
   data = lapply(data, remove_novar)
-  save(classes, data, pca_withna, pca_impute, mdist, file=argv$rdata)
+  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
+    tuned, pca_withna, pca_impute, mdist, argv, file=rdata
+  )
 
   # tune diablo parameters and run diablo
   keepx = tune_keepx(data, classes, dcomp, design, cpus=argv$ncpus, dist=mdist)
@@ -297,9 +312,9 @@ main = function() {
   predict_diablo(diablo, data, classes)
 
   # save RData object for future reference
-  print(paste("Saving diablo data to:", argv$rdata))
-  save(classes, data, diablo, pca_withna, pca_impute, mdist, file=argv$rdata)
-  print(paste("Saved plots to:", argv$plot))
+  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
+    tuned, pca_withna, pca_impute, mdist, argv, diablo, file=rdata
+  )
   dev.off()
 }
 
