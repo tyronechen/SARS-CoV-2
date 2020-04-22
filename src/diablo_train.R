@@ -17,14 +17,8 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--args", type="character", default="Rscript.sh",
-    help="command line options for script are saved here as a shell file"
-  )
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information eg individual (same format as classes)"
-  )
-  p = add_argument(p, "--data", type="character", nargs=Inf,
-    help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
   )
   p = add_argument(p, "--dropna_classes", type="character", default=TRUE,
     help="where all replicates for >= 1 class are NA, drop that feature. \
@@ -36,21 +30,18 @@ parse_argv = function() {
     drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
     --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
   )
+  p = add_argument(p, "--data", type="character", nargs=Inf,
+    help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
+  )
+  p = add_argument(p, "--mappings", type="character", nargs=Inf, default=NULL,
+    help="path to map file of feature id to name (must be same order as data!)"
+  )
   p = add_argument(p, "--ncpus", help="number of cpus", type="integer", default=2)
   p = add_argument(p, "--dcomp", type="integer", default=0,
     help="number of diablo components (set manually if you get inference error)"
   )
   p = add_argument(p, "--icomp", type="integer", default=10,
     help="component number for imputing (set 0 for no imputation)"
-  )
-  p = add_argument(p, "--rdata", type="character", default="./data.RData",
-    help="write RData object here, has (classes, data, diablo, mdist)"
-  )
-  p = add_argument(p, "--plot", type="character", default="./Rplots.pdf",
-    help="write R plots here (will overwrite existing!)"
-  )
-  p = add_argument(p, "--outfile_dir", type="character", default="./",
-    help="write args, R plots and RData here (will overwrite existing!)"
   )
   p = add_argument(p, "--pcomp", type="integer", default=0,
     help="number of principal components (defaults to number of samples)"
@@ -69,6 +60,18 @@ parse_argv = function() {
   )
   p = add_argument(p, "--contrib", type="character", default="max",
     help="contribution type for plotting loadings of s/PLSDA [max|min]"
+  )
+  p = add_argument(p, "--outfile_dir", type="character", default="./",
+    help="write args, R plots and RData here (will overwrite existing!)"
+  )
+  p = add_argument(p, "--rdata", type="character", default="./data.RData",
+    help="write RData object here, has (classes, data, diablo, mdist)"
+  )
+  p = add_argument(p, "--plot", type="character", default="./Rplots.pdf",
+    help="write R plots here (will overwrite existing!)"
+  )
+  p = add_argument(p, "--args", type="character", default="Rscript.sh",
+    help="command line options for script are saved here as a shell file"
   )
   # Parse the command line arguments
   argv = parse_args(p)
@@ -89,7 +92,6 @@ write_args = function(args, argpath) {
   args = head(args, -1)
   args[length(args)] = substr(args[length(args)],1,nchar(args[length(args)])-2)
   args = c(script_name, paste("  ", last), paste("  ", args))
-  print(args)
   write(args, sep="\n", file=argpath)
 }
 
@@ -293,10 +295,16 @@ main = function() {
     tuned = NA
   }
 
+  if (!is.null(argv$mappings)) {
+    mappings = lapply(argv$mappings, parse_mappings)
+    names(mappings) = names
+    # remap_data_(data$translatome, mappings$translatome)
+  }
+
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
     tuned, pca_withna, pca_impute, mdist, argv, file=rdata
   )
-
+  q()
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
