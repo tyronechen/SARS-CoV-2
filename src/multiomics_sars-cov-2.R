@@ -21,6 +21,26 @@ parse_data = function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
   return(data)
 }
 
+parse_mappings = function(infile_path) {
+  # load in id:name data into a mapping table, format: infile_path -> dataframe
+  print("Parsing mappings...")
+  print(infile_path)
+  data = read.table(infile_path, sep="\t", header=TRUE, row.names=2)
+  data["X"] = NULL
+  return(data)
+}
+
+remap_data_ = function(data, mapping) {
+  # map feature names to feature id, format: dataframe, dataframe -> dataframe
+  # TODO: doesnt handle duplicates in row ids (some feature id map to same name)
+  q()
+  print("Remapping data with mapfiles...")
+  data = merge(t(data), mapping, by=0, all.x=TRUE)
+  data["Row.names"] = NULL
+  row.names(data) = data$val
+  return(data)
+}
+
 show_na_prop = function(data_na, name) {
   # first, sum the number of missing values per variable
   sum_na_per_var = apply(data_na, 2, function(x) {sum(is.na(x))})
