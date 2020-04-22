@@ -17,8 +17,8 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--args", type="character", default="args.txt",
-    help="command line options for script are saved here as a tsv file"
+  p = add_argument(p, "--args", type="character", default="args.sh",
+    help="command line options for script are saved here as a shell file"
   )
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information eg individual (same format as classes)"
@@ -77,6 +77,22 @@ parse_argv = function() {
   return(argv)
 }
 
+write_args = function(args, argpath) {
+  args = as.data.frame(stack(args))
+  args = args[4:dim(args)[1],]
+  args = args[,c(2,1)]
+  args = paste("  --", paste(args$ind, args$values), " \\", sep="")
+  args[length(args)] = substr(args[length(args)],1,nchar(args[length(args)])-2)
+  script_name = paste("Rscript", sub(".*=", "", commandArgs()[4]), "\\")
+  args = c(script_name, args)
+  print(args)
+  write(args, sep="\n", file=argpath)
+
+  # write.table(
+  #   args, quote=FALSE, sep="\t", file=argpath, row.names=FALSE, col.names=FALSE
+  # )
+}
+
 main = function() {
   argv = parse_argv()
   print("Creating output files directory (will overwrite existing data!)")
@@ -86,7 +102,7 @@ main = function() {
   print("Writing command line arguments to:")
   argpath = paste(outdir, argv$args, sep="/")
   print(argpath)
-  write.table(unlist(argv)[-4:-1], file=argpath, sep="\t")
+  write_args(argv, argpath)
 
   rdata = paste(outdir, argv$rdata, sep="/")
   plot = paste(outdir, argv$plot, sep="/")
