@@ -17,7 +17,7 @@ parse_argv = function() {
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
-  p = add_argument(p, "--args", type="character", default="args.sh",
+  p = add_argument(p, "--args", type="character", default="Rscript.sh",
     help="command line options for script are saved here as a shell file"
   )
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
@@ -81,16 +81,16 @@ write_args = function(args, argpath) {
   args = as.data.frame(stack(args))
   args = args[4:dim(args)[1],]
   args = args[,c(2,1)]
-  args = paste("  --", paste(args$ind, args$values), " \\", sep="")
-  args[length(args)] = substr(args[length(args)],1,nchar(args[length(args)])-2)
+  args = aggregate(args$values, list(args$ind), paste, collapse=" ")
+  colnames(args) = c("ind", "values")
+  args = paste("--", paste(args$ind, args$values), " \\", sep="")
   script_name = paste("Rscript", sub(".*=", "", commandArgs()[4]), "\\")
-  args = c(script_name, args)
+  last = paste(unlist(strsplit(args[length(args)], " "))[2], " \\")
+  args = head(args, -1)
+  args[length(args)] = substr(args[length(args)],1,nchar(args[length(args)])-2)
+  args = c(script_name, paste("  ", last), paste("  ", args))
   print(args)
   write(args, sep="\n", file=argpath)
-
-  # write.table(
-  #   args, quote=FALSE, sep="\t", file=argpath, row.names=FALSE, col.names=FALSE
-  # )
 }
 
 main = function() {
