@@ -327,8 +327,9 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
     )
   }
   mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
-  loadings = plotLoadings(data_plsda,contrib=contrib,comp=ncomp,method='median',
-    ndisplay=50, name.var=colnames(data), title=paste(title, "PLSDA loadings")
+  mapply(function(x) plotLoadings(data_plsda, contrib=contrib, comp=x,
+    method='median', ndisplay=100, name.var=colnames(data),
+    title=paste(title, x, "PLSDA loadings")), seq(ncomp)
   )
   title = gsub(" ", "_", title)
   path = paste(outdir, "/", title, "_PLSDA", ".txt", sep="")
@@ -394,9 +395,9 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
   )
   mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
-  loadings = plotLoadings(data_splsda, contrib=contrib, comp=ncomp,
-    method='median', ndisplay=50, name.var=colnames(data),
-    title=paste(title, "sPLSDA loadings")
+  mapply(function(x) plotLoadings(data_splsda, contrib=contrib, comp=x,
+    method='median', ndisplay=100, name.var=colnames(data),
+    title=paste(title, x, "sPLSDA loadings")), seq(ncomp)
   )
   title = gsub(" ", "_", title)
   print(outdir)
