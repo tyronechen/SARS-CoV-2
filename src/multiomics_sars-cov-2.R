@@ -30,15 +30,15 @@ parse_mappings = function(infile_path) {
   return(data)
 }
 
-remap_data_ = function(data, mapping) {
+remap_data = function(data, mapping) {
   # map feature names to feature id, format: dataframe, dataframe -> dataframe
   # TODO: doesnt handle duplicates in row ids (some feature id map to same name)
-  q()
-  print("Remapping data with mapfiles...")
+  print("Remapping data with map files (duplicate row names will be renamed!)")
   data = merge(t(data), mapping, by=0, all.x=TRUE)
+  row.names(data) = make.names(data$val, unique=TRUE)
   data["Row.names"] = NULL
-  row.names(data) = data$val
-  return(data)
+  data["val"] = NULL
+  return(t(data))
 }
 
 show_na_prop = function(data_na, name) {
@@ -292,13 +292,13 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
 }
 
 plsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./") {
+  contrib="max", outdir="./", mappings=NULL) {
   mapply(function(x, y) plsda_classify_(
     x, classes, pch, y, ncomp, contrib, outdir), data, title)
 }
 
 plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./") {
+  contrib="max", outdir="./", mappings=NULL) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (!is.na(pch)) {
@@ -360,14 +360,14 @@ splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
 }
 
 splsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
-  keepX=NULL, contrib="max", outdir="./") {
+  keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
   mapply(function(x, y, c, k) splsda_classify_(
     x, classes, pch, y, c, k, contrib, outdir
   ), data, title, ncomp, keepX)
 }
 
 splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
-  keepX=NULL, contrib="max", outdir="./") {
+  keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
