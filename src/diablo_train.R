@@ -170,6 +170,19 @@ main = function() {
     save(classes, data, mdist, argv, file=rdata)
   }
 
+  if (!is.na(argv$mappings)) {
+    print("Using mappings from files (order must be identical to data!):")
+    print(argv$mappings)
+    mappings = argv$mappings
+    mapped = lapply(mappings, parse_mappings)
+    names(mapped) = names
+    data = mapply(function(x, y) remap_data(x, y), data, mapped)
+    names(data) = names
+  } else {
+    print("Not remapping new feature names to existing, will use original.")
+    mappings = NA
+  }
+
   # check dimensions
   print("Data dimensions:")
   dimensions = lapply(data, dim)
@@ -190,7 +203,7 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, data, pca_withna, mdist, argv, file=rdata)
+  save(classes, data, pca_withna, mdist, argv, mappings, file=rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -209,7 +222,8 @@ main = function() {
     data_imp = NA
     pca_impute = NA
   }
-  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv, file=rdata)
+  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv, mappings,
+    file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -233,24 +247,24 @@ main = function() {
     }
   } else { data_pca_multilevel = NA }
   save(classes, data, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, mdist, argv, file=rdata
+    pca_withna, pca_impute, mdist, argv, mappings, file=rdata
   )
 
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
     if (!is.na(pch)) {
       data_plsda = plsda_classify(input_data, classes, pch,
-        title=names, argv$plsdacomp, contrib, outdir
+        title=names, argv$plsdacomp, contrib, outdir, mappings
       )
     } else {
       data_plsda = plsda_classify(input_data, classes, pch=NA,
-        title=names, argv$plsdacomp, contrib, outdir
+        title=names, argv$plsdacomp, contrib, outdir, mappings
       )
     }
   } else { data_plsda = NA }
 
   save(classes, data, input_data, data_pca_multilevel, data_plsda, pca_withna,
-    pca_impute, mdist, argv, file=rdata
+    pca_impute, mdist, argv, mappings, file=rdata
   )
 
   # sparse partial least squares discriminant analysis
@@ -292,7 +306,7 @@ main = function() {
 
       data_splsda = splsda_classify(
         data_imp, classes, pch, title=names, splsda_ncomp,
-        splsda_keepx, contrib, outdir
+        splsda_keepx, contrib, outdir, mappings
       )
     }
   } else {
@@ -301,19 +315,9 @@ main = function() {
   }
 
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, file=rdata
-  )
-
-  if (!is.na(argv$mappings)) {
-    mappings = lapply(argv$mappings, parse_mappings)
-    names(mappings) = names
-    # remap_data_(data$translatome, mappings$translatome)
-  } else {mappings = NA}
-
-  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
     tuned, pca_withna, pca_impute, mdist, argv, mappings, file=rdata
   )
-  
+
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
@@ -329,7 +333,7 @@ main = function() {
   # remove invariant columns
   data = lapply(data, remove_novar)
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, file=rdata
+    tuned, pca_withna, pca_impute, mdist, argv, mappings, file=rdata
   )
 
   # tune diablo parameters and run diablo
@@ -346,7 +350,7 @@ main = function() {
 
   # save RData object for future reference
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, diablo, file=rdata
+    tuned, pca_withna, pca_impute, mdist, argv, mappings, diablo, file=rdata
   )
   dev.off()
 }
