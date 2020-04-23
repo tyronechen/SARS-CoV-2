@@ -13,7 +13,12 @@ parse_argv = function() {
   Imputes data, Run DIABLO on multi-omics data. Take tsv file of classes, \
   tsv files of omics data (at least 2!) and identify correlation between \
   features. For more information please refer to mixOmics and case studies at \
-  http://mixomics.org/mixdiablo/case-study-tcga/")
+  http://mixomics.org/mixdiablo/case-study-tcga/. \
+  To cite mixOmics in publications, please use:
+
+    Rohart F, Gautier B, Singh A, and Le Cao K-A (2017) mixOmics: An R
+    package for 'omics feature selection and multiple data integration.
+    PLoS computational biology 13(11):e1005752")
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
@@ -33,7 +38,7 @@ parse_argv = function() {
   p = add_argument(p, "--data", type="character", nargs=Inf,
     help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
   )
-  p = add_argument(p, "--mappings", type="character", nargs=Inf, default=NULL,
+  p = add_argument(p, "--mappings", type="character", nargs=Inf,
     help="path to map file of feature id to name (must be same order as data!)"
   )
   p = add_argument(p, "--ncpus", help="number of cpus", type="integer", default=2)
@@ -295,16 +300,20 @@ main = function() {
     tuned = NA
   }
 
-  if (!is.null(argv$mappings)) {
-    mappings = lapply(argv$mappings, parse_mappings)
-    names(mappings) = names
-    # remap_data_(data$translatome, mappings$translatome)
-  }
-
   save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
     tuned, pca_withna, pca_impute, mdist, argv, file=rdata
   )
-  q()
+
+  if (!is.na(argv$mappings)) {
+    mappings = lapply(argv$mappings, parse_mappings)
+    names(mappings) = names
+    # remap_data_(data$translatome, mappings$translatome)
+  } else {mappings = NA}
+
+  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
+    tuned, pca_withna, pca_impute, mdist, argv, mappings, file=rdata
+  )
+  
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$dcomp == 0) {
     tuned = tune_ncomp(data, classes, design)
