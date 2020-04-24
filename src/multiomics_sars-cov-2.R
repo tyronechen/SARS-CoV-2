@@ -225,13 +225,13 @@ plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0, show=FALSE)
 
   if (!is.na(pch)) {
     print("Plotting PCA by groups...")
-    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
       group=classes, legend=TRUE, ncomp=ncomp,
       title=paste(title, y, "PCA 1/2"), pch=pch), data_pca, names)
-    mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+    mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=FALSE,
       group=classes, legend=TRUE, ncomp=ncomp,
       title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
-    mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+    mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=FALSE,
       group=classes, legend=TRUE, ncomp=ncomp,
       title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
   } else {
@@ -279,13 +279,13 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
     data_pca, names)
 
   print("Plotting PCA multilevel...")
-  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+  mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
     group=classes, legend=TRUE, ncomp=ncomp,
     title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
-  mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+  mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=FALSE,
     group=classes, legend=TRUE, ncomp=ncomp,
     title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
-  mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+  mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=FALSE,
     group=classes, legend=TRUE, ncomp=ncomp,
     title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
   return(data_pca)
@@ -304,13 +304,13 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
   if (!is.na(pch)) {
     print("Plotting multi level partial least squares discriminant analysis")
     data_plsda = plsda(data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp)
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 1/2"), comp=c(1,2)
     )
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 1/3"), comp=c(1,3)
     )
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "PLSDA multi 2/3"), comp=c(2,3)
     )
   } else {
@@ -326,16 +326,21 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
       title=paste(title, "PLSDA single 2/3"), comp=c(2,3)
     )
   }
-  mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
-  mapply(function(x) plotLoadings(data_plsda, contrib=contrib, comp=x,
-    method='median', ndisplay=100, name.var=colnames(data),
-    title=paste(title, x, "PLSDA loadings")), seq(ncomp)
-  )
-  title = gsub(" ", "_", title)
-  path = paste(outdir, "/", title, "_PLSDA", ".txt", sep="")
-  print("Writing PLSDA loadings to:")
-  print(path)
-  write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
+
+  sink("/dev/null")
+  roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
+  sink()
+
+  for (comp in seq(ncomp)) {
+    loading = plotLoadings(data_plsda, contrib=contrib, comp=comp,
+      method='median', ndisplay=100, name.var=colnames(data), size.name=0.2,
+      title=paste(title, comp, "PLSDA loadings"))
+    title = gsub(" ", "_", title)
+    path = paste(outdir, "/", title, "_", comp, "_PLSDA", ".txt", sep="")
+    print("Writing PLSDA loadings to:")
+    print(path)
+    write.table(as.data.frame(loading), file=path, quote=FALSE, sep="\t")
+  }
   return(data_plsda)
 }
 
@@ -385,26 +390,31 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   print("number of variables on each component:")
   print(keepX)
   data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
-  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+
+  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2)
   )
-  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3)
   )
-  plotIndiv(data_splsda, ind.names=TRUE, group=classes, legend=TRUE,
+  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
   )
-  mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
-  mapply(function(x) plotLoadings(data_splsda, contrib=contrib, comp=x,
-    method='median', ndisplay=100, name.var=colnames(data),
-    title=paste(title, x, "sPLSDA loadings")), seq(ncomp)
-  )
-  title = gsub(" ", "_", title)
-  print(outdir)
-  path = paste(outdir, "/", title, "_sPLSDA", ".txt", sep="")
-  print("Writing sPLSDA loadings to:")
-  print(path)
-  write.table(as.data.frame(loadings), file=path, quote=FALSE, sep="\t")
+
+  sink("/dev/null")
+  roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
+  sink()
+
+  for (comp in seq(ncomp)) {
+    loading = plotLoadings(data_splsda, contrib=contrib, comp=comp,
+      method='median', ndisplay=100, name.var=colnames(data), size.name=0.2,
+      title=paste(title, comp, "sPLSDA loadings"))
+    title = gsub(" ", "_", title)
+    path = paste(outdir, "/", title, "_", comp, "_sPLSDA", ".txt", sep="")
+    print("Writing sPLSDA loadings to:")
+    print(path)
+    write.table(as.data.frame(loading), file=path, quote=FALSE, sep="\t")
+  }
   return(data_splsda)
 }
 
