@@ -333,13 +333,15 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
 
   for (comp in seq(ncomp)) {
     loading = plotLoadings(data_plsda, contrib=contrib, comp=comp,
-      method='median', ndisplay=100, name.var=colnames(data), size.name=0.2,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       title=paste(title, comp, "PLSDA loadings"))
+    loading_all = plotLoadings(data_plsda, contrib=contrib, comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     title = gsub(" ", "_", title)
     path = paste(outdir, "/", title, "_", comp, "_PLSDA", ".txt", sep="")
     print("Writing PLSDA loadings to:")
     print(path)
-    write.table(as.data.frame(loading), file=path, quote=FALSE, sep="\t")
+    write.table(as.data.frame(loading_all), file=path, quote=FALSE, sep="\t")
   }
   return(data_plsda)
 }
@@ -407,13 +409,15 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
 
   for (comp in seq(ncomp)) {
     loading = plotLoadings(data_splsda, contrib=contrib, comp=comp,
-      method='median', ndisplay=100, name.var=colnames(data), size.name=0.2,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       title=paste(title, comp, "sPLSDA loadings"))
+    loading_all = plotLoadings(data_splsda, contrib=contrib, comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     title = gsub(" ", "_", title)
     path = paste(outdir, "/", title, "_", comp, "_sPLSDA", ".txt", sep="")
     print("Writing sPLSDA loadings to:")
     print(path)
-    write.table(as.data.frame(loading), file=path, quote=FALSE, sep="\t")
+    write.table(as.data.frame(loading_all), file=path, quote=FALSE, sep="\t")
   }
   return(data_splsda)
 }
