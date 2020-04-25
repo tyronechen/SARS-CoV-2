@@ -93,6 +93,7 @@ write_args = function(args, argpath) {
   colnames(args) = c("ind", "values")
   args = paste("--", paste(args$ind, args$values), " \\", sep="")
   script_name = paste("Rscript", sub(".*=", "", commandArgs()[4]), "\\")
+  for (i in grep(",", args)) { args[i] = gsub(",", " ", args[i]) }
   last = paste(unlist(strsplit(args[length(args)], " "))[2], " \\")
   args = head(args, -1)
   args[length(args)] = substr(args[length(args)],1,nchar(args[length(args)])-2)
