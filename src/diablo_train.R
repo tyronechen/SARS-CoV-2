@@ -161,13 +161,13 @@ main = function() {
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data = lapply(data, remove_na_class, classes)
-    save(classes, data, mdist, argv, file=rdata)
+    save(classes, pch, data, mdist, argv, file=rdata)
   }
 
   # drop features / columns >= a threshold of NA values
   if (argv$dropna_prop > 0) {
     data = remove_na_prop(data, classes, pch=pch, na_prop=argv$dropna_prop)
-    save(classes, data, mdist, argv, file=rdata)
+    save(classes, pch, data, mdist, argv, file=rdata)
   }
 
   if (!is.na(argv$mappings)) {
@@ -203,7 +203,7 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, data, pca_withna, mdist, argv, mappings, file=rdata)
+  save(classes, pch, data, pca_withna, mdist, argv, mappings, file=rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -222,8 +222,8 @@ main = function() {
     data_imp = NA
     pca_impute = NA
   }
-  save(classes, data, data_imp, pca_withna, pca_impute, mdist, argv, mappings,
-    file=rdata)
+  save(classes, pch, data, data_imp, pca_withna, pca_impute, mdist, argv,
+    mappings, file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -246,7 +246,7 @@ main = function() {
       )
     }
   } else { data_pca_multilevel = NA }
-  save(classes, data, data_imp, data_pca_multilevel,
+  save(classes, pch, data, data_imp, data_pca_multilevel,
     pca_withna, pca_impute, mdist, argv, mappings, file=rdata
   )
 
@@ -263,8 +263,8 @@ main = function() {
     }
   } else { data_plsda = NA }
 
-  save(classes, data, input_data, data_pca_multilevel, data_plsda, pca_withna,
-    pca_impute, mdist, argv, mappings, file=rdata
+  save(classes, pch, data, input_data, data_pca_multilevel, data_plsda,
+    pca_withna, pca_impute, mdist, argv, mappings, file=rdata
   )
 
   # sparse partial least squares discriminant analysis
@@ -314,8 +314,9 @@ main = function() {
     tuned = NA
   }
 
-  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, mappings, file=rdata
+  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings,
+    file=rdata
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
@@ -332,8 +333,9 @@ main = function() {
 
   # remove invariant columns
   data = lapply(data, remove_novar)
-  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, mappings, file=rdata
+  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings,
+    file=rdata
   )
 
   # tune diablo parameters and run diablo
@@ -349,8 +351,9 @@ main = function() {
   predict_diablo(diablo, data, classes)
 
   # save RData object for future reference
-  save(classes, data, data_imp, data_pca_multilevel, data_plsda, data_splsda,
-    tuned, pca_withna, pca_impute, mdist, argv, mappings, diablo, file=rdata
+  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings, diablo,
+    file=rdata
   )
   dev.off()
 }
