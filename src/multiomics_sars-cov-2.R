@@ -332,16 +332,24 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
   sink()
 
   for (comp in seq(ncomp)) {
-    loading = plotLoadings(data_plsda, contrib=contrib, comp=comp,
+    plotLoadings(data_plsda, contrib="max", comp=comp,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "PLSDA loadings"))
-    loading_all = plotLoadings(data_plsda, contrib=contrib, comp=comp,
+      title=paste(title, comp, "PLSDA max loadings"))
+    plotLoadings(data_plsda, contrib="min", comp=comp,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      title=paste(title, comp, "PLSDA min loadings"))
+    loading_max = plotLoadings(data_plsda, contrib="max", comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+    loading_min = plotLoadings(data_plsda, contrib="min", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     title = gsub(" ", "_", title)
-    path = paste(outdir, "/", title, "_", comp, "_PLSDA", ".txt", sep="")
+    path_max = paste(outdir, "/", title, "_", comp, "_PLSDA_max.txt", sep="")
+    path_min = paste(outdir, "/", title, "_", comp, "_PLSDA_min.txt", sep="")
     print("Writing PLSDA loadings to:")
-    print(path)
-    write.table(as.data.frame(loading_all), file=path, quote=FALSE, sep="\t")
+    print(path_max)
+    print(path_min)
+    write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
+    write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
   }
   return(data_plsda)
 }
@@ -408,16 +416,24 @@ splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   sink()
 
   for (comp in seq(ncomp)) {
-    loading = plotLoadings(data_splsda, contrib=contrib, comp=comp,
+    plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "sPLSDA loadings"))
-    loading_all = plotLoadings(data_splsda, contrib=contrib, comp=comp,
+      title=paste(title, comp, "sPLSDA max loadings"))
+    plotLoadings(data_splsda, contrib="min", comp=comp,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      title=paste(title, comp, "sPLSDA min loadings"))
+    loading_max = plotLoadings(data_splsda, contrib="max", comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+    loading_min = plotLoadings(data_splsda, contrib="min", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     title = gsub(" ", "_", title)
-    path = paste(outdir, "/", title, "_", comp, "_sPLSDA", ".txt", sep="")
+    path_max = paste(outdir, "/", title, "_", comp, "_sPLSDA_max.txt", sep="")
+    path_min = paste(outdir, "/", title, "_", comp, "_sPLSDA_min.txt", sep="")
     print("Writing sPLSDA loadings to:")
-    print(path)
-    write.table(as.data.frame(loading_all), file=path, quote=FALSE, sep="\t")
+    print(path_max)
+    print(path_min)
+    write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
+    write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
   }
   return(data_splsda)
 }
