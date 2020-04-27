@@ -42,8 +42,11 @@ parse_argv = function() {
     help="path to map file of feature id to name (must be same order as data!)"
   )
   p = add_argument(p, "--ncpus", help="number of cpus", type="integer", default=2)
-  p = add_argument(p, "--dcomp", type="integer", default=0,
+  p = add_argument(p, "--diablocomp", type="integer", default=0,
     help="number of diablo components (set manually if you get inference error)"
+  )
+  p = add_argument(p, "--diablo_keepx", type="vector", default=NA, nargs="+",
+    help="variables to keep for diablo"
   )
   p = add_argument(p, "--icomp", type="integer", default=10,
     help="component number for imputing (set 0 for no imputation)"
@@ -184,6 +187,8 @@ main = function() {
     mappings = NA
   }
 
+  diablo_input = force_unique_blocks(data)
+
   # check dimensions
   print("Data dimensions:")
   dimensions = lapply(data, dim)
@@ -254,11 +259,11 @@ main = function() {
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
     if (!is.na(pch)) {
-      data_plsda = plsda_classify(input_data, classes, pch,
+      data_plsda = classify_plsda(input_data, classes, pch,
         title=names, argv$plsdacomp, contrib, outdir, mappings
       )
     } else {
-      data_plsda = plsda_classify(input_data, classes, pch=NA,
+      data_plsda = classify_plsda(input_data, classes, pch=NA,
         title=names, argv$plsdacomp, contrib, outdir, mappings
       )
     }
@@ -273,7 +278,7 @@ main = function() {
     if (!is.na(pch)) {
       print("Tuning splsda components and selected variables")
       if (is.na(argv$splsda_keepx)) {
-        splsda_keepx = c(1,2,3)
+        splsda_keepx = c(5,50,100)
         splsda_ncomp = length(splsda_keepx)
       } else {
         splsda_keepx = lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
@@ -285,13 +290,13 @@ main = function() {
       print("sPLSDA ncomp:")
       print(splsda_ncomp)
 
-      tuned = splsda_tune(input_data, classes, names, data.frame(pch),
+      tuned_splsda = tune_splsda(input_data, classes, names, data.frame(pch),
         ncomp=splsda_ncomp, nrepeat=10, logratio="none",
         test_keepX=splsda_keepx, validation="loo", folds=10, dist=argv$mdist,
         cpus=argv$ncpus, progressBar=TRUE)
 
-      splsda_keepx = lapply(tuned, `[`, "choice.keepX")
-      splsda_ncomp = lapply(tuned, `[`, "choice.ncomp")
+      splsda_keepx = lapply(tuned_splsda, `[`, "choice.keepX")
+      splsda_ncomp = lapply(tuned_splsda, `[`, "choice.ncomp")
 
       print("Tuned splsda to use number of components:")
       splsda_ncomp = lapply(splsda_ncomp, `[`, "ncomp")
@@ -305,56 +310,70 @@ main = function() {
       names(splsda_keepx) = names
       print(splsda_keepx)
 
-      data_splsda = splsda_classify(
+      data_splsda = classify_splsda(
         data_imp, classes, pch, title=names, splsda_ncomp,
         splsda_keepx, contrib, outdir, mappings
       )
     }
   } else {
     data_splsda = NA
-    tuned = NA
+    tuned_splsda = NA
   }
 
   save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings,
+    data_splsda, tuned_splsda, pca_withna, pca_impute, mdist, argv, mappings,
     file=rdata
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
-  if (argv$dcomp == 0) {
-    tuned = tune_ncomp(data, classes, design)
+  if (argv$diablocomp == 0) {
+    tuned_diablo = tune_diablo_ncomp(data, classes, design, argv$diablocomp)
     print("Parameters with lowest error rate:")
-    tuned = tuned$choice.ncomp$WeightedVote["Overall.BER",]
-    dcomp = tuned[which.max(tuned)]
+    tuned_diablo = tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
+    diablo_ncomp = tuned_diablo[which.max(tuned_diablo)]
   } else {
-    dcomp = argv$dcomp
+    diablo_ncomp = argv$diablocomp
   }
   print("Number of components:")
-  print(dcomp)
+  print(diablo_ncomp)
 
   # remove invariant columns
-  data = lapply(data, remove_novar)
+  # data = lapply(data, remove_novar)
   save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings,
-    file=rdata
+    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute, mdist,
+    argv, mappings, file=rdata
   )
 
+  if (is.na(data_imp)) {
+    print("Using non-imputed data as input to DIABLO")
+    diablo_input = data
+  } else {
+    print("Using imputed data as input to DIABLO")
+    diablo_input = data_imp
+  }
+
   # tune diablo parameters and run diablo
-  keepx = tune_keepx(data, classes, dcomp, design, cpus=argv$ncpus, dist=mdist)
-  print("keepx:")
-  print(keepx)
-  diablo = run_diablo(data, classes, dcomp, keepx, design)
-  print("diablo design:")
+  diablo_keepx = lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
+  diablo_keepx = tune_diablo_keepx(diablo_input, classes, diablo_ncomp, design,
+    diablo_keepx, cpus=argv$ncpus, dist=mdist, progressBar=TRUE)
+
+  print("Making feature names unique across all blocks...")
+  diablo_input = force_unique_blocks(diablo_input)
+
+  print("Diablo keepx:")
+  print(diablo_keepx)
+  diablo = run_diablo(diablo_input, classes, diablo_ncomp, diablo_keepx, design)
+  print("Diablo design:")
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
-  plot_diablo(diablo)
-  assess_performance(diablo, dist=mdist)
-  predict_diablo(diablo, data, classes)
+  plot_diablo(diablo, diablo_ncomp)
+  # assess_performance(diablo, dist=mdist)
+  predict_diablo(diablo, diablo_input, classes)
 
   # save RData object for future reference
   save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned, pca_withna, pca_impute, mdist, argv, mappings, diablo,
-    file=rdata
+    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute, mdist,
+    argv, mappings, diablo, file=rdata
   )
   dev.off()
 }

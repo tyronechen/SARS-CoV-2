@@ -291,13 +291,13 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
   return(data_pca)
 }
 
-plsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
+classify_plsda = function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL) {
-  mapply(function(x, y) plsda_classify_(
+  mapply(function(x, y) classify_plsda_(
     x, classes, pch, y, ncomp, contrib, outdir), data, title)
 }
 
-plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
+classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
@@ -354,17 +354,18 @@ plsda_classify_ = function(data, classes, pch=NA, title="", ncomp=0,
   return(data_plsda)
 }
 
-splsda_tune = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
+tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
-    mapply(function(x, y) splsda_tune_(x, classes, names, multilevel, ncomp,
+    mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
       nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
       data, names, SIMPLIFY=FALSE)
   }
 
-splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
+tune_splsda_ = function(data, classes, names, multilevel, ncomp=0, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="max.dist", cpus=2, progressBar=TRUE) {
+  if (ncomp == 0) {ncomp = (length(test_keepX))}
   # tune splsda components
   tuned = tune.splsda(data, Y=classes, multilevel=multilevel, ncomp=ncomp,
     nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
@@ -375,14 +376,14 @@ splsda_tune_ = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   return(tuned)
 }
 
-splsda_classify = function(data, classes, pch=NA, title="", ncomp=0,
+classify_splsda = function(data, classes, pch=NA, title="", ncomp=0,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
-  mapply(function(x, y, c, k) splsda_classify_(
+  mapply(function(x, y, c, k) classify_splsda_(
     x, classes, pch, y, c, k, contrib, outdir
   ), data, title, ncomp, keepX)
 }
 
-splsda_classify_ = function(data, classes, pch=NA, title="", ncomp=NULL,
+classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
@@ -487,26 +488,26 @@ cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
   pca_withna, pca_impute, names)
 }
 
-tune_ncomp = function(data, classes, design) {
+tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
   # First, we fit a DIABLO model without variable selection to assess the global
   # performance and choose the number of components for the final DIABLO model.
   # The function perf is run with 10-fold cross validation repeated 10 times.
-  # ncomp = length(unique(classes))
-  print("Finding optimal number of components...")
-  ncomp = 10
-  sgccda_res = block.splsda(X = data, Y = classes, ncomp = ncomp, design = design)
+  print("Finding optimal number of components for DIABLO...")
+  if (ncomp == 0) {ncomp = length(unique(classes))}
+  sgccda_res = block.splsda(X=data, Y=classes, ncomp=ncomp, design=design)
 
   # this code takes a couple of min to run
-  perf_diablo = perf(sgccda_res, validation = 'Mfold', folds = 10, nrepeat = 10)
+  perf_diablo = perf(sgccda_res, validation = 'loo', folds = 10, nrepeat = 10)
 
   # print(perf.diablo)  # lists the different outputs
-  plot(perf_diablo)
+  plot(perf_diablo, main="DIABLO optimal components")
   # perf_diablo$choice.ncomp$WeightedVote
   print(perf_diablo$choice.ncomp)
   return(perf_diablo)
 }
 
-tune_keepx = function(data, classes, ncomp, design, cpus=2, dist="centroids.dist") {
+tune_diablo_keepx = function(data, classes, ncomp, design,
+  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
   # We choose the optimal number of variables to select in each data set using
@@ -518,31 +519,50 @@ tune_keepx = function(data, classes, ncomp, design, cpus=2, dist="centroids.dist
   # test_keepX = list(proteome = c(5:9, seq(10, 18, 2), seq(20,30,5)),
   #                   translatome = c(5:9, seq(10, 18, 2), seq(20,30,5)))
   test_keepX = mapply(function(name, dims) list(name=dims), names(data),
-    rep(list(c(5:9, seq(10, 18, 2), seq(20,30,5))))
+    # rep(list(c(5:9, seq(10, 18, 2), seq(20,30,5))))
+    # rep(list(c(5, 10, 15, 20, 25, 30, 35, 40)))
+    rep(list(test_keepX))
   )
 
-  tune_data = tune.block.splsda(X = data, Y = classes, ncomp = ncomp,
-                                test.keepX = test_keepX, design = design,
-                                validation = 'Mfold', folds = 10, nrepeat = 1,
-                                cpus = cpus, dist = dist)
+  tune_data = tune.block.splsda(
+      X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
+      validation='loo', folds=10, nrepeat=1, cpus=cpus, dist=dist,
+      progressBar=progressBar)
   list_keepX = tune_data$choice.keepX
   return(list_keepX)
+}
+
+force_unique_blocks = function(data) {
+  # in diablo, features across blocks must be unique: list of df -> list of df
+  print("Appending suffix to individual block names (diablo requires unique!):")
+  names = names(data)
+  print(names)
+  colnames_new = mapply(
+    function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
+  )
+  reassign_colnames_ = function(data, colnames_new) {
+    colnames(data) = colnames_new
+    return(data)
+  }
+  data = mapply(reassign_colnames_, data, colnames_new)
+  names(data) = names
+  return(data)
 }
 
 run_diablo = function(data, classes, ncomp, keepx, design) {
   # this is the actual part where diablo is run
   print("Running DIABLO...")
-  sgccda_res = block.splsda(X = data, Y = classes, ncomp = ncomp,
-                            keepX = keepx, design = design)
-  return(sgccda_res)
+  block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
 }
 
-plot_diablo = function(data) {
+plot_diablo = function(data, ncomp=0) {
   # plot the diablo data with a series of diagnostic plots
-  print("Plotting correlation betweem components...")
-  plotDiablo(data, ncomp = 1)
+  print("Plotting correlation between components...")
+  # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
+  mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
+  # plotDiablo(data, ncomp = 1)
   print("Plotting individual samples into space spanned by block components...")
-  plotIndiv(data, ind.names = FALSE, legend = TRUE, title = 'DIABLO', ellipse = TRUE)
+  plotIndiv(data, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
   print("Plotting arrow plot...")
   plotArrow(data, ind.names = FALSE, legend = TRUE, title = 'DIABLO')
   print("Plotting correlation circle plot...")
@@ -554,10 +574,10 @@ plot_diablo = function(data) {
              color.blocks= c('darkorchid', 'lightgreen'),
              color.cor = c("chocolate3","grey20"), size.labels = 1.5)
   print("Plotting relevance network from similarity matrix...")
-  network(data, blocks = c(1,2),
-          color.node = c('darkorchid', 'lightgreen'), cutoff = 0.4)
+  network(data, blocks = c(1,2), color.node = c('darkorchid', 'lightgreen'), cutoff = 0.4)
   print("Plotting loading weight of selected variables on each component and dataset...")
-  plotLoadings(data, comp = 1, contrib = 'max', method = 'median')
+  mapply(function(x) plotLoadings(data, comp=x, contrib="max", method="median"), seq(ncomp))
+  # plotLoadings(data, comp = 1, contrib = 'max', method = 'median')
   print("Plotting heatmap...")
   cimDiablo(data)
 }
@@ -566,7 +586,7 @@ assess_performance = function(data, dist) {
   # review performance of diablo
   # remember to use the same distance metric which had the max value!
   print("Assessing performance...")
-  perf_diablo = perf(data, validation='Mfold', M=10, nrepeat=10, dist=dist)
+  perf_diablo = perf(data, validation='loo', M=10, nrepeat=10, dist=dist)
   #perf.diablo  # lists the different outputs
 
   # Performance with Majority vote
@@ -575,7 +595,7 @@ assess_performance = function(data, dist) {
   # ROC and AUC criteria are not particularly insightful in relation to the
   # performance evaluation of our methods, but can complement the analysis.
   print("Plotting ROC...")
-  auc_splsda = auroc(data, roc.block = "proteome", roc.comp = 1)
+  # auc_splsda = auroc(data, roc.block = "proteome", roc.comp = 1)
 }
 
 predict_diablo = function(data, test, classes) {
