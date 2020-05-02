@@ -260,11 +260,11 @@ main = function() {
   if (argv$plsdacomp > 0) {
     if (!is.na(pch)) {
       data_plsda = classify_plsda(input_data, classes, pch,
-        title=names, argv$plsdacomp, contrib, outdir, mappings
+        title=names, argv$plsdacomp, contrib, outdir, mappings, mdist, bg=TRUE
       )
     } else {
       data_plsda = classify_plsda(input_data, classes, pch=NA,
-        title=names, argv$plsdacomp, contrib, outdir, mappings
+        title=names, argv$plsdacomp, contrib, outdir, mappings, mdist, bg=TRUE
       )
     }
   } else { data_plsda = NA }
