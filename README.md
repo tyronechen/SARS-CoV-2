@@ -13,28 +13,30 @@ Method reference:
 
 - [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
 
-Experimental design:
+Experimental design (n=3 for all classes):
 
-| Design  |               |              |             |             |          |          |           |           |
-|---------|---------------|--------------|-------------|-------------|----------|----------|-----------|-----------|
-| Analysis 1 | Control       | Virus        |             |             |          |          |           |           |
-|         | 12            | 12           |             |             |          |          |           |           |
-| Analysis 2 | Control early | Control late | Virus early | Virus late  |          |          |           |           |
-|         | 6             | 6            | 6           | 6           |          |          |           |           |
-| Analysis 3 | Control_2h    | Control_6h   | Control_10h | Control_24h | Virus_2h | Virus_6h | Virus_10h | Virus_24h |
-|         | 3             | 3            | 3           | 3           | 3        | 3        | 3         | 3         |
-|         |               |              |             |             |          |          |           |           |
+| Infection state | Timepoint (hour) |
+|-----------------|------------------|
+| Control         | 2                |
+| Control         | 6                |
+| Control         | 10               |
+| Control         | 24               |
+| Infected        | 2                |
+| Infected        | 6                |
+| Infected        | 10               |
+| Infected        | 24               |
 
 Software libraries involved are:
 
-- python 3.8.2
-  - jupyter-notebook 1.0.0
-  - pandas 1.0.2
+```
+python 3.8.2
+  jupyter-notebook 1.0.0
+  pandas 1.0.2
 
-- R 3.6.2
-  - argparser 0.6
-  - BiocManager 1.30.10
-  - mixOmics 6.11.11
+R 3.6.2
+  argparser 0.6
+  mixOmics 6.11.11
+```
 
 Acknowledgements:
 
