@@ -292,38 +292,55 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
 }
 
 classify_plsda = function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./", mappings=NULL) {
+  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
   mapply(function(x, y) classify_plsda_(
-    x, classes, pch, y, ncomp, contrib, outdir), data, title)
+    x, classes, pch, y, ncomp, contrib, outdir, bg), data, title)
 }
 
 classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./", mappings=NULL) {
+  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (!is.na(pch)) {
     print("Plotting multi level partial least squares discriminant analysis")
+    pch = c(as.factor(pch))
+    title_plt = paste(title, "PLSDA multi")
     data_plsda = plsda(data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp)
+    if (!is.na(bg)) {
+      bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
+        background=bg
+      )
+    }
     plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "PLSDA multi 1/2"), comp=c(1,2)
+      pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
     )
     plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "PLSDA multi 1/3"), comp=c(1,3)
+      pch=pch, title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
     )
     plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "PLSDA multi 2/3"), comp=c(2,3)
+      pch=pch, title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
     )
   } else {
-    print("Plotting single level partial least squares discriminant analysis")
+    print("Plotting multi level partial least squares discriminant analysis")
+    title_plt = paste(title, "PLSDA single")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PLSDA single 1/2"), comp=c(1,2)
+    if (!is.na(bg)) {
+      bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
+        background=bg
+      )
+    }
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
     )
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PLSDA single 1/3"), comp=c(1,3)
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
     )
-    plotIndiv(data_plsda, ind.names=TRUE, group=classes, legend=TRUE,
-      title=paste(title, "PLSDA single 2/3"), comp=c(2,3)
+    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
     )
   }
 
@@ -403,13 +420,13 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
 
   plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2)
+    pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE
   )
   plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3)
+    pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3), ellipse=TRUE
   )
   plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3)
+    pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
   )
 
   sink("/dev/null")
