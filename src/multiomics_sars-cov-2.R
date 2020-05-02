@@ -393,15 +393,17 @@ tune_splsda_ = function(data, classes, names, multilevel, ncomp=0, nrepeat=10,
   return(tuned)
 }
 
-classify_splsda = function(data, classes, pch=NA, title="", ncomp=0,
-  keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
+classify_splsda = function(data, classes, pch=NA, title="", ncomp=NULL,
+  keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
+  bg=TRUE) {
   mapply(function(x, y, c, k) classify_splsda_(
     x, classes, pch, y, c, k, contrib, outdir
   ), data, title, ncomp, keepX)
 }
 
 classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
-  keepX=NULL, contrib="max", outdir="./", mappings=NULL) {
+  keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
+  bg=TRUE) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
@@ -418,6 +420,14 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   print("number of variables on each component:")
   print(keepX)
   data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
+
+  if (!is.na(bg)) {
+    bg = background.predict(data_splsda, comp.predicted=2, dist=dist)
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
+      ellipse=TRUE, background=bg
+    )
+  }
 
   plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE

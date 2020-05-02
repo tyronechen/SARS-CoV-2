@@ -312,7 +312,7 @@ main = function() {
 
       data_splsda = classify_splsda(
         data_imp, classes, pch, title=names, splsda_ncomp,
-        splsda_keepx, contrib, outdir, mappings
+        splsda_keepx, contrib, outdir, mappings, mdist, bg=TRUE
       )
     }
   } else {
