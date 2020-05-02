@@ -368,14 +368,11 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     colours_cim = cbind(colours_class, colours_pch)
   } else {colours_cim = data.frame(colours_class)}
 
-  print(colours_class)
-  print(colours_cim)
-
   cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
     legend=list(title="Status")
   )
   for (comp in seq(ncomp)) {
-    cim(data_plsda, comp=comp, title=paste("Component", comp),
+    cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status")
     )
     plotLoadings(data_plsda, contrib="max", comp=comp,
@@ -486,10 +483,28 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   sink()
+
+  plotArrow(data_splsda, legend=TRUE)
+  # plotVar(data_plsda, legend=TRUE)
+
   print("Getting loadings and plotting clustered image maps")
-  cim(data_splsda, title="sPLSDA")
+
+  # setup colour map for clustered image plots
+  colours_class = color.mixo(1:length(unique(classes)))[as.numeric(as.factor(classes))]
+
+  if (!is.na(pch)) {
+    colours_pch = color.mixo(1:length(unique(pch)))[as.numeric(as.factor(pch))]
+    colours_cim = cbind(colours_class, colours_pch)
+  } else {colours_cim = data.frame(colours_class)}
+
+  cim(data_splsda, title="sPLSDA", row.sideColors=colours_cim,
+    legend=list(title="Status")
+  )
+
   for (comp in seq(ncomp)) {
-    cim(data_splsda, comp=comp, title=paste("Component", comp))
+    cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
+      row.sideColors=colours_cim, legend=list(title="Status")
+    )
     plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       title=paste(title, comp, "sPLSDA max loadings"))
