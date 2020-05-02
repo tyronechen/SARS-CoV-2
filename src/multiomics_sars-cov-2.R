@@ -348,13 +348,36 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   print("Plotting error rates...")
   metrics = perf(data_plsda, validation="loo", progressBar=TRUE, auc=TRUE)
   plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
-  
+
+  # supporess roc printing automatically to stdout
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   sink()
-  print("Getting loadings")
 
+  # consider using plotvar for some datasets
+  plotArrow(data_plsda, legend=TRUE)
+  # plotVar(data_plsda, legend=TRUE)
+
+  print("Getting loadings and plotting clustered image maps")
+
+  # setup colour map for clustered image plots
+  colours_class = color.mixo(1:length(unique(classes)))[as.numeric(as.factor(classes))]
+
+  if (!is.na(pch)) {
+    colours_pch = color.mixo(1:length(unique(pch)))[as.numeric(as.factor(pch))]
+    colours_cim = cbind(colours_class, colours_pch)
+  } else {colours_cim = data.frame(colours_class)}
+
+  print(colours_class)
+  print(colours_cim)
+
+  cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
+    legend=list(title="Status")
+  )
   for (comp in seq(ncomp)) {
+    cim(data_plsda, comp=comp, title=paste("Component", comp),
+      row.sideColors=colours_cim, legend=list(title="Status")
+    )
     plotLoadings(data_plsda, contrib="max", comp=comp,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       title=paste(title, comp, "PLSDA max loadings"))
@@ -463,9 +486,10 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   sink()
-  print("Getting loadings")
-
+  print("Getting loadings and plotting clustered image maps")
+  cim(data_splsda, title="sPLSDA")
   for (comp in seq(ncomp)) {
+    cim(data_splsda, comp=comp, title=paste("Component", comp))
     plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       title=paste(title, comp, "sPLSDA max loadings"))
