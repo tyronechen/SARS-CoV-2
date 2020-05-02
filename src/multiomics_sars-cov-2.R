@@ -344,9 +344,15 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     )
   }
 
+  print("Getting performance metrics")
+  print("Plotting error rates...")
+  metrics = perf(data_plsda, validation="loo", progressBar=TRUE, auc=TRUE)
+  plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
+  
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   sink()
+  print("Getting loadings")
 
   for (comp in seq(ncomp)) {
     plotLoadings(data_plsda, contrib="max", comp=comp,
@@ -373,7 +379,7 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
 
 tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="max.dist", cpus=2, progressBar=TRUE) {
+  dist="centroids.dist", cpus=2, progressBar=TRUE) {
     mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
       nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
       data, names, SIMPLIFY=FALSE)
@@ -381,7 +387,7 @@ tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
 
 tune_splsda_ = function(data, classes, names, multilevel, ncomp=0, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="max.dist", cpus=2, progressBar=TRUE) {
+  dist="centroids.dist", cpus=2, progressBar=TRUE) {
   if (ncomp == 0) {ncomp = (length(test_keepX))}
   # tune splsda components
   tuned = tune.splsda(data, Y=classes, multilevel=multilevel, ncomp=ncomp,
@@ -439,9 +445,25 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
   )
 
+  print("Getting performance metrics")
+  print("Plotting error rates...")
+  metrics = perf(data_splsda, validation="loo", progressBar=TRUE, auc=TRUE)
+  print(metrics$error.rate)
+  plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
+  print("Plotting stability...")
+  plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
+    ylab="Stability", xlab="Features"
+  )
+  plot(metrics$features$stable[[2]], type="h", main="Comp 2", las=2,
+    ylab="Stability", xlab="Features"
+  )
+  plot(metrics$features$stable[[3]], type="h", main="Comp 3", las=2,
+    ylab="Stability", xlab="Features"
+  )
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   sink()
+  print("Getting loadings")
 
   for (comp in seq(ncomp)) {
     plotLoadings(data_splsda, contrib="max", comp=comp,

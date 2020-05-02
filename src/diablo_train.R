@@ -292,7 +292,7 @@ main = function() {
 
       tuned_splsda = tune_splsda(input_data, classes, names, data.frame(pch),
         ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-        test_keepX=splsda_keepx, validation="loo", folds=10, dist=argv$mdist,
+        test_keepX=splsda_keepx, validation="loo", folds=10, dist=mdist,
         cpus=argv$ncpus, progressBar=TRUE)
 
       splsda_keepx = lapply(tuned_splsda, `[`, "choice.keepX")
