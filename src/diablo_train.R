@@ -64,13 +64,13 @@ parse_argv = function() {
     help="variables to keep for splsda"
   )
   p = add_argument(p, "--dist_splsda", type="character", default="centroids.dist",
-    help="splsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
+    help="s/plsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p = add_argument(p, "--dist_diablo", type="character", default="centroids.dist",
     help="diablo distance metric [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p = add_argument(p, "--contrib", type="character", default="max",
-    help="contribution type for plotting loadings of s/PLSDA [max|min]"
+    help="contribution type for plotting loadings of s/PLSDA/DIABLO [max|min]"
   )
   p = add_argument(p, "--outfile_dir", type="character", default="./",
     help="write args, R plots and RData here (will overwrite existing!)"
@@ -127,10 +127,12 @@ main = function() {
   print(detectCores())
   print("Using cpus (change with --ncpus):")
   print(argv$ncpus)
-  print("Distance measure:")
-  print(argv$mdist)
   dist_splsda = argv$dist_splsda
   dist_diablo = argv$dist_diablo
+  print("Distance measure (s/PLSDA):")
+  print(dist_splsda)
+  print("Distance measure (DIABLO):")
+  print(dist_diablo)
 
   options(warn=1)
 
@@ -145,6 +147,8 @@ main = function() {
     pch = parse_classes(argv$classes_secondary)
   } else {
     pch = NA
+    tuned_splsda = NA
+    data_splsda = NA
   }
 
   # parse out identifiers coded within the file paths (hardcoded)
