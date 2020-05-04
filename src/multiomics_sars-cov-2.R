@@ -643,7 +643,7 @@ run_diablo = function(data, classes, ncomp, keepx, design) {
   block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
 }
 
-plot_diablo = function(data, ncomp=0) {
+plot_diablo = function(data, ncomp=0, outdir="./") {
   # plot the diablo data with a series of diagnostic plots
   print("Plotting correlation between components...")
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
@@ -652,22 +652,46 @@ plot_diablo = function(data, ncomp=0) {
   print("Plotting individual samples into space spanned by block components...")
   plotIndiv(data, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
   print("Plotting arrow plot...")
-  plotArrow(data, ind.names = FALSE, legend = TRUE, title = 'DIABLO')
+  plotArrow(data, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
-  plotVar(data, var.names = FALSE, style = 'graphics', legend = TRUE,
-    pch=c(16, 17), cex=c(2,2), col=c('darkorchid', 'lightgreen')
-  )
+  plotVar(data, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
+  plotVar(data, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
+  plotVar(data, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   print("Plotting circos from similarity matrix...")
-  circosPlot(data, cutoff = 0.7, line = TRUE,
-             color.blocks= c('darkorchid', 'lightgreen'),
-             color.cor = c("chocolate3","grey20"), size.labels = 1.5)
+  circosPlot(data, cutoff=0.7, line=TRUE, size.legend=0.5)
   print("Plotting relevance network from similarity matrix...")
-  network(data, blocks = c(1,2), color.node = c('darkorchid', 'lightgreen'), cutoff = 0.4)
-  print("Plotting loading weight of selected variables on each component and dataset...")
-  mapply(function(x) plotLoadings(data, comp=x, contrib="max", method="median"), seq(ncomp))
-  # plotLoadings(data, comp = 1, contrib = 'max', method = 'median')
-  print("Plotting heatmap...")
+  network(data, blocks=c(1,2), color.node=c('darkorchid', 'lightgreen'), cutoff=0.4)
+
+  print("Plotting overall heatmap...")
   cimDiablo(data)
+
+  print("Plotting loading weight of selected variables on each component...")
+  for (comp in seq(ncomp)) {
+    cimDiablo(data, comp=comp)
+    plotLoadings(data, contrib="max", comp=comp,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      title=paste(comp, "DIABLO max loadings"))
+    plotLoadings(data, contrib="min", comp=comp,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      title=paste(comp, "DIABLO min loadings"))
+    loading_max = plotLoadings(data, contrib="max", comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+    loading_min = plotLoadings(data, contrib="min", comp=comp,
+      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+    # title = gsub(" ", "_", title)
+    path_max = paste(outdir, "/", comp, "_DIABLO_max.txt", sep="")
+    path_min = paste(outdir, "/", comp, "_DIABLO_min.txt", sep="")
+    print("Writing DIABLO loadings to:")
+    print(path_max)
+    print(path_min)
+    write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
+    write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
+  }
+
+  # mapply(function(x) plotLoadings(data, comp=x, contrib="max", method="median"), seq(ncomp))
+  # plotLoadings(data, comp = 1, contrib = 'max', method = 'median')
+  # print("Plotting heatmap...")
+  # cimDiablo(data)
 }
 
 assess_performance = function(data, dist) {
