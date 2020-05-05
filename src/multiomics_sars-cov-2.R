@@ -375,12 +375,12 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status")
     )
-    plotLoadings(data_plsda, contrib="max", comp=comp,
+    plotLoadings(data_plsda, contrib="max", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "PLSDA max loadings"))
-    plotLoadings(data_plsda, contrib="min", comp=comp,
+      size.legend=0.6, title=paste(title, comp, "PLSDA max loadings"))
+    plotLoadings(data_plsda, contrib="min", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "PLSDA min loadings"))
+      size.legend=0.6, title=paste(title, comp, "PLSDA min loadings"))
     loading_max = plotLoadings(data_plsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     loading_min = plotLoadings(data_plsda, contrib="min", comp=comp,
@@ -505,12 +505,12 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status")
     )
-    plotLoadings(data_splsda, contrib="max", comp=comp,
+    plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "sPLSDA max loadings"))
-    plotLoadings(data_splsda, contrib="min", comp=comp,
+      size.legend=0.6, title=paste(title, comp, "sPLSDA max loadings"))
+    plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(title, comp, "sPLSDA min loadings"))
+      size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
     loading_max = plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     loading_min = plotLoadings(data_splsda, contrib="min", comp=comp,
@@ -637,7 +637,7 @@ force_unique_blocks = function(data) {
   return(data)
 }
 
-run_diablo = function(data, classes, ncomp, keepx, design) {
+run_diablo = function(data, classes, ncomp, design, keepx=NULL) {
   # this is the actual part where diablo is run
   print("Running DIABLO...")
   block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
@@ -658,22 +658,22 @@ plot_diablo = function(data, ncomp=0, outdir="./") {
   plotVar(data, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
   plotVar(data, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   print("Plotting circos from similarity matrix...")
-  circosPlot(data, cutoff=0.7, line=TRUE, size.legend=0.5)
+  circosPlot(data, cutoff=0.8, line=TRUE, size.legend=0.5)
   print("Plotting relevance network from similarity matrix...")
   network(data, blocks=c(1,2), color.node=c('darkorchid', 'lightgreen'), cutoff=0.4)
 
   print("Plotting overall heatmap...")
-  cimDiablo(data)
+  cimDiablo(data, size.legend=0.5)
 
   print("Plotting loading weight of selected variables on each component...")
   for (comp in seq(ncomp)) {
-    cimDiablo(data, comp=comp)
-    plotLoadings(data, contrib="max", comp=comp,
+    cimDiablo(data, comp=comp, size.legend=0.5)
+    plotLoadings(data, contrib="max", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(comp, "DIABLO max loadings"))
-    plotLoadings(data, contrib="min", comp=comp,
+      size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
+    plotLoadings(data, contrib="min", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
-      title=paste(comp, "DIABLO min loadings"))
+      size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
     loading_max = plotLoadings(data, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
     loading_min = plotLoadings(data, contrib="min", comp=comp,

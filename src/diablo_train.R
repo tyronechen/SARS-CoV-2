@@ -361,17 +361,30 @@ main = function() {
     diablo_input = data_imp
   }
 
+  print("Making feature names unique across all blocks...")
+  diablo_input = force_unique_blocks(diablo_input)
+
+  print("Run DIABLO keeping all features")
+  diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
+  plot_diablo(diablo_all, diablo_ncomp, outdir)
+  assess_performance(diablo_all, dist=dist_diablo)
+  predict_diablo(diablo_all, diablo_input, classes)
+  print("Diablo design:")
+  print(diablo_all$design)
+
+  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
+    dist_splsda, dist_diablo, argv, mappings, diablo_all, file=rdata
+  )
+
   # tune diablo parameters and run diablo
   diablo_keepx = lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
   diablo_keepx = tune_diablo_keepx(diablo_input, classes, diablo_ncomp, design,
     diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE)
 
-  print("Making feature names unique across all blocks...")
-  diablo_input = force_unique_blocks(diablo_input)
-
   print("Diablo keepx:")
   print(diablo_keepx)
-  diablo = run_diablo(diablo_input, classes, diablo_ncomp, diablo_keepx, design)
+  diablo = run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
   print("Diablo design:")
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
@@ -382,7 +395,7 @@ main = function() {
   # save RData object for future reference
   save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, argv, mappings, diablo, file=rdata
+    dist_splsda, dist_diablo, argv, mappings, diablo_all, diablo, file=rdata
   )
   dev.off()
 }
