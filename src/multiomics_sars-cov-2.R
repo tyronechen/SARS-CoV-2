@@ -47,7 +47,7 @@ show_na_prop = function(data_na, name) {
   ​
   # show proportion of NA values across all samples (y) for a variable (x)
   plot(sum_na_per_var/nrow(data_na), type='h', xlab='variable index',
-    ylab='NA proportion within sample',
+    ylab='NA proportion (across all samples for a variable)',
     main=paste(name, 'NA rate per variable on unfiltered data'))
 }
 
