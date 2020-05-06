@@ -353,13 +353,8 @@ main = function() {
     dist_splsda, dist_diablo, argv, mappings, file=rdata
   )
 
-  if (is.na(data_imp)) {
-    print("Using non-imputed data as input to DIABLO")
-    diablo_input = data
-  } else {
-    print("Using imputed data as input to DIABLO")
-    diablo_input = data_imp
-  }
+  # block-wise splsda doesnt do internal multilevel decomposition
+  diablo_input = lapply(input_data, withinVariation, design=data.frame(pch))
 
   print("Making feature names unique across all blocks...")
   diablo_input = force_unique_blocks(diablo_input)
