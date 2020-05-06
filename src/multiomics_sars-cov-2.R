@@ -46,7 +46,7 @@ show_na_prop = function(data_na, name) {
   sum_na_per_var = apply(data_na, 2, function(x) {sum(is.na(x))})
   ​
   # simple plot shows that some variable have an NA rate greater than 30%
-  plot(sum_na_per_var/ncol(data_na), type='h', xlab='variable index',
+  plot(sum_na_per_var/nrow(data_na), type='h', xlab='variable index',
     ylab='NA rate', main=paste(name, 'NA rate per variable on unfiltered data'))
 }
 
@@ -658,7 +658,9 @@ plot_diablo = function(data, ncomp=0, outdir="./") {
   plotVar(data, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
   plotVar(data, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   print("Plotting circos from similarity matrix...")
-  circosPlot(data, cutoff=0.8, line=TRUE, size.legend=0.5)
+  corr_diablo = circosPlot(data, cutoff=0.95, line=TRUE, size.legend=0.5)
+  corr_out = file=paste(outdir, "/DIABLO_correlations.txt", sep="")
+  write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
   network(data, blocks=c(1,2), color.node=c('darkorchid', 'lightgreen'), cutoff=0.4)
 
