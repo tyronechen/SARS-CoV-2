@@ -664,11 +664,11 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   corr_out = file=paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
-  # cyto = network(
-  #   data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4
-  # )
-  # cyto_out = paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
-  # write.graph(cyto$gR, cyto_out, format="graphml")
+  cyto = network(
+    data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4
+  )
+  cyto_out = paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
+  write.graph(cyto$gR, cyto_out, format="graphml")
   print("Plotting overall heatmap...")
   cimDiablo(data, size.legend=0.5)
 
