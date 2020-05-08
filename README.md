@@ -35,7 +35,8 @@ python 3.8.2
 
 R 3.6.2
   argparser 0.6
-  mixOmics 6.11.11
+  igraph_1.2.5
+  mixOmics 6.13.3
 ```
 
 Acknowledgements:
