@@ -675,14 +675,22 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting loading weight of selected variables on each component...")
   for (comp in seq(ncomp)) {
     cimDiablo(data, comp=comp, size.legend=0.5)
-    plotLoadings(data, contrib="max", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+    plotLoadings(data, contrib="max", comp=comp, max.name.length=12,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.4,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
-    plotLoadings(data, contrib="min", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+    plotLoadings(data, contrib="min", comp=comp, max.name.length=12,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.4,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
 
     for (i in data_names) {
+      plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=16,
+        method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+        title=paste(comp, i, "DIABLO max loadings"), size.name=0.6
+      )
+      plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=16,
+        method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+        title=paste(comp, i, "DIABLO min loadings"), size.name=0.6
+      )
       loading_max = plotLoadings(data, contrib="max", comp=comp, block=i,
         method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
       loading_min = plotLoadings(data, contrib="min", comp=comp, block=i,
