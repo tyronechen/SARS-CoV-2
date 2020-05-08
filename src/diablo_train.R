@@ -151,13 +151,14 @@ main = function() {
     data_splsda = NA
   }
 
+  # TODO: make naming independent of file names
   # parse out identifiers coded within the file paths (hardcoded)
-  names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
-  names = unname(lapply(sapply(names, strsplit, ".", fixed=TRUE), head, 1))
-  names = unname(sapply(sapply(names, head, 1), strsplit, "_"))
-  names = unlist(lapply(lapply(names, tail, -1), paste, collapse="_"))
+  data_names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
+  data_names = unname(lapply(sapply(data_names,strsplit,".",fixed=TRUE),head,1))
+  data_names = unname(sapply(sapply(data_names, head, 1), strsplit, "_"))
+  data_names = unlist(lapply(lapply(data_names, tail, -1), paste, collapse="_"))
   print("Omics data types")
-  print(names)
+  print(data_names)
 
   # initialise plots
   print(paste("Saving plots to (overwriting existing):", plot))
@@ -165,10 +166,10 @@ main = function() {
 
   # load data and drop features / columns with all NA
   data = lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
-  names(data) = names
+  names(data) = data_names
 
   # show proportion of NA values in unfiltered data
-  mapply(function(x, y) show_na_prop(x, y), data, names)
+  mapply(function(x, y) show_na_prop(x, y), data, data_names)
 
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
@@ -187,9 +188,9 @@ main = function() {
     print(argv$mappings)
     mappings = argv$mappings
     mapped = lapply(mappings, parse_mappings)
-    names(mapped) = names
+    names(mapped) = data_names
     data = mapply(function(x, y) remap_data(x, y), data, mapped)
-    names(data) = names
+    names(data) = data_names
   } else {
     print("Not remapping new feature names to existing, will use original.")
     mappings = NA
@@ -231,7 +232,7 @@ main = function() {
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
       title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
     )
-    heatmaps = cor_imputed_unimputed(pca_withna, pca_impute, names)
+    heatmaps = cor_imputed_unimputed(pca_withna, pca_impute, data_names)
   } else {
     print("Impute components unset, not imputing NA (set -i > 0 to enable)")
     data_imp = NA
@@ -268,11 +269,11 @@ main = function() {
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
     if (!is.na(pch)) {
-      data_plsda = classify_plsda(input_data, classes, pch, title=names,
+      data_plsda = classify_plsda(input_data, classes, pch, title=data_names,
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
       )
     } else {
-      data_plsda = classify_plsda(input_data, classes, pch=NA, title=names,
+      data_plsda = classify_plsda(input_data, classes, pch=NA, title=data_names,
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
       )
     }
@@ -299,7 +300,7 @@ main = function() {
       print("sPLSDA ncomp:")
       print(splsda_ncomp)
 
-      tuned_splsda = tune_splsda(input_data, classes, names, data.frame(pch),
+      tuned_splsda = tune_splsda(input_data,classes,data_names,data.frame(pch),
         ncomp=splsda_ncomp, nrepeat=10, logratio="none",
         test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
         cpus=argv$ncpus, progressBar=TRUE)
@@ -310,17 +311,17 @@ main = function() {
       print("Tuned splsda to use number of components:")
       splsda_ncomp = lapply(splsda_ncomp, `[`, "ncomp")
       splsda_ncomp = unlist(splsda_ncomp, recursive = FALSE)
-      names(splsda_ncomp) = names
+      names(splsda_ncomp) = data_names
       print(splsda_ncomp)
 
       print("Tuned the number of variables selected on each component to:")
       print(splsda_keepx)
       splsda_keepx = unlist(splsda_keepx, recursive = FALSE)
-      names(splsda_keepx) = names
+      names(splsda_keepx) = data_names
       print(splsda_keepx)
 
       data_splsda = classify_splsda(
-        data_imp, classes, pch, title=names, splsda_ncomp,
+        data_imp, classes, pch, title=data_names, splsda_ncomp,
         splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
       )
     }
@@ -361,8 +362,8 @@ main = function() {
 
   print("Run DIABLO keeping all features")
   diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
-  plot_diablo(diablo_all, diablo_ncomp, outdir)
-  assess_performance(diablo_all, dist=dist_diablo)
+  plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
+  assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
   predict_diablo(diablo_all, diablo_input, classes)
   print("Diablo design:")
   print(diablo_all$design)
@@ -383,8 +384,8 @@ main = function() {
   print("Diablo design:")
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
-  plot_diablo(diablo, diablo_ncomp, outdir)
-  assess_performance(diablo, dist=dist_diablo)
+  plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
+  assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
   predict_diablo(diablo, diablo_input, classes)
 
   # save RData object for future reference
