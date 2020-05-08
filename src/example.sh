@@ -1,19 +1,22 @@
 Rscript diablo_train.R \
    ../data/classes_diablo.txt  \
-   --args Rscript.sh \
    --classes_secondary ../data/pch.txt \
-   --data ../data/diablo_proteome.txt ../data/diablo_translatome.txt \
    --dropna_classes TRUE \
    --dropna_prop 0 \
+   --data ../data/diablo_proteome.txt ../data/diablo_translatome.txt \
+   --mappings ../data/proteome_mapfile.txt ../data/translatome_mapfile.txt \
    --ncpus 6 \
-   --dcomp 0 \
-   --icomp 5 \
-   --rdata RData.RData \
-   --plot Rplots.pdf \
-   --outfile_dir test \
+   --diablocomp 0 \
+   --diablo_keepx 5 10 12 14 16 18 20 30 \
+   --icomp 24 \
    --pcomp 10 \
    --plsdacomp 4 \
    --splsdacomp 4 \
-   --splsda_keepx 10,50,100,250 \
-   --mdist mahalanobis \
-   --contrib min
+   --splsda_keepx 10 25 50 100 \
+   --dist_splsda centroids.dist \
+   --dist_diablo mahalanobis.dist \
+   --contrib max \
+   --outfile_dir ../results/splsdacentroids_diablomahalanobis_i24_comp4_splsdakeepx10_100_diablokeepx5_30_corrected \
+   --rdata RData.RData \
+   --plot Rplots.pdf \
+   --args Rscript.sh
