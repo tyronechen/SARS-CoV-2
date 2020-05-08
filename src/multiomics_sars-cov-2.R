@@ -2,6 +2,7 @@
 # combine translatome and proteomics data for sars-cov-2
 # data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
 library(argparser, quietly=TRUE)
+library(igraph)
 library(mixOmics)
 
 parse_data = function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
@@ -644,7 +645,7 @@ run_diablo = function(data, classes, ncomp, design, keepx=NULL) {
   block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
 }
 
-plot_diablo = function(data, ncomp=0, outdir="./") {
+plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # plot the diablo data with a series of diagnostic plots
   print("Plotting correlation between components...")
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
@@ -660,11 +661,14 @@ plot_diablo = function(data, ncomp=0, outdir="./") {
   plotVar(data, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   print("Plotting circos from similarity matrix...")
   corr_diablo = circosPlot(data, cutoff=0.95, line=TRUE, size.legend=0.5)
-  corr_out = file=paste(outdir, "/DIABLO_correlations.txt", sep="")
+  corr_out = file=paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
-  network(data, blocks=c(1,2), color.node=c('darkorchid', 'lightgreen'), cutoff=0.4)
-
+  # cyto = network(
+  #   data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4
+  # )
+  # cyto_out = paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
+  # write.graph(cyto$gR, cyto_out, format="graphml")
   print("Plotting overall heatmap...")
   cimDiablo(data, size.legend=0.5)
 
@@ -677,27 +681,29 @@ plot_diablo = function(data, ncomp=0, outdir="./") {
     plotLoadings(data, contrib="min", comp=comp, max.name.length=16,
       method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
-    loading_max = plotLoadings(data, contrib="max", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
-    loading_min = plotLoadings(data, contrib="min", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
-    # title = gsub(" ", "_", title)
-    path_max = paste(outdir, "/", comp, "_DIABLO_max.txt", sep="")
-    path_min = paste(outdir, "/", comp, "_DIABLO_min.txt", sep="")
-    print("Writing DIABLO loadings to:")
-    print(path_max)
-    print(path_min)
-    write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
-    write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
-  }
 
-  # mapply(function(x) plotLoadings(data, comp=x, contrib="max", method="median"), seq(ncomp))
-  # plotLoadings(data, comp = 1, contrib = 'max', method = 'median')
-  # print("Plotting heatmap...")
-  # cimDiablo(data)
+    for (i in data_names) {
+      loading_max = plotLoadings(data, contrib="max", comp=comp, block=i,
+        method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      loading_min = plotLoadings(data, contrib="min", comp=comp, block=i,
+        method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      # title = gsub(" ", "_", title)
+      path_max = paste(
+        outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
+      )
+      path_min = paste(
+        outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_min.txt", sep=""
+      )
+      print("Writing DIABLO loadings to:")
+      print(path_max)
+      print(path_min)
+      write.table(as.data.frame(loading_max),file=path_max,quote=FALSE,sep="\t")
+      write.table(as.data.frame(loading_min),file=path_min,quote=FALSE,sep="\t")
+    }
+  }
 }
 
-assess_performance = function(data, dist) {
+assess_performance = function(data, dist, ncomp) {
   # review performance of diablo
   # remember to use the same distance metric which had the max value!
   print("Assessing performance...")
@@ -709,8 +715,8 @@ assess_performance = function(data, dist) {
 
   # ROC and AUC criteria are not particularly insightful in relation to the
   # performance evaluation of our methods, but can complement the analysis.
-  print("Plotting ROC...")
-  # auc_splsda = auroc(data, roc.block = "proteome", roc.comp = 1)
+  # print("Plotting ROC...")
+  # mapply(function(x) auroc(data, x), seq(ncomp))
 }
 
 predict_diablo = function(data, test, classes) {
