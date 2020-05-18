@@ -1,6 +1,6 @@
 # SARS-CoV-2
 
-Integrate multi-omics data for SARS-Cov-2.
+Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly.
 
 Data obtained from:
 
