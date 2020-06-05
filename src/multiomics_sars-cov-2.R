@@ -158,9 +158,9 @@ parse_classes = function(infile_path) {
   return(unlist(as.vector(t(data))))
 }
 
-create_design = function(data) {
-  # create design matrix from data: dataframe -> matrix (design)
-  design = matrix(0.1, ncol = length(data), nrow = length(data),
+create_design = function(data, link=0.1) {
+  # create design matrix from data: dataframe, link -> matrix (design)
+  design = matrix(link, ncol = length(data), nrow = length(data),
                   dimnames = list(names(data), names(data)))
   diag(design) = 0
   return(design)
