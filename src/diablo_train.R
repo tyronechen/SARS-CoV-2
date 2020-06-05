@@ -45,6 +45,9 @@ parse_argv = function() {
   p = add_argument(p, "--diablocomp", type="integer", default=0,
     help="number of diablo components (set manually if you get inference error)"
   )
+  p = add_argument(p, "--linkage", type="integer", default=0.1,
+    help="degree of blocks linkage 0 (discrimination) < x < 1 (correlation)"
+  )
   p = add_argument(p, "--diablo_keepx", type="vector", default=NA, nargs="+",
     help="variables to keep for diablo"
   )
@@ -127,6 +130,9 @@ main = function() {
   print(detectCores())
   print("Using cpus (change with --ncpus):")
   print(argv$ncpus)
+  print("Degree of linkage for omics blocks:")
+  linkage = argv$linkage
+  print(linkage)
   dist_splsda = argv$dist_splsda
   dist_diablo = argv$dist_diablo
   print("Distance measure (s/PLSDA):")
@@ -203,7 +209,7 @@ main = function() {
   dimensions = lapply(data, dim)
   print(dimensions)
 
-  design = create_design(data)
+  design = create_design(data, linkage)
 
   # check classes
   print(summary(classes))
@@ -218,7 +224,7 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, pch, data, pca_withna, dist_splsda, dist_diablo, argv, mappings,
+  save(classes, pch, data, linkage, pca_withna, dist_splsda, dist_diablo, argv, mappings,
     file=rdata)
 
   # impute data if components given
@@ -238,8 +244,8 @@ main = function() {
     data_imp = NA
     pca_impute = NA
   }
-  save(classes, pch, data, data_imp, pca_withna, pca_impute, dist_splsda,
-    dist_diablo, argv, mappings, file=rdata)
+  save(classes, pch, data, linkage, data_imp, pca_withna, pca_impute,
+    dist_splsda, dist_diablo, argv, mappings, file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -262,7 +268,7 @@ main = function() {
       )
     }
   } else { data_pca_multilevel = NA }
-  save(classes, pch, data, data_imp, data_pca_multilevel,
+  save(classes, pch, data, linkage, data_imp, data_pca_multilevel,
     pca_withna, pca_impute, dist_splsda, dist_diablo, argv, mappings, file=rdata
   )
 
@@ -279,7 +285,7 @@ main = function() {
     }
   } else { data_plsda = NA }
 
-  save(classes, pch, data, input_data, data_pca_multilevel, data_plsda,
+  save(classes, pch, data, linkage, input_data, data_pca_multilevel, data_plsda,
     pca_withna, pca_impute, dist_splsda, dist_diablo, argv, mappings, file=rdata
   )
 
@@ -330,7 +336,7 @@ main = function() {
     tuned_splsda = NA
   }
 
-  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, pca_withna, pca_impute, dist_splsda, dist_diablo,
     argv, mappings, file=rdata
   )
@@ -349,7 +355,7 @@ main = function() {
 
   # remove invariant columns
   # data = lapply(data, remove_novar)
-  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
     dist_splsda, dist_diablo, argv, mappings, file=rdata
   )
@@ -368,7 +374,7 @@ main = function() {
   print("Diablo design:")
   print(diablo_all$design)
 
-  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
     dist_splsda, dist_diablo, argv, mappings, diablo_all, file=rdata
   )
@@ -389,7 +395,7 @@ main = function() {
   predict_diablo(diablo, diablo_input, classes)
 
   # save RData object for future reference
-  save(classes, pch, data, data_imp, data_pca_multilevel, data_plsda,
+  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
     dist_splsda, dist_diablo, argv, mappings, diablo_all, diablo, file=rdata
   )
