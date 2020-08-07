@@ -368,6 +368,17 @@ main = function() {
 
   print("Run DIABLO keeping all features")
   diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
+
+  # had to hardcode this block for now, if names are too long things break
+  # diablo_all$names$colnames$proteome <- gsub(
+  #   "_prot_proteome", "_P", diablo_all$names$colnames$proteome
+  # )
+  #
+  # mapply(function(x, y, z) gsub(x, y, z), prot_names, long_names, counter)
+  # diablo_all$names$colnames$translatome <- gsub(
+  #   "_tran_translatome", "_T", diablo_all$names$colnames$translatome
+  # )
+
   plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
   assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
   predict_diablo(diablo_all, diablo_input, classes)
