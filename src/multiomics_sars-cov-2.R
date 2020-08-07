@@ -503,15 +503,16 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     legend=list(title="Status")
   )
 
+  short = make.names(sapply(colnames(data), strtrim, 6, USE.NAMES=FALSE), unique=TRUE)
   for (comp in seq(ncomp)) {
     cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status")
     )
-    plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+    plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
+      method='median', ndisplay=50, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA max loadings"))
-    plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+    plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
+      method='median', ndisplay=50, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
     loading_max = plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
@@ -644,23 +645,79 @@ run_diablo = function(data, classes, ncomp, design, keepx=NULL) {
   print("Running DIABLO...")
   block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
 }
+# load("../RData.RData")
+# colnames(diablo$X$proteome) <- make.unique(gsub("_proteome", "", colnames(diablo$X$proteome)))
+# colnames(diablo$X$translatome) <- make.unique(gsub("_translatome", "", colnames(diablo$X$translatome)))
+# diablo$names$colnames$proteome <- make.unique(gsub("_proteome", "", diablo$names$colnames$proteome))
+# diablo$names$colnames$translatome <- make.unique(gsub("_translatome", "", diablo$names$colnames$translatome))
+# var.names <- list(make.unique(gsub("_prot_proteome", "", diablo$names$colnames$proteome)), make.unique(gsub("_tran_translatome", "", diablo$names$colnames$translatome)))
+# circosPlot(diablo, cutoff=0.95, line=FALSE, size.legend=0.5)
 
 plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # plot the diablo data with a series of diagnostic plots
+
+  # need to make a function to squeeze sample names automatically and remap
+  trim_names_ = function(data, trim=16) {
+    all_names = data
+    long_names = which(sapply(data, nchar, USE.NAMES=FALSE) > trim)
+    if (length(long_names) == 0) {return()}
+    original_names = data[long_names]
+    for (i in long_names) { data[i] = as.character(i) }
+    # later map these back
+    maptable = data.frame(from=long_names, to=original_names)
+    return(list(data=data, all_names=all_names, maptable=maptable))
+  }
+  trimmed_names = lapply(data$names$colnames, trim_names_)
+  block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
+
+  # replace names in all associated columns for visualisation only
+  replace_names_ = function(data, trim=16) {
+    all_names = head(data$names$colnames, n=-1)
+    split_ = function(block, all_names) {
+      all_names = gsub("__FEATUREID", "", all_names[[block]])
+      all_names = gsub(paste("_", block, sep=""), "", all_names)
+      return(all_names)
+    }
+    splitted = mapply(
+      function(x) split_(x, all_names), names(all_names), SIMPLIFY=FALSE
+    )
+
+    truncate_ = function(names, trim) {
+      ifelse(nchar(names) > trim, paste0(strtrim(names, trim), ''), names)
+    }
+    truncated = lapply(splitted, truncate_, trim)
+
+    # make a copy, dont want to overwrite
+    data_vis = data
+
+    # map truncated values to all locations
+    for (i in names(all_names)) {
+      row.names(data_vis$loadings[[i]]) = make.unique(sapply(truncated[[i]], toString), sep="__")
+      data_vis$names$colnames[[i]] = make.unique(sapply(truncated[[i]], toString), sep="__")
+      colnames(data_vis$X[[i]]) = make.unique(sapply(truncated[[i]], toString), sep="__")
+    }
+    return(list(data_vis=data_vis, truncated=truncated))
+  }
+  data_vis_names = replace_names_(data, trim=16)
+  data_vis = data_vis_names$data_vis
+  truncated = data_vis_names$truncated
+  print(colnames(data_vis$X$translatome))
   print("Plotting correlation between components...")
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   # plotDiablo(data, ncomp = 1)
   print("Plotting individual samples into space spanned by block components...")
-  plotIndiv(data, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
+  plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
   print("Plotting arrow plot...")
-  plotArrow(data, ind.names=FALSE, legend=TRUE, title='DIABLO')
+  plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
-  plotVar(data, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
-  plotVar(data, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
-  plotVar(data, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
+  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
+  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
+  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   print("Plotting circos from similarity matrix...")
-  corr_diablo = circosPlot(data, cutoff=0.95, line=TRUE, size.legend=0.5)
+  corr_diablo = circosPlot(
+    data, cutoff=0.95, line=TRUE, size.legend=0.5, var.names=truncated
+  )
   corr_out = file=paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
@@ -672,25 +729,40 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting overall heatmap...")
   cimDiablo(data, size.legend=0.5)
 
+  block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
+
   print("Plotting loading weight of selected variables on each component...")
   for (comp in seq(ncomp)) {
+    for (i in block_to_trim) {
+      data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
+    }
     cimDiablo(data, comp=comp, size.legend=0.5)
-    plotLoadings(data, contrib="max", comp=comp, max.name.length=12,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.4,
+    plotLoadings(data, contrib="max", comp=comp, max.name.length=8,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
-    plotLoadings(data, contrib="min", comp=comp, max.name.length=12,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.4,
+    plotLoadings(data, contrib="min", comp=comp, max.name.length=8,
+      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
+    for (i in block_to_trim) {
+      data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
+    }
 
     for (i in data_names) {
-      plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=16,
+      for (i in block_to_trim) {
+        data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
+      }
+      plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=8,
         method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
         title=paste(comp, i, "DIABLO max loadings"), size.name=0.6
       )
-      plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=16,
+      plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=8,
         method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
         title=paste(comp, i, "DIABLO min loadings"), size.name=0.6
       )
+      for (i in block_to_trim) {
+        data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
+      }
+
       loading_max = plotLoadings(data, contrib="max", comp=comp, block=i,
         method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
       loading_min = plotLoadings(data, contrib="min", comp=comp, block=i,
