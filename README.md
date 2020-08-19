@@ -1,19 +1,28 @@
 # SARS-CoV-2
 
-Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly.
+*Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)
 
-Data obtained from:
+Code in this repository is provided under a MIT license. This documentation is provided under a CC-BY-3.0 AU license.*
 
-- [SARS-CoV-2 infected host cell proteomics reveal potential therapy targets](DOI:10.21203/rs.3.rs-17218/v1)
-  Denisa Bojkova, Kevin Klann, Benjamin Koch, Marek Widera, David Krause, Sandra Ciesek, Jindrich Cinatl, Christian Münch
-- [Supp table 1](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2001.xlsx)
-- [Supp table 2](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2002.xlsx)
+## Overview
 
-Method reference:
+Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly, so both datasets measure protein molecule abundances.
 
-- [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
+## Contents:
 
-Experimental design (n=3 for all classes):
+[[_TOC_]]
+
+<!-- - Experimental design
+- Data availability
+- Software availability
+- Method references
+- Walkthrough
+- Reproducing our results
+- Acknowledgements -->
+
+## Experimental design
+
+n=3 for all classes:
 
 | Infection state | Timepoint (hour) |
 |-----------------|------------------|
@@ -26,7 +35,15 @@ Experimental design (n=3 for all classes):
 | Infected        | 10               |
 | Infected        | 24               |
 
-Software libraries involved are:
+
+## Data availability
+
+- [SARS-CoV-2 infected host cell proteomics reveal potential therapy targets](DOI:10.21203/rs.3.rs-17218/v1)
+  Denisa Bojkova, Kevin Klann, Benjamin Koch, Marek Widera, David Krause, Sandra Ciesek, Jindrich Cinatl, Christian Münch
+- [Supp table 1](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2001.xlsx)
+- [Supp table 2](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2002.xlsx)
+
+## Software availability
 
 ```
 python 3.8.2
@@ -39,6 +56,130 @@ R 3.6.2
   mixOmics 6.13.3
 ```
 
-Acknowledgements:
+## Method references
+
+- [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
+- [Path Models with Latent Variables: The NIPALS Approach](https://doi.org/10.1016/B978-0-12-103950-9.50017-4)
+
+## Walkthrough
+
+### Reformatting the data for input into our pipeline
+
+Before data enters the pipeline, we reformat it into an appropriate matrix of abundance measures. Steps taken can be viewed in the jupyter notebook `src/parse_data_for_diablo.ipynb`.
+
+### Data quality control
+
+To ensure that the data is suitable for testing our hypothesis, we assess the data with quality metrics before analysis.
+
+We identified two issues:
+- A high proportion of missing values within the translatome data
+- Unwanted variation possibly caused by the longitudinal study design
+
+#### Accounting for missing values
+
+We discovered a high proportion of missing values within the **translatome** data.
+
+<!-- _Figure showing presence of missing values_ -->
+
+<!-- ![NA values in proteome data](images/pg_0001.png) -->
+
+*Proportion of NA values (of 24 samples) for each variable present in the proteome data.*
+
+<!-- ![NA values in translatome data](images/pg_0002.png) -->
+
+*Proportion of NA values (of 24 samples) for each variable present in the translatome data.*
+
+We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
+
+Filtering was performed by dropping all protein features which were not represented across each biological sample group.
+
+| Infection state | Timepoint (hour) | Var1 (Keep) | Var2  (Filter) |
+|-----------------|------------------|------|--------|
+| Control         | 2                | 2    | 0      |
+| Control         | 2                | 0    | 0      |
+| Control         | 2                | 5    | 0      |
+| Control         | 6                | 1    | 3      |
+| Control         | 6                | 3    | 4      |
+| Control         | 6                | 2    | 9      |
+| ...             | ...              | ...  | ...    |
+
+This reduced the quantity of missing values to ~17% of the original data. An imputation was performed with the [NIPALS algorithm](https://doi.org/10.1016/B978-0-12-103950-9.50017-4), which is effective on data with < 20% missing values.
+
+In the case of proteomics data, < 0.01% of the dataset consisted of missing values. These few values were imputed with the same procedure applied on the translatome data for consistency. No filtering was required as all proteins were represented in each sample group.
+
+> _**NOTE**_: Filtering alone would have removed about 47% of the data along with potential signal, while imputing alone would not be effective on this level of missing values. Therefore, we filtered missing values to reduce it to 17% of the dataset and imputed the remaining. NIPALS is effective on datasets with < 20% missing values.
+
+_sample nipals code_
+
+To test that imputation has not introduced significant technical variation into the data, we observe the correlation between variates of the principal components.
+
+_Figure showing heatmap of PCA variates_
+
+#### Accounting for unwanted variation
+
+We observed a "sample effect" in the data, which is likely caused by the longitudinal study design, where sets of cell cultures were resampled over a time series.
+
+_Figure of single level PCA_
+
+We show that we can account for this unwanted variation with a multilevel decomposition.
+
+_Figure of multi level PCA_
+
+### Single omics analysis
+
+_To be written._
+
+#### Parameter tuning
+
+#### Results
+
+### Multi omics analysis
+
+_To be written._
+
+#### Parameter tuning
+
+#### Results
+
+
+## Reproducing our results
+
+The complete data object generated by this code and used in the publication can be accessed by loading the provided `RData` file within an R environment.
+
+```
+load("results/results.RData")
+```
+
+Alternatively, a complete run can be made by running the following command:
+
+*TODO: update paths*
+
+```
+Rscript diablo_train.R \
+   ../data/classes_diablo.txt  \
+   --classes_secondary ../data/pch.txt \
+   --dropna_classes TRUE \
+   --dropna_prop 0 \
+   --data ../data/diablo_proteome.txt ../data/diablo_translatome.txt \
+   --ncpus 6 \  # edit this depending on how many cpus you have
+   --diablocomp 0 \
+   --diablo_keepx 5 10 12 14 16 18 20 30 \
+   --icomp 24 \
+   --pcomp 10 \
+   --plsdacomp 4 \
+   --splsdacomp 4 \
+   --splsda_keepx 10 25 50 100 \
+   --dist_splsda centroids.dist \
+   --dist_diablo mahalanobis.dist \
+   --contrib max \
+   --outfile_dir ../results/test_run \
+   --rdata RData.RData \
+   --plot Rplots.pdf \
+   --args Rscript.sh
+```
+
+Note that this may yield slightly different results, as the algorithm is not deterministic. As of `R >=3.6`, setting seeds will not replicate results across different `R` versions.
+
+## Acknowledgements
 
 [We thank Kim-Anh Lê Cao](https://lecao-lab.science.unimelb.edu.au/) for contributions to the code and analysis.
