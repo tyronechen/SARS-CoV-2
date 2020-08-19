@@ -83,11 +83,11 @@ We discovered a high proportion of missing values within the **translatome** dat
 
 <!-- _Figure showing presence of missing values_ -->
 
-<!-- ![NA values in proteome data](images/pg_0001.png) -->
+![NA values in proteome data](images/pg_0001.png)
 
 *Proportion of NA values (of 24 samples) for each variable present in the proteome data.*
 
-<!-- ![NA values in translatome data](images/pg_0002.png) -->
+![NA values in translatome data](images/pg_0002.png)
 
 *Proportion of NA values (of 24 samples) for each variable present in the translatome data.*
 
