@@ -1,8 +1,10 @@
 # SARS-CoV-2
 
-*Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)
+*Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)*
 
-Code in this repository is provided under a MIT license. This documentation is provided under a CC-BY-3.0 AU license.*
+*Code in this repository is provided under a MIT license. This documentation is provided under a CC-BY-3.0 AU license.*
+
+*[Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/)*
 
 ## Overview
 
