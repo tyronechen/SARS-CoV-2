@@ -139,6 +139,8 @@ We show that we can account for this unwanted variation with a multilevel decomp
 | After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition | After imputation: PCA of translatome data with imputed values and multilevel decomposition |
 | ![After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition](images/pg_0033.png) | ![After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition](images/pg_0034.png) |
 
+> _**NOTE**_: [Here is an example use case of the multilevel decomposition.](http://mixomics.org/methods/multilevel/)
+
 ### Single omics analysis
 
 _To be written._
