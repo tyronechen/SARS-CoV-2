@@ -40,10 +40,9 @@ n=3 for all classes:
 
 ## Data availability
 
-- [SARS-CoV-2 infected host cell proteomics reveal potential therapy targets](DOI:10.21203/rs.3.rs-17218/v1)
-  Denisa Bojkova, Kevin Klann, Benjamin Koch, Marek Widera, David Krause, Sandra Ciesek, Jindrich Cinatl, Christian Münch
-- [Supp table 1](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2001.xlsx)
-- [Supp table 2](https://assets.researchsquare.com/files/rs-17218/v1/Supplementary%20Table%2002.xlsx)
+- [Bojkova, D., Klann, K., Koch, B. et al. Proteomics of SARS-CoV-2-infected host cells reveals therapy targets. Nature 583, 469–472 (2020). https://doi.org/10.1038/s41586-020-2332-7](https://doi.org/10.1038/s41586-020-2332-7)
+- [Supp table 1](https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-020-2332-7/MediaObjects/41586_2020_2332_MOESM2_ESM.xlsx)
+- [Supp table 2](https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-020-2332-7/MediaObjects/41586_2020_2332_MOESM3_ESM.xlsx)
 
 ## Software availability
 
@@ -147,7 +146,7 @@ We show that we can account for this unwanted variation with a [multilevel decom
 
 ### Single omics analysis
 
-_To be written._
+
 
 #### Parameter tuning
 
