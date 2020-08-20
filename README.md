@@ -162,7 +162,10 @@ To investigate the parameters best suited for the methods, leave-one-out cross v
 
 To assess method performance, a ROC curve was also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
 
-
+| Proteome | Translatome |
+|----------|-------------|
+| ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. | ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. |
+| ![ROC curve for classification accuracy on sPLSDA component 1](images/pg_0095.png) | ![OC curve for classification accuracy on sPLSDA component 1](images/pg_0121.png) |
 
 To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories. The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
 
