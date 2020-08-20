@@ -163,6 +163,15 @@ Plotting the first few components of the sPLSDA reveals several distinct sample 
 
 Running a non sparse variant of the sPLSDA with all features showed significant similarities among patterns in the data.
 
+| Proteome | Translatome |
+|----------|-------------|
+| PLSDA proteome component 1/2. Both components account for ~34% of variation in the data. | PLSDA translatome component 1/2. Both components account for ~34% of variation in the data. |
+| ![PLSDA proteome component 1/2](images/pg_0039.png) | ![PLSDA translatome component 1/2](images/pg_0062.png) |
+| PLSDA proteome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. | PLSDA translatome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. |
+| ![PLSDA proteome clustered image map](images/pg_0049.png) | ![PLSDA translatome clustered image map](images/pg_072.png) |
+| The top loadings for the first component are visualised in the proteome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. | The top loadings for the first component are visualised in the translatome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
+| ![PLSDA proteome ](images/pg_0051.png) | ![PLSDA translatome ](images/pg_0074.png) |
+
 > _**NOTE**_: [Here is an example use case of PLSDA](http://mixomics.org/methods/pls-da/)
 
 #### Parameter tuning
