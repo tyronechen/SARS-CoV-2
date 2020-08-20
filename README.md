@@ -175,7 +175,12 @@ It is also possible to view the stability of the selected variables.
 
 To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories. The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
 
-
+| Proteome | Translatome |
+|----------|-------------|
+| sPLSDA arrow plots | sPLSDA arrow plots |
+| ![sPLSDA arrow plots](images/pg_0099.png) | ![sPLSDA arrow plots](images/pg_0125.png) |
+| sPLSDA correlation circle plots | sPLSDA correlation circle plots |
+| ![sPLSDA correlation circle plots](images/pg_0099.png) | ![sPLSDA correlation circle plots](images/pg_0125.png) |
 
 #### Results
 
