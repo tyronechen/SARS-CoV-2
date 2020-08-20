@@ -107,15 +107,26 @@ Filtering was performed by dropping all protein features which were not represen
 
 This reduced the quantity of missing values to ~17% of the original data. An imputation was performed with the [NIPALS algorithm](https://doi.org/10.1016/B978-0-12-103950-9.50017-4), which is effective on data with < 20% missing values.
 
+> _**NOTE**_: [Here is an example use case of the imputation.](http://mixomics.org/methods/missing-values/)
+
 In the case of proteomics data, < 0.01% of the dataset consisted of missing values. These few values were imputed with the same procedure applied on the translatome data for consistency. No filtering was required as all proteins were represented in each sample group.
 
 > _**NOTE**_: Filtering alone would have removed about 47% of the data along with potential signal, while imputing alone would not be effective on this level of missing values. Therefore, we filtered missing values to reduce it to 17% of the dataset and imputed the remaining. NIPALS is effective on datasets with < 20% missing values.
 
-_sample nipals code_
-
 To test that imputation has not introduced significant technical variation into the data, we observe the correlation between variates of the principal components.
 
-_Figure showing heatmap of PCA variates_
+![Before imputation: PCA of proteome data with NA values](images/pg_0005.png)
+![Before imputation: PCA of translatome data with NA values](images/pg_0006.png)
+
+![After imputation: PCA of proteome data with imputed values](images/pg_0015.png)
+![After imputation: PCA of translatome data with imputed values](images/pg_0016.png)
+
+![Correlation of proteome PCA variates with NA values](images/pg_0021.png)
+![Correlation of translatome PCA variates with NA values](images/pg_0022.png)
+
+In both cases, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
+
+> _**NOTE**_: In this case, either strong positive or strong negative correlations indicate similarity (directionality not important).
 
 #### Accounting for unwanted variation
 
