@@ -197,7 +197,7 @@ Plotting the first few components of the sPLSDA reveals several distinct sample 
 | sPLSDA proteome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. | sPLSDA translatome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. |
 | ![sPLSDA proteome clustered image map](images/pg_0100.png) | ![sPLSDA translatome clustered image map](images/pg_0126.png) |
 | The top loadings for the first component are visualised in the proteome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. | The top loadings for the first component are visualised in the translatome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
-| ![sPLSDA proteome ](images/pg_0102.png) | ![sPLSDA translatome ](images/pg_0128.png) |
+| ![sPLSDA proteome loadings](images/pg_0102.png) | ![sPLSDA translatome loadings](images/pg_0128.png) |
 
 To supplement the sPLSDA, we also compared the performance of PLSDA (a non sparse variant of sPLSDA keeping all features). This showed similarities in patterns across the datasets (not shown). Parameter tuning was carried out as with sPLSDA (not shown).
 
@@ -214,12 +214,27 @@ To supplement the sPLSDA, we also compared the performance of PLSDA (a non spars
 
 ### Multi omics analysis
 
-_To be written._
+Having assessed the major sources of variation and features of interest contributing to biological conditions within the individual blocks of omics data, we used this information to guide our multi-omics integration.
 
 #### Parameter tuning
 
+
+
+
 #### Results
 
+We applied a latent variable approach to identify a highly correlated multi-omics signature. This analysis is carried out in a conceptually similar way to the previous sPLSDA with similar parameter requirements, except with multiple omics data blocks corrected for longitudinal study effects specified as input. We illustrate the correlation between features across these omics blocks with a circos plot.
+
+| Multiomics |
+|------------|
+|  Multiblock sPLSDA component 1/2 |
+| ![Multiblock sPLSDA component 1/2](images/pg_0220.png) |
+|  Multiblock sPLSDA clustered image map |
+| ![Multiblock sPLSDA clustered image map](images/pg_0227.png) |
+| The top loadings for the first component are visualised. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
+| ![Multiblock sPLSDA loadings](images/pg_0229.png) |
+| Circos plot, built on a similarity matrix demonstrates the correlation between different proteins and transcripts, with a visualisation cutoff of 0.95 correlation score. Positive correlations are in red and negative correlations are in blue. Proteome block is in blue and translatome block is in green. Line graphs on the outside of the circos plot represent expression levels of their corresponding features, and are coloured by their biological sample class. |
+| ![Multiblock sPLSDA component 1/2](images/pg_0225.png) |
 
 ## Reproducing our results
 
