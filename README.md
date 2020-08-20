@@ -161,6 +161,8 @@ To investigate the parameters best suited for the methods, leave-one-out cross v
 | Balanced error rate per number of features. 4 components appears to be the most effective. | Balanced error rate per number of features. 4 components appears to be the most effective. |
 | ![Balanced error rate per number of features](images/pg_0085.png) | ![Balanced error rate per number of features](images/pg_0086.png) |
 
+#### Diagnostic plots
+
 To assess method performance, a ROC curve was also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
 
 | Proteome | Translatome |
@@ -218,8 +220,14 @@ Having assessed the major sources of variation and features of interest contribu
 
 #### Parameter tuning
 
+| Multiomics |
+|------------|
+| Balanced error rate per multiblock sPLSDA component. Mahalanobis distance metric with 8 components appears to be the most effective. |
+| ![Balanced error rate per multiblock sPLSDA component 1/2](images/pg_0139.png) |
+| Correlation plot between components from each data set shows that the correlation was maximised as specified in the design matrix. Dimension 1 was assessed. |
+| ![Balanced error rate per number of features](images/pg_0212.png) |
 
-
+#### Diagnostic plots
 
 #### Results
 
