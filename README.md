@@ -127,11 +127,17 @@ In both cases, there is a strong correlation between the variates on at least th
 
 We observed a "sample effect" in the data, which is likely caused by the longitudinal study design, where sets of cell cultures were resampled over a time series.
 
-_Figure of single level PCA_
+| Proteome | Translatome |
+|----------|-------------|
+| After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
+| ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
 
 We show that we can account for this unwanted variation with a multilevel decomposition.
 
-_Figure of multi level PCA_
+| Proteome | Translatome |
+|----------|-------------|
+| After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition | After imputation: PCA of translatome data with imputed values and multilevel decomposition |
+| ![After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition](images/pg_0033.png) | ![After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition](images/pg_0034.png) |
 
 ### Single omics analysis
 
