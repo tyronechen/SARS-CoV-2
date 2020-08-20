@@ -110,14 +110,14 @@ In the case of proteomics data, < 0.01% of the dataset consisted of missing valu
 
 To test that imputation has not introduced significant technical variation into the data, we observe the correlation between variates of the principal components.
 
-![Before imputation: PCA of proteome data with NA values](images/pg_0005.png)
-![Before imputation: PCA of translatome data with NA values](images/pg_0006.png)
-
-![After imputation: PCA of proteome data with imputed values](images/pg_0015.png)
-![After imputation: PCA of translatome data with imputed values](images/pg_0016.png)
-
-![Correlation of proteome PCA variates with NA values](images/pg_0021.png)
-![Correlation of translatome PCA variates with NA values](images/pg_0022.png)
+| Proteome | Translatome |
+|----------|-------------|
+| Before imputation: PCA of proteome data with NA values | Before imputation: PCA of translatome data with NA values |
+| ![Before imputation: PCA of proteome data with NA values](images/pg_0005.png) | ![Before imputation: PCA of translatome data with NA values](images/pg_0006.png) |
+| After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
+| ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
+| Correlation of proteome PCA variates with NA values | Correlation of translatome PCA variates with NA values |
+| ![Correlation of proteome PCA variates with NA values](images/pg_0021.png) | ![Correlation of translatome PCA variates with NA values](images/pg_0022.png) |
 
 In both cases, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
 
