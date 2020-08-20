@@ -150,6 +150,18 @@ We next apply the sPLSDA (sparse Partial Least Squares Discriminant Analysis) me
 
 > _**NOTE**_: [Here is an example use case of sPLSDA](http://mixomics.org/case-studies/splsda-srbct/)
 
+#### Parameter tuning
+
+To investigate the parameters best suited for the methods, leave-one-out cross validation was performed. The classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. At the same time, the number of components and features selected were tuned internally with a function in the mixOmics package.
+
+To assess method performance, a ROC curve is also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
+
+To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
+
+The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
+
+#### Results
+
 Plotting the first few components of the sPLSDA reveals several distinct sample groups, with the main distinction in both omics data blocks as the difference between late stage infected samples with all other samples. This matches the independent observations of the laboratory which originally generated the data. There are multiple secondary distinctions between data groups in both omics data blocks, mostly between groups of timepoints. It is also interesting to note that some sub-groups of data include both infected and uninfected samples.
 
 | Proteome | Translatome |
@@ -173,10 +185,6 @@ Running a non sparse variant of the sPLSDA with all features showed significant 
 | ![PLSDA proteome ](images/pg_0051.png) | ![PLSDA translatome ](images/pg_0074.png) |
 
 > _**NOTE**_: [Here is an example use case of PLSDA](http://mixomics.org/methods/pls-da/)
-
-#### Parameter tuning
-
-#### Results
 
 ### Multi omics analysis
 
