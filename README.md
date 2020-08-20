@@ -152,13 +152,21 @@ We next apply the sPLSDA (sparse Partial Least Squares Discriminant Analysis) me
 
 #### Parameter tuning
 
-To investigate the parameters best suited for the methods, leave-one-out cross validation was performed. The classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. At the same time, the number of components and features selected were tuned internally with a function in the mixOmics package.
+To investigate the parameters best suited for the methods, leave-one-out cross validation was performed. The balanced classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. At the same time, the number of components and features selected were tuned internally with a function in the mixOmics package.
 
-To assess method performance, a ROC curve is also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
+| Proteome | Translatome |
+|----------|-------------|
+| Balanced error rate per sPLSDA component. Centroids distance metric with 4 components appears to be the most effective. | Balanced error rate per sPLSDA component. Centroids distance metric with 4 components appears to be the most effective. |
+| ![Balanced error rate per sPLSDA component 1/2](images/pg_0091.png) | ![Balanced error rate per sPLSDA component 1/2](images/pg_0117.png) |
 
-To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
 
-The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
+To assess method performance, a ROC curve was also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
+
+
+
+To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories. The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
+
+
 
 #### Results
 
