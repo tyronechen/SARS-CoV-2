@@ -62,6 +62,7 @@ R 3.6.2
 
 - [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
 - [Path Models with Latent Variables: The NIPALS Approach](https://doi.org/10.1016/B978-0-12-103950-9.50017-4)
+- [A novel approach for biomarker selection and the integration of repeated measures experiments from two assays](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-325)
 
 ## Walkthrough
 
@@ -132,7 +133,7 @@ We observed a "sample effect" in the data, which is likely caused by the longitu
 | After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
 | ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
 
-We show that we can account for this unwanted variation with a multilevel decomposition.
+We show that we can account for this unwanted variation with a [multilevel decomposition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-325).
 
 | Proteome | Translatome |
 |----------|-------------|
@@ -140,6 +141,8 @@ We show that we can account for this unwanted variation with a multilevel decomp
 | ![After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition](images/pg_0033.png) | ![After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition](images/pg_0034.png) |
 
 > _**NOTE**_: [Here is an example use case of the multilevel decomposition.](http://mixomics.org/methods/multilevel/)
+
+<!-- will we need to address single omics analysis -->
 
 ### Single omics analysis
 
