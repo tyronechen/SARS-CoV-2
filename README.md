@@ -177,7 +177,7 @@ It is also possible to view the stability of the selected variables.
 | Stability of the selected variables on sPLSDA component 1 | Stability of the selected variables on sPLSDA component 1 |
 | ![Stability of the selected variables on sPLSDA component 1](images/pg_0092.png) | ![Stability of the selected variables on sPLSDA component 1](images/pg_0118.png) |
 
-To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
+To screen data, arrow plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
 
 <!-- The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points. -->
 
@@ -228,6 +228,17 @@ Having assessed the major sources of variation and features of interest contribu
 | ![Balanced error rate per number of features](images/pg_0212.png) |
 
 #### Diagnostic plots
+
+To screen data, arrow plots and correlation circle plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
+
+The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
+
+| Proteome | Translatome |
+|----------|-------------|
+| Multiblock sPLSDA arrow plots |
+| ![Multiblock sPLSDA arrow plots](images/pg_0221.png) |
+| Multiblock sPLSDA correlation circle plots |
+| ![Multiblock sPLSDA correlation circle plots](images/pg_0222.png) |
 
 #### Results
 
