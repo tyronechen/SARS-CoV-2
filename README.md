@@ -199,7 +199,7 @@ Plotting the first few components of the sPLSDA reveals several distinct sample 
 | The top loadings for the first component are visualised in the proteome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. | The top loadings for the first component are visualised in the translatome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
 | ![sPLSDA proteome ](images/pg_0102.png) | ![sPLSDA translatome ](images/pg_0128.png) |
 
-Running a non sparse variant of the sPLSDA with all features showed significant similarities among patterns in the data.
+To supplement the sPLSDA, we also compared the performance of PLSDA (a non sparse variant of sPLSDA keeping all features). This showed similarities in patterns across the datasets. Parameter tuning was carried out as with sPLSDA (not shown).
 
 | Proteome | Translatome |
 |----------|-------------|
