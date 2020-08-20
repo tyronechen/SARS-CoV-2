@@ -62,7 +62,8 @@ R 3.6.2
 
 - [DIABLO: an integrative approach for identifying key molecular drivers from multi-omics assays](https://doi.org/10.1093/bioinformatics/bty1054) Amrit Singh, Casey P Shannon, Benoît Gautier, Florian Rohart, Michaël Vacher, Scott J Tebbutt, Kim-Anh Lê Cao
 - [Path Models with Latent Variables: The NIPALS Approach](https://doi.org/10.1016/B978-0-12-103950-9.50017-4)
-- [A novel approach for biomarker selection and the integration of repeated measures experiments from two assays](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-325)
+- [A novel approach for biomarker selection and the integration of repeated measures experiments from two assays](https://doi.org/10.1186/1471-2105-13-325)
+- [mixOmics: an R package for ‘omics feature selection and multiple data integration](https://doi.org/10.1371/journal.pcbi.1005752)
 
 ## Walkthrough
 
