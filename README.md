@@ -81,10 +81,10 @@ We identified two issues:
 
 We discovered a high proportion of missing values within the **translatome** data.
 
-| *Proportion of NA values (of 24 samples) for each variable present in the proteome data.* | *Proportion of NA values (of 24 samples) for each variable present in the translatome data.* |
-|--------|--------|
+| Proteome | Translatome |
+|----------|-------------|
+| Proportion of NA values (of 24 samples) for each variable present in the proteome data. | Proportion of NA values (of 24 samples) for each variable present in the translatome data. |
 | ![NA values in proteome data](images/pg_0001.png) | ![NA values in translatome data](images/pg_0002.png) |
-
 
 We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
 
