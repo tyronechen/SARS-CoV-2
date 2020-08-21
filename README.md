@@ -106,6 +106,10 @@ We discovered a high proportion of missing values within the **translatome** dat
 | Proportion of NA values (of 24 samples) for each variable present in the proteome data. | Proportion of NA values (of 24 samples) for each variable present in the translatome data. |
 | ![NA values in proteome data](images/pg_0001.png) | ![NA values in translatome data](images/pg_0002.png) |
 
+We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
+
+Filtering was performed by dropping all protein features which were not represented across each biological sample group.
+
 <details>
   <summary>Click to expand code block</summary>
 
@@ -145,10 +149,6 @@ We discovered a high proportion of missing values within the **translatome** dat
   ```
 </details>
 
-We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
-
-Filtering was performed by dropping all protein features which were not represented across each biological sample group.
-
 | Infection state | Timepoint (hour) | Var1 (Keep) | Var2  (Filter) |
 |-----------------|------------------|------|--------|
 | Control         | 2                | 2    | 0      |
@@ -161,6 +161,30 @@ Filtering was performed by dropping all protein features which were not represen
 
 This reduced the quantity of missing values to ~17% of the original data. An imputation was performed with the [NIPALS algorithm](https://doi.org/10.1016/B978-0-12-103950-9.50017-4), which is effective on data with < 20% missing values.
 
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  impute_missing_ = function(data, ncomp=10, block_name="") {
+    # impute missing values with nipals: dataframe (with NA) -> dataframe
+    print("Number of components for imputation:")
+    print(ncomp)
+    nipals_tune = nipals(data, reconst=TRUE, ncomp=ncomp)
+    barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
+      xlab="Number of components", ylab="Explained variance"
+    )
+    return(nipals_tune$rec)
+  }
+
+  impute_missing = function(data, ncomps) {
+    mapply(function(x, y, z) impute_missing_(x, y, z), data, ncomps, names(data))
+  }
+
+  data_imp = impute_missing(data, rep(argv$icomp, length(data)))
+  data = replace_missing(data, data_imp)
+  ```
+</details>
+
 > _**NOTE**_: [Here is an example use case of the imputation.](http://mixomics.org/methods/missing-values/)
 
 In the case of proteomics data, < 0.01% of the dataset consisted of missing values. These few values were imputed with the same procedure applied on the translatome data for consistency. No filtering was required as all proteins were represented in each sample group.
@@ -168,6 +192,18 @@ In the case of proteomics data, < 0.01% of the dataset consisted of missing valu
 > _**NOTE**_: Filtering alone would have removed about 47% of the data along with potential signal, while imputing alone would not be effective on this level of missing values. Therefore, we filtered missing values to reduce it to 17% of the dataset and imputed the remaining. NIPALS is effective on datasets with < 20% missing values.
 
 To test that imputation has not introduced significant technical variation into the data, we observe the correlation between variates of the principal components.
+
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  pca_impute = plot_pca_single(
+    data_imp, classes, pch=pch, ncomp=argv$pcomp,
+    title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+  )
+  heatmaps = cor_imputed_unimputed(pca_withna, pca_impute, data_names)
+  ```
+</details>
 
 | Proteome | Translatome |
 |----------|-------------|
