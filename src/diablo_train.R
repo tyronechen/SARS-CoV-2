@@ -402,8 +402,8 @@ main = function() {
   print(diablo$design)
   # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
   plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
-  assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
-  predict_diablo(diablo, diablo_input, classes)
+  # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
+  # predict_diablo(diablo, diablo_input, classes)
 
   # save RData object for future reference
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
