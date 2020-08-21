@@ -197,6 +197,51 @@ To test that imputation has not introduced significant technical variation into 
   <summary>Click to expand code block</summary>
 
   ```
+  plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0, show=FALSE) {
+    # do pca on individual classes: dataframe, vector, vector -> outfile_path.pdf
+    names = names(data)
+
+    print("Removing 0 variance columns from data...")
+    data = lapply(data, remove_novar)
+
+    if (ncomp == 0) {ncomp = dim(classes)[1]}
+
+    data_pca = lapply(data, pca, ncomp=ncomp, center=TRUE, scale=TRUE)
+
+    if (show == TRUE) {
+      print("Showing PCA component contribution...")
+      print(data_pca)
+    }
+
+    print("Plotting PCA component contribution...")
+    mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
+
+    if (!is.na(pch)) {
+      print("Plotting PCA by groups...")
+      mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 1/2"), pch=pch), data_pca, names)
+      mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=FALSE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
+      mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=FALSE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    } else {
+      print("Plotting PCA by groups...")
+      mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 1/2")), data_pca, names)
+      mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
+      mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+        group=classes, legend=TRUE, ncomp=ncomp,
+        title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    }
+    return(data_pca)
+  }
+
   pca_impute = plot_pca_single(
     data_imp, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
@@ -222,12 +267,72 @@ In both cases, there is a strong correlation between the variates on at least th
 
 We observed a "sample effect" in the data, which is likely caused by the longitudinal study design, where sets of cell cultures were resampled over a time series.
 
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  # we assume the plot_pca_single() function in the previous code block is loaded
+
+  pca_impute = plot_pca_single(
+    data_imp, classes, pch=pch, ncomp=argv$pcomp,
+    title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+  )
+  ```
+</details>
+
 | Proteome | Translatome |
 |----------|-------------|
 | After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
 | ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
 
 We show that we can account for this unwanted variation with a [multilevel decomposition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-325).
+
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE) {
+    names = names(data)
+
+    print("Removing 0 variance columns from data...")
+    data = lapply(data, remove_novar)
+
+    if (ncomp == 0) {ncomp = dim(classes)[1]}
+
+    data_pca = lapply(data,pca,ncomp=ncomp,center=TRUE,scale=TRUE,multilevel=pch)
+    if (show == TRUE) {
+      print("Showing PCA multilevel component contribution...")
+      print(data_pca)
+    }
+
+    print("Plotting PCA multilevel component contribution...")
+    mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
+      data_pca, names)
+
+    print("Plotting PCA multilevel...")
+    mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
+      group=classes, legend=TRUE, ncomp=ncomp,
+      title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
+    mapply(function(x, y) plotIndiv(x, comp=c(1,3), ind.names=FALSE,
+      group=classes, legend=TRUE, ncomp=ncomp,
+      title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
+    mapply(function(x, y) plotIndiv(x, comp=c(2,3), ind.names=FALSE,
+      group=classes, legend=TRUE, ncomp=ncomp,
+      title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
+    return(data_pca)
+  }
+
+  data_pca_multilevel = plot_pca_multilevel(
+    input_data, classes, pch=pch, ncomp=argv$pcomp,
+    title=paste("With NA. PC:", argv$pcomp)
+  )
+
+  data_pca_multilevel = plot_pca_multilevel(
+    input_data, classes, pch=pch, ncomp=argv$pcomp,
+    title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+  )
+  ```
+</details>
 
 | Proteome | Translatome |
 |----------|-------------|
@@ -327,8 +432,8 @@ To screen data, arrow plots and correlation circle plots are also useful. The ar
 
 The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
 
-| Proteome | Translatome |
-|----------|-------------|
+| Multiomics |
+|----------|
 | Multiblock sPLSDA arrow plots |
 | ![Multiblock sPLSDA arrow plots](images/pg_0221.png) |
 | Multiblock sPLSDA correlation circle plots |
