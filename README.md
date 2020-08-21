@@ -106,6 +106,45 @@ We discovered a high proportion of missing values within the **translatome** dat
 | Proportion of NA values (of 24 samples) for each variable present in the proteome data. | Proportion of NA values (of 24 samples) for each variable present in the translatome data. |
 | ![NA values in proteome data](images/pg_0001.png) | ![NA values in translatome data](images/pg_0002.png) |
 
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  remove_na_class = function(data, classes, missing_as=NA) {
+    # where there is NA for a whole class of features, remove feature column
+    if (is.na(missing_as)) {
+      data[is.na(data)] = 0
+    } else {
+      data[which(data == missing_as, arr.ind=TRUE)] = 0
+    }
+    print(dim(data))
+    print("Dropping features where at least one class is NA")
+    uniq = unique(classes)
+    subsets = list()
+    for (i in uniq) {subsets[[i]] = data[grep(i, rownames(data)), ]}
+    subsets = lapply(lapply(lapply(subsets, colSums), data.frame), t)
+    subsets = do.call("rbind", subsets)
+    rownames(subsets) = uniq
+
+    if (is.na(missing_as)) {
+      subsets[which(subsets == 0, arr.ind=TRUE)] = NA
+    } else {
+      subsets[which(subsets == 0, arr.ind=TRUE)] = missing_as
+    }
+
+    subsets = t(na.omit(t(subsets)))
+    data = data[, c(colnames(subsets))]
+
+    if (is.na(missing_as)) {
+      data[which(data == 0, arr.ind=TRUE)] = NA
+    } else {
+      data[which(data == 0, arr.ind=TRUE)] = missing_as
+    }
+    return(data)
+  }
+  ```
+</details>
+
 We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
 
 Filtering was performed by dropping all protein features which were not represented across each biological sample group.
