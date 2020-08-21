@@ -12,6 +12,8 @@ Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and t
 
 ## Contents:
 
+<!-- This directive renders a table of contents in `gitlab` but may not work elsewhere! -->
+
 [[_TOC_]]
 
 <!-- - Experimental design
@@ -101,10 +103,15 @@ We discovered a high proportion of missing values within the **translatome** dat
   ```
 </details>
 
-| Proteome | Translatome |
-|----------|-------------|
-| Proportion of NA values (of 24 samples) for each variable present in the proteome data. | Proportion of NA values (of 24 samples) for each variable present in the translatome data. |
-| ![NA values in proteome data](images/pg_0001.png) | ![NA values in translatome data](images/pg_0002.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | Proportion of NA values (of 24 samples) for each variable present in the proteome data. | Proportion of NA values (of 24 samples) for each variable present in the translatome data. |
+  | ![NA values in proteome data](images/pg_0001.png) | ![NA values in translatome data](images/pg_0002.png) |
+
+</details>
 
 We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective.
 
@@ -250,14 +257,19 @@ To test that imputation has not introduced significant technical variation into 
   ```
 </details>
 
-| Proteome | Translatome |
-|----------|-------------|
-| Before imputation: PCA of proteome data with NA values | Before imputation: PCA of translatome data with NA values |
-| ![Before imputation: PCA of proteome data with NA values](images/pg_0005.png) | ![Before imputation: PCA of translatome data with NA values](images/pg_0006.png) |
-| After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
-| ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
-| Correlation of proteome PCA variates with NA values | Correlation of translatome PCA variates with NA values |
-| ![Correlation of proteome PCA variates with NA values](images/pg_0021.png) | ![Correlation of translatome PCA variates with NA values](images/pg_0022.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | Before imputation: PCA of proteome data with NA values | Before imputation: PCA of translatome data with NA values |
+  | ![Before imputation: PCA of proteome data with NA values](images/pg_0005.png) | ![Before imputation: PCA of translatome data with NA values](images/pg_0006.png) |
+  | After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
+  | ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
+  | Correlation of proteome PCA variates with NA values | Correlation of translatome PCA variates with NA values |
+  | ![Correlation of proteome PCA variates with NA values](images/pg_0021.png) | ![Correlation of translatome PCA variates with NA values](images/pg_0022.png) |
+
+</details>
 
 In both cases, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
 
@@ -280,10 +292,15 @@ We observed a "sample effect" in the data, which is likely caused by the longitu
   ```
 </details>
 
-| Proteome | Translatome |
-|----------|-------------|
-| After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
-| ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | After imputation: PCA of proteome data with imputed values | After imputation: PCA of translatome data with imputed values |
+  | ![After imputation: PCA of proteome data with imputed values](images/pg_0015.png) | ![After imputation: PCA of translatome data with imputed values](images/pg_0016.png) |
+
+</details>
 
 We show that we can account for this unwanted variation with a [multilevel decomposition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-325).
 
@@ -334,10 +351,15 @@ We show that we can account for this unwanted variation with a [multilevel decom
   ```
 </details>
 
-| Proteome | Translatome |
-|----------|-------------|
-| After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition | After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition |
-| ![After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition](images/pg_0033.png) | ![After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition](images/pg_0034.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition | After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition |
+  | ![After imputation and multilevel decomposition: PCA of proteome data with imputed values and multilevel decomposition](images/pg_0033.png) | ![After imputation and multilevel decomposition: PCA of translatome data with imputed values and multilevel decomposition](images/pg_0034.png) |
+
+</details>
 
 > _**NOTE**_: [Here is an example use case of the multilevel decomposition.](http://mixomics.org/methods/multilevel/)
 
@@ -556,19 +578,29 @@ To assess method performance, a ROC curve was also plotted. However, this may be
 
 It is also possible to view the stability of the selected variables.
 
-| Proteome | Translatome |
-|----------|-------------|
-| Stability of the selected variables on sPLSDA component 1 | Stability of the selected variables on sPLSDA component 1 |
-| ![Stability of the selected variables on sPLSDA component 1](images/pg_0092.png) | ![Stability of the selected variables on sPLSDA component 1](images/pg_0118.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | Stability of the selected variables on sPLSDA component 1 | Stability of the selected variables on sPLSDA component 1 |
+  | ![Stability of the selected variables on sPLSDA component 1](images/pg_0092.png) | ![Stability of the selected variables on sPLSDA component 1](images/pg_0118.png) |
+
+</details>
 
 To screen data, arrow plots are also useful. The arrow plots display samples spanned by components of the sPLSDA, with arrows indicating the location of the individual categories.
 
 <!-- The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points. -->
 
-| Proteome | Translatome |
-|----------|-------------|
-| sPLSDA arrow plots | sPLSDA arrow plots |
-| ![sPLSDA arrow plots](images/pg_0099.png) | ![sPLSDA arrow plots](images/pg_0125.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | sPLSDA arrow plots | sPLSDA arrow plots |
+  | ![sPLSDA arrow plots](images/pg_0099.png) | ![sPLSDA arrow plots](images/pg_0125.png) |
+
+</details>
 <!-- | sPLSDA correlation circle plots | sPLSDA correlation circle plots |
 | ![sPLSDA correlation circle plots](images/pg_0099.png) | ![sPLSDA correlation circle plots](images/pg_0125.png) | -->
 
@@ -576,14 +608,19 @@ To screen data, arrow plots are also useful. The arrow plots display samples spa
 
 Plotting the first few components of the sPLSDA reveals several distinct sample groups, with the main distinction in both omics data blocks as the difference between late stage infected samples with all other samples. This matches the independent observations of the laboratory which originally generated the data. There are multiple secondary distinctions between data groups in both omics data blocks, mostly between groups of timepoints. It is also interesting to note that some sub-groups of data include both infected and uninfected samples.
 
-| Proteome | Translatome |
-|----------|-------------|
-| sPLSDA proteome component 1/2. Both components account for ~34% of variation in the data. | sPLSDA translatome component 1/2. Both components account for ~34% of variation in the data. |
-| ![sPLSDA proteome component 1/2](images/pg_0087.png) | ![sPLSDA translatome component 1/2](images/pg_0113.png) |
-| sPLSDA proteome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. | sPLSDA translatome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. |
-| ![sPLSDA proteome clustered image map](images/pg_0100.png) | ![sPLSDA translatome clustered image map](images/pg_0126.png) |
-| The top loadings for the first component are visualised in the proteome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. | The top loadings for the first component are visualised in the translatome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
-| ![sPLSDA proteome loadings](images/pg_0102.png) | ![sPLSDA translatome loadings](images/pg_0128.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | sPLSDA proteome component 1/2. Both components account for ~34% of variation in the data. | sPLSDA translatome component 1/2. Both components account for ~34% of variation in the data. |
+  | ![sPLSDA proteome component 1/2](images/pg_0087.png) | ![sPLSDA translatome component 1/2](images/pg_0113.png) |
+  | sPLSDA proteome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. | sPLSDA translatome clustered image map with features plotted as the horizontal axis and samples on the vertical axis. Colours on the vertical axis indicate sam-ple class and sample source. |
+  | ![sPLSDA proteome clustered image map](images/pg_0100.png) | ![sPLSDA translatome clustered image map](images/pg_0126.png) |
+  | The top loadings for the first component are visualised in the proteome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. | The top loadings for the first component are visualised in the translatome dataset. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
+  | ![sPLSDA proteome loadings](images/pg_0102.png) | ![sPLSDA translatome loadings](images/pg_0128.png) |
+
+</details>
 
 To supplement the sPLSDA, we also compared the performance of PLSDA (a non sparse variant of sPLSDA keeping all features). This showed similarities in patterns across the datasets (not shown). Parameter tuning was carried out as with sPLSDA (not shown).
 
@@ -604,12 +641,17 @@ Having assessed the major sources of variation and features of interest contribu
 
 #### Parameter tuning
 
-| Multiomics |
-|------------|
-| Balanced error rate per multiblock sPLSDA component. Mahalanobis distance metric with 8 components appears to be the most effective. |
-| ![Balanced error rate per multiblock sPLSDA component 1/2](images/pg_0139.png) |
-| Correlation plot between components from each data set shows that the correlation was maximised as specified in the design matrix. Dimension 1 was assessed. |
-| ![Balanced error rate per number of features](images/pg_0212.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Multiomics |
+  |------------|
+  | Balanced error rate per multiblock sPLSDA component. Mahalanobis distance metric with 8 components appears to be the most effective. |
+  | ![Balanced error rate per multiblock sPLSDA component 1/2](images/pg_0139.png) |
+  | Correlation plot between components from each data set shows that the correlation was maximised as specified in the design matrix. Dimension 1 was assessed. |
+  | ![Balanced error rate per number of features](images/pg_0212.png) |
+
+</details>
 
 #### Diagnostic plots
 
@@ -617,27 +659,37 @@ To screen data, arrow plots and correlation circle plots are also useful. The ar
 
 The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
 
-| Multiomics |
-|----------|
-| Multiblock sPLSDA arrow plots |
-| ![Multiblock sPLSDA arrow plots](images/pg_0221.png) |
-| Multiblock sPLSDA correlation circle plots |
-| ![Multiblock sPLSDA correlation circle plots](images/pg_0222.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Multiomics |
+  |----------|
+  | Multiblock sPLSDA arrow plots |
+  | ![Multiblock sPLSDA arrow plots](images/pg_0221.png) |
+  | Multiblock sPLSDA correlation circle plots |
+  | ![Multiblock sPLSDA correlation circle plots](images/pg_0222.png) |
+
+</details>
 
 #### Results
 
 We applied a latent variable approach to identify a highly correlated multi-omics signature. This analysis is carried out in a conceptually similar way to the previous sPLSDA with similar parameter requirements, except with multiple omics data blocks corrected for longitudinal study effects specified as input. We illustrate the correlation between features across these omics blocks with a circos plot.
 
-| Multiomics |
-|------------|
-|  Multiblock sPLSDA component 1/2 |
-| ![Multiblock sPLSDA component 1/2](images/pg_0220.png) |
-|  Multiblock sPLSDA clustered image map |
-| ![Multiblock sPLSDA clustered image map](images/pg_0227.png) |
-| The top loadings for the first component are visualised. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
-| ![Multiblock sPLSDA loadings](images/pg_0229.png) |
-| Circos plot, built on a similarity matrix demonstrates the correlation between different proteins and transcripts, with a visualisation cutoff of 0.95 correlation score. Positive correlations are in red and negative correlations are in blue. Proteome block is in blue and translatome block is in green. Line graphs on the outside of the circos plot represent expression levels of their corresponding features, and are coloured by their biological sample class. |
-| ![Multiblock sPLSDA component 1/2](images/pg_0225.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Multiomics |
+  |------------|
+  |  Multiblock sPLSDA component 1/2 |
+  | ![Multiblock sPLSDA component 1/2](images/pg_0220.png) |
+  |  Multiblock sPLSDA clustered image map |
+  | ![Multiblock sPLSDA clustered image map](images/pg_0227.png) |
+  | The top loadings for the first component are visualised. These correspond to the variables in each dataset which contribute the most to variation. The biological outcome they most contribute to are coloured. |
+  | ![Multiblock sPLSDA loadings](images/pg_0229.png) |
+  | Circos plot, built on a similarity matrix demonstrates the correlation between different proteins and transcripts, with a visualisation cutoff of 0.95 correlation score. Positive correlations are in red and negative correlations are in blue. Proteome block is in blue and translatome block is in green. Line graphs on the outside of the circos plot represent expression levels of their corresponding features, and are coloured by their biological sample class. |
+  | ![Multiblock sPLSDA component 1/2](images/pg_0225.png) |
+
+</details>
 
 ## Reproducing our results
 
