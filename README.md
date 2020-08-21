@@ -341,8 +341,6 @@ We show that we can account for this unwanted variation with a [multilevel decom
 
 > _**NOTE**_: [Here is an example use case of the multilevel decomposition.](http://mixomics.org/methods/multilevel/)
 
-<!-- will we need to address single omics analysis -->
-
 ### Single omics analysis
 
 We next apply the sPLSDA (sparse Partial Least Squares Discriminant Analysis) method for each block of single-omics data, and as before internally perform a multilevel decomposition to account for the repeated measurements within each cell culture.
@@ -352,6 +350,188 @@ We next apply the sPLSDA (sparse Partial Least Squares Discriminant Analysis) me
 #### Parameter tuning
 
 To investigate the parameters best suited for the methods, leave-one-out cross validation was performed. The balanced classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. At the same time, the number of components and features selected were tuned internally with a function in the mixOmics package.
+
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  # we want to tune splsda parameters (this will take a while!)
+  # or you can just access the "tuned_splsda" object and skip this step
+
+  tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
+    logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
+    dist="centroids.dist", cpus=2, progressBar=TRUE) {
+      mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
+        nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
+        data, names, SIMPLIFY=FALSE)
+    }
+
+  tune_splsda_ = function(data, classes, names, multilevel, ncomp=0, nrepeat=10,
+    logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
+    dist="centroids.dist", cpus=2, progressBar=TRUE) {
+    if (ncomp == 0) {ncomp = (length(test_keepX))}
+    # tune splsda components
+    tuned = tune.splsda(data, Y=classes, multilevel=multilevel, ncomp=ncomp,
+      nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
+      validation=validation, folds=folds, dist=dist, cpus=cpus,
+      progressBar=progressBar
+    )
+    print(plot(tuned, main=names))
+    return(tuned)
+  }
+
+  splsda_keepx = lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
+  splsda_ncomp = length(splsda_keepx)
+
+  print("sPLSDA keepX:")
+  print(splsda_keepx)
+  print("sPLSDA ncomp:")
+  print(splsda_ncomp)
+
+  tuned_splsda = tune_splsda(input_data,classes,data_names,data.frame(pch),
+    ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+    test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
+    cpus=1, progressBar=TRUE)
+
+  splsda_keepx = lapply(tuned_splsda, `[`, "choice.keepX")
+  splsda_ncomp = lapply(tuned_splsda, `[`, "choice.ncomp")
+
+  print("Tuned splsda to use number of components:")
+  splsda_ncomp = lapply(splsda_ncomp, `[`, "ncomp")
+  splsda_ncomp = unlist(splsda_ncomp, recursive = FALSE)
+  names(splsda_ncomp) = data_names
+  print(splsda_ncomp)
+
+  print("Tuned the number of variables selected on each component to:")
+  print(splsda_keepx)
+  splsda_keepx = unlist(splsda_keepx, recursive = FALSE)
+  names(splsda_keepx) = data_names
+  print(splsda_keepx)
+  ```
+</details>
+
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  # now that we have tuned it, run the splsda (this will take a while!)
+  # or you can just access the "data_splsda" object and skip this step
+  # this generates all remaining plots for the splsda section
+
+  classify_splsda = function(data, classes, pch=NA, title="", ncomp=NULL,
+    keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
+    bg=TRUE) {
+    mapply(function(x, y, c, k) classify_splsda_(
+      x, classes, pch, y, c, k, contrib, outdir
+    ), data, title, ncomp, keepX)
+  }
+
+  classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
+    keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
+    bg=TRUE) {
+    # discriminate samples: list, vector, bool, integer, vector -> list
+    # single or multilevel sPLS-DA
+    if (is.null(keepX)) {
+      print("The number of variables selected on each component is not selected!")
+      q(status=1)
+    }
+    if (is.null(ncomp)) {
+      print("Invalid number of components, inferring from keepX")
+      ncomp = length(keepX)
+      print(ncomp)
+    }
+    print("splsda components:")
+    print(ncomp)
+    print("number of variables on each component:")
+    print(keepX)
+    data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
+
+    if (!is.na(bg)) {
+      bg = background.predict(data_splsda, comp.predicted=2, dist=dist)
+      plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
+        ellipse=TRUE, background=bg
+      )
+    }
+
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE
+    )
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3), ellipse=TRUE
+    )
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
+    )
+
+    print("Getting performance metrics")
+    print("Plotting error rates...")
+    metrics = perf(data_splsda, validation="loo", progressBar=TRUE, auc=TRUE)
+    print(metrics$error.rate)
+    plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
+    print("Plotting stability...")
+    plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
+      ylab="Stability", xlab="Features"
+    )
+    plot(metrics$features$stable[[2]], type="h", main="Comp 2", las=2,
+      ylab="Stability", xlab="Features"
+    )
+    plot(metrics$features$stable[[3]], type="h", main="Comp 3", las=2,
+      ylab="Stability", xlab="Features"
+    )
+    sink("/dev/null")
+    roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
+    sink()
+
+    plotArrow(data_splsda, legend=TRUE)
+    # plotVar(data_plsda, legend=TRUE)
+
+    print("Getting loadings and plotting clustered image maps")
+
+    # setup colour map for clustered image plots
+    colours_class = color.mixo(1:length(unique(classes)))[as.numeric(as.factor(classes))]
+
+    if (!is.na(pch)) {
+      colours_pch = color.mixo(1:length(unique(pch)))[as.numeric(as.factor(pch))]
+      colours_cim = cbind(colours_class, colours_pch)
+    } else {colours_cim = data.frame(colours_class)}
+
+    cim(data_splsda, title="sPLSDA", row.sideColors=colours_cim,
+      legend=list(title="Status")
+    )
+
+    short = make.names(sapply(colnames(data), strtrim, 6, USE.NAMES=FALSE), unique=TRUE)
+    for (comp in seq(ncomp)) {
+      cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
+        row.sideColors=colours_cim, legend=list(title="Status")
+      )
+      plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
+        method='median', ndisplay=50, name.var=short, size.name=0.6,
+        size.legend=0.6, title=paste(title, comp, "sPLSDA max loadings"))
+      plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
+        method='median', ndisplay=50, name.var=short, size.name=0.6,
+        size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
+      loading_max = plotLoadings(data_splsda, contrib="max", comp=comp,
+        method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      loading_min = plotLoadings(data_splsda, contrib="min", comp=comp,
+        method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      title = gsub(" ", "_", title)
+      path_max = paste(outdir, "/", title, "_", comp, "_sPLSDA_max.txt", sep="")
+      path_min = paste(outdir, "/", title, "_", comp, "_sPLSDA_min.txt", sep="")
+      print("Writing sPLSDA loadings to:")
+      print(path_max)
+      print(path_min)
+      write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
+      write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
+    }
+    return(data_splsda)
+  }
+
+  data_splsda = classify_splsda(
+    data_imp, classes, pch, title=data_names, splsda_ncomp,
+    splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
+  ```
+</details>
 
 | Proteome | Translatome |
 |----------|-------------|
@@ -364,10 +544,15 @@ To investigate the parameters best suited for the methods, leave-one-out cross v
 
 To assess method performance, a ROC curve was also plotted. However, this may be less effective in determining performance due to the nature of the sPLSDA algorithm.
 
-| Proteome | Translatome |
-|----------|-------------|
-| ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. | ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. |
-| ![ROC curve for classification accuracy on sPLSDA component 1](images/pg_0095.png) | ![OC curve for classification accuracy on sPLSDA component 1](images/pg_0121.png) |
+<details>
+  <summary>Click to expand figure block</summary>
+
+  | Proteome | Translatome |
+  |----------|-------------|
+  | ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. | ROC curve for sPLSDA classification accuracy on sPLSDA component 1. This metric is less effective in context of the sPLSDA algorithm. |
+  | ![ROC curve for classification accuracy on sPLSDA component 1](images/pg_0095.png) | ![ROC curve for classification accuracy on sPLSDA component 1](images/pg_0121.png) |
+
+</details>
 
 It is also possible to view the stability of the selected variables.
 
