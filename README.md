@@ -649,6 +649,253 @@ Having assessed the major sources of variation and features of interest contribu
 <details>
   <summary>Click to expand figure block</summary>
 
+  ```
+  # as with splsda, this while take a while to run
+  # you can skip this step by using the "tuned_diablo" object
+
+  tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
+    # First, we fit a DIABLO model without variable selection to assess the global
+    # performance and choose the number of components for the final DIABLO model.
+    # The function perf is run with 10-fold cross validation repeated 10 times.
+    print("Finding optimal number of components for DIABLO...")
+    if (ncomp == 0) {ncomp = length(unique(classes))}
+    sgccda_res = block.splsda(X=data, Y=classes, ncomp=ncomp, design=design)
+
+    # this code takes a couple of min to run
+    perf_diablo = perf(sgccda_res, validation = 'loo', folds = 10, nrepeat = 10)
+
+    # print(perf.diablo)  # lists the different outputs
+    plot(perf_diablo, main="DIABLO optimal components")
+    # perf_diablo$choice.ncomp$WeightedVote
+    print(perf_diablo$choice.ncomp)
+    return(perf_diablo)
+  }
+
+  tune_diablo_keepx = function(data, classes, ncomp, design,
+    test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE) {
+    # This tuning function should be used to tune the keepX parameters in the
+    #   block.splsda function.
+    # We choose the optimal number of variables to select in each data set using
+    # the tune function, for a grid of keepX values. Note that the function has
+    # been set to favor the small-ish signature while allowing to obtain a
+    # sufficient number of variables for downstream validation / interpretation.
+    # See ?tune.block.splsda.
+    print("Tuning keepX parameter...")
+    # test_keepX = list(proteome = c(5:9, seq(10, 18, 2), seq(20,30,5)),
+    #                   translatome = c(5:9, seq(10, 18, 2), seq(20,30,5)))
+    test_keepX = mapply(function(name, dims) list(name=dims), names(data),
+      # rep(list(c(5:9, seq(10, 18, 2), seq(20,30,5))))
+      # rep(list(c(5, 10, 15, 20, 25, 30, 35, 40)))
+      rep(list(test_keepX))
+    )
+
+    tune_data = tune.block.splsda(
+        X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
+        validation='loo', folds=10, nrepeat=1, cpus=cpus, dist=dist,
+        progressBar=progressBar)
+    list_keepX = tune_data$choice.keepX
+    return(list_keepX)
+  }
+
+  tuned_diablo = tune_diablo_ncomp(data, classes, design, argv$diablocomp)
+  print("Parameters with lowest error rate:")
+  tuned_diablo = tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
+  diablo_ncomp = tuned_diablo[which.max(tuned_diablo)]
+
+  diablo_keepx = lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
+  diablo_keepx = tune_diablo_keepx(diablo_input, classes, diablo_ncomp, design,
+    diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE)
+  ```
+</details>
+
+<details>
+    <summary>Click to expand code block</summary>
+
+    ```
+    # run multi-block splsda (diablo)
+    # as with splsda, this while take a while to run
+    # you can skip this step by using the "diablo" object
+
+    force_unique_blocks = function(data) {
+      # in diablo, features across blocks must be unique: list of df -> list of df
+      print("Appending suffix to individual block names (diablo requires unique!):")
+      names = names(data)
+      print(names)
+      colnames_new = mapply(
+        function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
+      )
+      reassign_colnames_ = function(data, colnames_new) {
+        colnames(data) = colnames_new
+        return(data)
+      }
+      data = mapply(reassign_colnames_, data, colnames_new)
+      names(data) = names
+      return(data)
+    }
+
+    run_diablo = function(data, classes, ncomp, design, keepx=NULL) {
+      # this is the actual part where diablo is run
+      print("Running DIABLO...")
+      block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
+    }
+
+    # block-wise splsda doesnt do internal multilevel decomposition
+    diablo_input = lapply(input_data, withinVariation, design=data.frame(pch))
+
+    print("Making feature names unique across all blocks...")
+    diablo_input = force_unique_blocks(diablo_input)
+
+    print("Diablo keepx:")
+    print(diablo_keepx)
+    diablo = run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+    print("Diablo design:")
+    print(diablo$design)
+    ```
+</details>
+
+<details>
+  <summary>Click to expand code block</summary>
+
+  ```
+  # generate all remaining diagnostic and results plots for this multi-omics section
+  plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
+    # plot the diablo data with a series of diagnostic plots
+
+    # need to make a function to squeeze sample names automatically and remap
+    trim_names_ = function(data, trim=16) {
+      all_names = data
+      long_names = which(sapply(data, nchar, USE.NAMES=FALSE) > trim)
+      if (length(long_names) == 0) {return()}
+      original_names = data[long_names]
+      for (i in long_names) { data[i] = as.character(i) }
+      # later map these back
+      maptable = data.frame(from=long_names, to=original_names)
+      return(list(data=data, all_names=all_names, maptable=maptable))
+    }
+    trimmed_names = lapply(data$names$colnames, trim_names_)
+    block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
+
+    # replace names in all associated columns for visualisation only
+    replace_names_ = function(data, trim=16) {
+      all_names = head(data$names$colnames, n=-1)
+      split_ = function(block, all_names) {
+        all_names = gsub("__FEATUREID", "", all_names[[block]])
+        all_names = gsub(paste("_", block, sep=""), "", all_names)
+        return(all_names)
+      }
+      splitted = mapply(
+        function(x) split_(x, all_names), names(all_names), SIMPLIFY=FALSE
+      )
+
+      truncate_ = function(names, trim) {
+        ifelse(nchar(names) > trim, paste0(strtrim(names, trim), ''), names)
+      }
+      truncated = lapply(splitted, truncate_, trim)
+
+      # make a copy, dont want to overwrite
+      data_vis = data
+
+      # map truncated values to all locations
+      for (i in names(all_names)) {
+        row.names(data_vis$loadings[[i]]) = make.unique(sapply(truncated[[i]], toString), sep="__")
+        data_vis$names$colnames[[i]] = make.unique(sapply(truncated[[i]], toString), sep="__")
+        colnames(data_vis$X[[i]]) = make.unique(sapply(truncated[[i]], toString), sep="__")
+      }
+      return(list(data_vis=data_vis, truncated=truncated))
+    }
+    data_vis_names = replace_names_(data, trim=16)
+    data_vis = data_vis_names$data_vis
+    truncated = data_vis_names$truncated
+    print(colnames(data_vis$X$translatome))
+    print("Plotting correlation between components...")
+    # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
+    mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
+    # plotDiablo(data, ncomp = 1)
+    print("Plotting individual samples into space spanned by block components...")
+    plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
+    print("Plotting arrow plot...")
+    plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
+    print("Plotting correlation circle plot...")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
+    print("Plotting circos from similarity matrix...")
+    corr_diablo = circosPlot(
+      data, cutoff=0.95, line=TRUE, size.legend=0.5, var.names=truncated
+    )
+    corr_out = file=paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
+    write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
+    print("Plotting relevance network from similarity matrix...")
+    cyto = network(
+      data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4
+    )
+    cyto_out = paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
+    write.graph(cyto$gR, cyto_out, format="graphml")
+    print("Plotting overall heatmap...")
+    cimDiablo(data, size.legend=0.5)
+
+    block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
+
+    print("Plotting loading weight of selected variables on each component...")
+    for (comp in seq(ncomp)) {
+      for (i in block_to_trim) {
+        data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
+      }
+      cimDiablo(data, comp=comp, size.legend=0.5)
+      plotLoadings(data, contrib="max", comp=comp, max.name.length=8,
+        method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+        size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
+      plotLoadings(data, contrib="min", comp=comp, max.name.length=8,
+        method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+        size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
+      for (i in block_to_trim) {
+        data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
+      }
+
+      for (i in data_names) {
+        for (i in block_to_trim) {
+          data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
+        }
+        plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=8,
+          method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+          title=paste(comp, i, "DIABLO max loadings"), size.name=0.6
+        )
+        plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=8,
+          method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+          title=paste(comp, i, "DIABLO min loadings"), size.name=0.6
+        )
+        for (i in block_to_trim) {
+          data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
+        }
+
+        loading_max = plotLoadings(data, contrib="max", comp=comp, block=i,
+          method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+        loading_min = plotLoadings(data, contrib="min", comp=comp, block=i,
+          method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+        # title = gsub(" ", "_", title)
+        path_max = paste(
+          outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
+        )
+        path_min = paste(
+          outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_min.txt", sep=""
+        )
+        print("Writing DIABLO loadings to:")
+        print(path_max)
+        print(path_min)
+        write.table(as.data.frame(loading_max),file=path_max,quote=FALSE,sep="\t")
+        write.table(as.data.frame(loading_min),file=path_min,quote=FALSE,sep="\t")
+      }
+    }
+  }
+
+  plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
+  ```
+
+</details>
+
+<details>
+  <summary>Click to expand figure block</summary>
+
   | Multiomics |
   |------------|
   | Balanced error rate per multiblock sPLSDA component. Mahalanobis distance metric with 8 components appears to be the most effective. |
