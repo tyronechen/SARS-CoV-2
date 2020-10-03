@@ -396,7 +396,8 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
     write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
   }
-  return(data_plsda)
+  print(metrics)
+  return(list(data_plsda=data_plsda, perf_plsda=metrics))
 }
 
 tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
@@ -471,8 +472,8 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   print("Plotting error rates...")
   metrics = perf(data_splsda, validation="loo", progressBar=TRUE, auc=TRUE)
   print(metrics$error.rate)
-  plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
-  print("Plotting stability...")
+  plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
+  print("Plotting stability of sPLSDA...")
   plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
     ylab="Stability", xlab="Features"
   )
@@ -527,7 +528,7 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
     write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
   }
-  return(data_splsda)
+  return(list(data_splsda=data_splsda, perf_splsda=metrics))
 }
 
 plot_plsda = function(data, classes, pch, title="", ncomp=0) {
@@ -594,6 +595,27 @@ tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
   plot(perf_diablo, main="DIABLO optimal components")
   # perf_diablo$choice.ncomp$WeightedVote
   print(perf_diablo$choice.ncomp)
+
+  print("Plotting stability of DIABLO components...")
+  # return(perf_diablo)
+  for (i in perf_diablo$features$stable$nrep1) {
+    for (j in names(perf_diablo$features$stable$nrep1)) {
+      plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
+        main=paste(j, "Comp 1")
+      )
+      print(paste(j, "Comp 1"))
+      plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
+        main=paste(j, "Comp 2")
+      )
+      print(paste(j, "Comp 2"))
+      plot(i$comp3, type="h", las=2, ylab="Stability", xlab="Features",
+        main=paste(j, "Comp 3")
+      )
+      print(paste(j, "Comp 3"))
+    }
+  }
+  # sink("/dev/null")
+
   return(perf_diablo)
 }
 
@@ -627,7 +649,7 @@ force_unique_blocks = function(data) {
   # in diablo, features across blocks must be unique: list of df -> list of df
   print("Appending suffix to individual block names (diablo requires unique!):")
   names = names(data)
-  print(names)
+  # print(names)
   colnames_new = mapply(
     function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
   )
@@ -701,7 +723,6 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   data_vis_names = replace_names_(data, trim=16)
   data_vis = data_vis_names$data_vis
   truncated = data_vis_names$truncated
-  print(colnames(data_vis$X$translatome))
   print("Plotting correlation between components...")
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
@@ -797,6 +818,7 @@ assess_performance = function(data, dist, ncomp) {
   # performance evaluation of our methods, but can complement the analysis.
   # print("Plotting ROC...")
   # mapply(function(x) auroc(data, x), seq(ncomp))
+  return(perf_diablo)
 }
 
 predict_diablo = function(data, test, classes) {
