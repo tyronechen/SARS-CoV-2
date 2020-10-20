@@ -643,7 +643,7 @@ Having assessed the major sources of variation and features of interest contribu
 #### Parameter tuning
 
 <details>
-  <summary>Click to expand figure block</summary>
+  <summary>Click to expand code block</summary>
 
   ```
   # as with splsda, this while take a while to run
