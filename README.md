@@ -6,6 +6,8 @@ Code in this repository is provided under a [MIT license](https://opensource.org
 
 [Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/) Contact Sonika Tyagi at [sonika.tyagi@monash.edu](mailto:sonika.tyagi@monash.edu).
 
+This work was presented at the [ABACBS (Australian Bioinformatics and Computational Biology Society) Conference 2020](https://doi.org/10.7490/F1000RESEARCH.1118362.1).
+
 ## Overview
 
 Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly, so both datasets measure protein molecule abundances.
@@ -1046,4 +1048,4 @@ To annotate and organise correlation tables for further analysis, run the jupyte
 
 ## Acknowledgements
 
-[We thank Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116) for contributions to the code and analysis. [We thank David A. Matthews](https://orcid.org/0000-0003-4611-8795) for helpful discussions and feedback. [We thank Yashpal Ramakrishnaiah](https://orcid.org/0000-0002-2213-8348) for performing an extended analysis of the primary data. The authors thank the HPC team at Monash eResearch Centre for their continuous personnel support. This work was supported by the [MASSIVE HPC facility](www.massive.org.au). [We acknowledge and pay respects to the Elders and Traditional Owners of the land on which our 4 Australian campuses stand](https://www.monash.edu/indigenous-australians/about-us/recognising-traditional-owners).
+[We thank Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116) for contributions to the code and analysis. [We thank David A. Matthews](https://orcid.org/0000-0003-4611-8795) for helpful discussions and feedback. [We thank Yashpal Ramakrishnaiah](https://orcid.org/0000-0002-2213-8348) for performing an extended analysis of the primary data. [We thank Melcy Philip](https://orcid.org/0000-0002-0827-866X) for performing downstream analysis of the data. The authors thank the HPC team at Monash eResearch Centre for their continuous personnel support. This work was supported by the [MASSIVE HPC facility](www.massive.org.au). [We acknowledge and pay respects to the Elders and Traditional Owners of the land on which our 4 Australian campuses stand](https://www.monash.edu/indigenous-australians/about-us/recognising-traditional-owners).
