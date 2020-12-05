@@ -6,7 +6,9 @@ Code in this repository is provided under a [MIT license](https://opensource.org
 
 [Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/) Contact Sonika Tyagi at [sonika.tyagi@monash.edu](mailto:sonika.tyagi@monash.edu).
 
-This work was presented at the [ABACBS (Australian Bioinformatics and Computational Biology Society) Conference 2020](https://doi.org/10.7490/F1000RESEARCH.1118362.1).
+This work was presented at the [ABACBS (Australian Bioinformatics and Computational Biology Society) Conference 2020](https://doi.org/10.7490/F1000RESEARCH.1118362.1), winning the best asynchronous talk award.
+
+Future work will involve the application of deep learning to better identify latent patterns in high dimensional data. [An example of some of our preliminary work on this topic is available here.](https://gitlab.com/tyagilab/integrativeepigenomics)
 
 ## Overview
 
