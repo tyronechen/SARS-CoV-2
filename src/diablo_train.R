@@ -1,6 +1,5 @@
-#!/usr/bin/R
-# combine translatome and proteomics data for sars-cov-2
-# data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
+#!/usr/bin/Rscript
+# combine multi-omics data
 library(argparser, quietly=TRUE)
 library(ggplot2)
 library(parallel)

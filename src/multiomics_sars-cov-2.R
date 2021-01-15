@@ -1,6 +1,4 @@
 #!/usr/bin/Rscript
-# combine translatome and proteomics data for sars-cov-2
-# data originally from DOI:10.21203/rs.3.rs-17218/v1 - supp tables 1 and 2
 library(argparser, quietly=TRUE)
 library(igraph)
 library(mixOmics)
@@ -654,11 +652,7 @@ tune_diablo_keepx = function(data, classes, ncomp, design,
   # sufficient number of variables for downstream validation / interpretation.
   # See ?tune.block.splsda.
   print("Tuning keepX parameter...")
-  # test_keepX = list(proteome = c(5:9, seq(10, 18, 2), seq(20,30,5)),
-  #                   translatome = c(5:9, seq(10, 18, 2), seq(20,30,5)))
   test_keepX = mapply(function(name, dims) list(name=dims), names(data),
-    # rep(list(c(5:9, seq(10, 18, 2), seq(20,30,5))))
-    # rep(list(c(5, 10, 15, 20, 25, 30, 35, 40)))
     rep(list(test_keepX))
   )
 
@@ -692,13 +686,6 @@ run_diablo = function(data, classes, ncomp, design, keepx=NULL) {
   print("Running DIABLO...")
   block.splsda(X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design)
 }
-# load("../RData.RData")
-# colnames(diablo$X$proteome) <- make.unique(gsub("_proteome", "", colnames(diablo$X$proteome)))
-# colnames(diablo$X$translatome) <- make.unique(gsub("_translatome", "", colnames(diablo$X$translatome)))
-# diablo$names$colnames$proteome <- make.unique(gsub("_proteome", "", diablo$names$colnames$proteome))
-# diablo$names$colnames$translatome <- make.unique(gsub("_translatome", "", diablo$names$colnames$translatome))
-# var.names <- list(make.unique(gsub("_prot_proteome", "", diablo$names$colnames$proteome)), make.unique(gsub("_tran_translatome", "", diablo$names$colnames$translatome)))
-# circosPlot(diablo, cutoff=0.95, line=FALSE, size.legend=0.5)
 
 plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # plot the diablo data with a series of diagnostic plots
@@ -760,7 +747,7 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
   if (ncomp > 2) {
     plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")    
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   }
   print("Plotting circos from similarity matrix...")
   corr_diablo = circosPlot(
@@ -836,22 +823,20 @@ assess_performance = function(data, dist, ncomp) {
   # remember to use the same distance metric which had the max value!
   print("Assessing performance...")
   perf_diablo = perf(data, validation='loo', M=10, nrepeat=10, dist=dist)
-  #perf.diablo  # lists the different outputs
+  perf.diablo  # lists the different outputs
 
   # Performance with Majority vote
-  # print(perf_diablo$MajorityVote.error.rate)
+  print(perf_diablo$MajorityVote.error.rate)
 
   # ROC and AUC criteria are not particularly insightful in relation to the
   # performance evaluation of our methods, but can complement the analysis.
-  # print("Plotting ROC...")
-  # mapply(function(x) auroc(data, x), seq(ncomp))
+  print("Plotting ROC...")
+  mapply(function(x) auroc(data, x), seq(ncomp))
   return(perf_diablo)
 }
 
 predict_diablo = function(data, test, classes) {
   # prepare test set data: here one block (proteins) is missing
-  # data.test.TCGA = list(mRNA = breast.TCGA$data.test$mrna,
-  #                       miRNA = breast.TCGA$data.test$mirna)
   print("Predicting data on an external test set...")
   predict.diablo = predict(data, newdata = test)
   # the warning message will inform us that one block is missing
