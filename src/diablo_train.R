@@ -25,7 +25,7 @@ parse_argv = function() {
   p = add_argument(p, "--classes_secondary", type="character", default=NA,
     help="secondary sample information eg individual (same format as classes)"
   )
-  p = add_argument(p, "--dropna_classes", type="character", default=TRUE,
+  p = add_argument(p, "--dropna_classes", type="bool", default=TRUE,
     help="where all replicates for >= 1 class are NA, drop that feature. \
     If both --dropna_classes and --dropna_prop are enabled, perform \
     --dropna_classes and then --dropna_prop."
@@ -37,6 +37,9 @@ parse_argv = function() {
   )
   p = add_argument(p, "--data", type="character", nargs=Inf,
     help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
+  )
+  p = add_argument(p, "--force_unique", type="bool", default=TRUE,
+    help="force values to be unique in each omics data block (default TRUE)"
   )
   p = add_argument(p, "--mappings", type="character", nargs=Inf,
     help="path to map file of feature id to name (must be same order as data!)"
@@ -202,7 +205,9 @@ main = function() {
     mappings = NA
   }
 
-  diablo_input = force_unique_blocks(data)
+  if (argv$force_unique == TRUE) {
+    diablo_input = force_unique_blocks(data)
+  }
 
   # check dimensions
   print("Data dimensions:")
@@ -232,7 +237,7 @@ main = function() {
   print(argv$icomp)
   if (argv$icomp > 0) {
     print("Impute components set, imputing NA values (set -i 0 to disable)")
-    data_imp = impute_missing(data, rep(argv$icomp, length(data)))
+    data_imp = impute_missing(data, rep(argv$icomp, length(data)), outdir)
     data = replace_missing(data, data_imp)
     pca_impute = plot_pca_single(
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
@@ -295,7 +300,6 @@ main = function() {
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
-    if (!is.na(pch)) {
       print("Tuning splsda components and selected variables")
       if (is.na(argv$splsda_keepx)) {
         splsda_keepx = c(5,50,100)
@@ -310,11 +314,17 @@ main = function() {
       print("sPLSDA ncomp:")
       print(splsda_ncomp)
 
-      tuned_splsda = tune_splsda(input_data,classes,data_names,data.frame(pch),
-        ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-        test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
-        cpus=argv$ncpus, progressBar=TRUE)
-
+      if (!is.na(pch)) {
+        tuned_splsda = tune_splsda(input_data,classes,data_names,data.frame(pch),
+          ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+          test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
+          cpus=argv$ncpus, progressBar=TRUE)
+      } else {
+        tuned_splsda = tune_splsda(input_data, classes, data_names, NULL,
+          ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+          test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
+          cpus=argv$ncpus, progressBar=TRUE)
+      }
       splsda_keepx = lapply(tuned_splsda, `[`, "choice.keepX")
       splsda_ncomp = lapply(tuned_splsda, `[`, "choice.ncomp")
 
@@ -328,16 +338,21 @@ main = function() {
       print(splsda_keepx)
       splsda_keepx = unlist(splsda_keepx, recursive = FALSE)
       names(splsda_keepx) = data_names
-      print(splsda_keepx)
 
-      data_splsda = classify_splsda(
-        data_imp, classes, pch, title=data_names, splsda_ncomp,
-        splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
-      )
+      if (!is.na(pch)) {
+        data_splsda = classify_splsda(
+          input_data, classes, pch, title=data_names, splsda_ncomp,
+          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
+        )
+      } else {
+        data_splsda = classify_splsda(
+          input_data, classes, pch=NA, title=data_names, splsda_ncomp,
+          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
+        )
+      }
       perf_splsda = data_splsda$perf_splsda
       print(names(perf_splsda))
       data_splsda = data_splsda$data_splsda
-    }
   } else {
     data_splsda = NA
     tuned_splsda = NA
@@ -370,23 +385,18 @@ main = function() {
   )
 
   # block-wise splsda doesnt do internal multilevel decomposition
-  diablo_input = lapply(input_data, withinVariation, design=data.frame(pch))
+  if (!is.na(pch)) {
+    diablo_input = lapply(input_data, withinVariation, design=data.frame(pch))
+  } else {
+    diablo_input = input_data
+  }
 
   print("Making feature names unique across all blocks...")
-  diablo_input = force_unique_blocks(diablo_input)
-
+  if (argv$force_unique == TRUE) {
+    diablo_input = force_unique_blocks(data)
+  }
   print("Run DIABLO keeping all features")
   diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
-
-  # had to hardcode this block for now, if names are too long things break
-  # diablo_all$names$colnames$proteome <- gsub(
-  #   "_prot_proteome", "_P", diablo_all$names$colnames$proteome
-  # )
-  #
-  # mapply(function(x, y, z) gsub(x, y, z), prot_names, long_names, counter)
-  # diablo_all$names$colnames$translatome <- gsub(
-  #   "_tran_translatome", "_T", diablo_all$names$colnames$translatome
-  # )
 
   plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
   assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
@@ -410,10 +420,8 @@ main = function() {
   diablo = run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
   print("Diablo design:")
   print(diablo$design)
-  # selectVar(diablo, block = "proteome", comp = 1)$proteome$name
   plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
   # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
-  # predict_diablo(diablo, diablo_input, classes)
 
   # save RData object for future reference
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
