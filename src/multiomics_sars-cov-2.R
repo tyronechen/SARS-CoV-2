@@ -181,19 +181,27 @@ count_missing = function(data) {
   return(list(ids_na=ids_na, pct_na=pct_na))
 }
 
-impute_missing_ = function(data, ncomp=10, block_name="") {
+impute_missing_ = function(data, ncomp=10, block_name="", outdir="./") {
   # impute missing values with nipals: dataframe (with NA) -> dataframe
   print("Number of components for imputation:")
   print(ncomp)
+  # data <- data[!is.na(apply(data, 1, function(x) var(x, na.rm = TRUE))),
+  #              !is.na(apply(data, 2, function(x) var(x, na.rm = TRUE)))]
   nipals_tune = nipals(data, reconst=TRUE, ncomp=ncomp)
   barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
     xlab="Number of components", ylab="Explained variance"
   )
+  outfile_path = paste(outdir, "/", "data_", block_name, "_imputed.tsv", sep="")
+  write.table(
+    as.data.frame(nipals_tune$rec), file=outfile_path, quote=FALSE, sep="\t"
+  )
   return(nipals_tune$rec)
 }
 
-impute_missing = function(data, ncomps) {
-  mapply(function(x, y, z) impute_missing_(x, y, z), data, ncomps, names(data))
+impute_missing = function(data, ncomps, outdir) {
+  mapply(function(x, y, z)
+    impute_missing_(x, y, z, outdir), data, ncomps, names(data), SIMPLIFY=FALSE
+  )
 }
 
 replace_missing_ = function(data, imputed) {
@@ -378,10 +386,10 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
       row.sideColors=colours_cim, legend=list(title="Status")
     )
     plotLoadings(data_plsda, contrib="max", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA max loadings"))
     plotLoadings(data_plsda, contrib="min", comp=comp, max.name.length=16,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA min loadings"))
     loading_max = plotLoadings(data_plsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
@@ -400,7 +408,7 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   return(list(data_plsda=data_plsda, perf_plsda=metrics))
 }
 
-tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
+tune_splsda = function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=TRUE) {
     mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
@@ -408,7 +416,7 @@ tune_splsda = function(data, classes, names, multilevel, ncomp=3, nrepeat=10,
       data, names, SIMPLIFY=FALSE)
   }
 
-tune_splsda_ = function(data, classes, names, multilevel, ncomp=0, nrepeat=10,
+tune_splsda_ = function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=TRUE) {
   if (ncomp == 0) {ncomp = (length(test_keepX))}
@@ -448,13 +456,24 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   print(ncomp)
   print("number of variables on each component:")
   print(keepX)
-  data_splsda = splsda(data, Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX)
+  classes = as.factor(classes)
+
+  if (!is.na(pch)) {
+    data_splsda = splsda(data,Y=classes,multilevel=pch,ncomp=ncomp,keepX=keepX)
+  } else {
+    data_splsda = splsda(data, Y=classes, ncomp=ncomp, keepX=keepX)
+  }
 
   if (!is.na(bg)) {
     bg = background.predict(data_splsda, comp.predicted=2, dist=dist)
     plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
       ellipse=TRUE, background=bg
+    )
+  } else {
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
+      ellipse=TRUE, background=NULL
     )
   }
 
@@ -510,10 +529,10 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
       row.sideColors=colours_cim, legend=list(title="Status")
     )
     plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
-      method='median', ndisplay=50, name.var=short, size.name=0.6,
+      method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA max loadings"))
     plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
-      method='median', ndisplay=50, name.var=short, size.name=0.6,
+      method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
     loading_max = plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
@@ -600,18 +619,24 @@ tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
   # return(perf_diablo)
   for (i in perf_diablo$features$stable$nrep1) {
     for (j in names(perf_diablo$features$stable$nrep1)) {
-      plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
-        main=paste(j, "Comp 1")
-      )
-      print(paste(j, "Comp 1"))
-      plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
-        main=paste(j, "Comp 2")
-      )
-      print(paste(j, "Comp 2"))
-      plot(i$comp3, type="h", las=2, ylab="Stability", xlab="Features",
-        main=paste(j, "Comp 3")
-      )
-      print(paste(j, "Comp 3"))
+      if (any(is.infinite(i$comp1)) == FALSE) {
+        plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
+          main=paste(j, "Comp 1")
+        )
+        print(paste(j, "Comp 1"))
+      }
+      if (any(is.infinite(i$comp2)) == FALSE) {
+        plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
+          main=paste(j, "Comp 2")
+        )
+        print(paste(j, "Comp 2"))
+      }
+      if (any(is.infinite(i$comp3)) == FALSE) {
+        plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
+          main=paste(j, "Comp 3")
+        )
+        print(paste(j, "Comp 3"))
+      }
     }
   }
   # sink("/dev/null")
@@ -733,8 +758,10 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
   plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
-  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
-  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
+  if (ncomp > 2) {
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")    
+  }
   print("Plotting circos from similarity matrix...")
   corr_diablo = circosPlot(
     data, cutoff=0.95, line=TRUE, size.legend=0.5, var.names=truncated
@@ -759,10 +786,10 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     }
     cimDiablo(data, comp=comp, size.legend=0.5)
     plotLoadings(data, contrib="max", comp=comp, max.name.length=8,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
     plotLoadings(data, contrib="min", comp=comp, max.name.length=8,
-      method='median', ndisplay=50, name.var=colnames(data), size.name=0.6,
+      method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
     for (i in block_to_trim) {
       data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
@@ -773,11 +800,11 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
         data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
       }
       plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=8,
-        method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+        method='median', ndisplay=20, name.var=colnames(data), plot=TRUE,
         title=paste(comp, i, "DIABLO max loadings"), size.name=0.6
       )
       plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=8,
-        method='median', ndisplay=50, name.var=colnames(data), plot=TRUE,
+        method='median', ndisplay=20, name.var=colnames(data), plot=TRUE,
         title=paste(comp, i, "DIABLO min loadings"), size.name=0.6
       )
       for (i in block_to_trim) {
