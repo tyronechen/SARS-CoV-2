@@ -398,8 +398,8 @@ main = function() {
   diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
 
   plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
-  assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
-  predict_diablo(diablo_all, diablo_input, classes)
+  # assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
+  # predict_diablo(diablo_all, diablo_input, classes)
   print("Diablo design:")
   print(diablo_all$design)
 
