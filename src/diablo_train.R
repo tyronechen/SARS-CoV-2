@@ -420,7 +420,7 @@ main = function() {
   print("Diablo design:")
   print(diablo$design)
   plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
-  # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
+  assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
 
   # save RData object for future reference
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
