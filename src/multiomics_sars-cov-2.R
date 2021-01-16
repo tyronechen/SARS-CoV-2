@@ -739,8 +739,10 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   # plotDiablo(data, ncomp = 1)
-  print("Plotting individual samples into space spanned by block components...")
-  plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
+  if (ncomp > 2) {
+    print("Plotting individual samples into space spanned by block components...")
+    plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
+  }
   print("Plotting arrow plot...")
   plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
@@ -821,12 +823,12 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
 assess_performance = function(data, dist, ncomp) {
   # review performance of diablo
   # remember to use the same distance metric which had the max value!
-  print("Assessing performance...")
-  perf_diablo = perf(data, validation='loo', M=10, nrepeat=10, dist=dist)
-  perf.diablo  # lists the different outputs
+  # print("Assessing performance...")
+  # perf_diablo = perf(data, validation='loo', M=10, nrepeat=10, dist=dist)
+  # perf.diablo  # lists the different outputs
 
   # Performance with Majority vote
-  print(perf_diablo$MajorityVote.error.rate)
+  # print(perf_diablo$MajorityVote.error.rate)
 
   # ROC and AUC criteria are not particularly insightful in relation to the
   # performance evaluation of our methods, but can complement the analysis.
