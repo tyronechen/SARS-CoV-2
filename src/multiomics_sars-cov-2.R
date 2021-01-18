@@ -787,7 +787,7 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting overall heatmap...")
 
   # hide column (sample) names by default (will run off page otherwise)
-  if (max(unlist(lapply(diablo$names$colnames$X, nchar))) > 8) {
+  if (max(unlist(lapply(data$names$colnames$X, nchar))) > 8) {
     show_cols = FALSE
   } else {
     show_cols = TRUE
