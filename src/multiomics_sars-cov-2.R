@@ -43,7 +43,6 @@ remap_data = function(data, mapping) {
 show_na_prop = function(data_na, name) {
   # first, sum the number of missing values per variable
   sum_na_per_var = apply(data_na, 2, function(x) {sum(is.na(x))})
-  ​
   # show proportion of NA values across all samples (y) for a variable (x)
   plot(sum_na_per_var/nrow(data_na), type='h', xlab='variable index',
     ylab='NA proportion (across all samples for a variable)',
@@ -376,6 +375,13 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     colours_cim = cbind(colours_class, colours_pch)
   } else {colours_cim = data.frame(colours_class)}
 
+  # hide column (sample) names by default (will run off page otherwise)
+  if (max(unlist(lapply(data_plsda$names$colnames$X, nchar))) > 8) {
+    show_cols = FALSE
+  } else {
+    show_cols = TRUE
+  }
+
   cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
     legend=list(title="Status")
   )
@@ -517,8 +523,14 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     colours_cim = cbind(colours_class, colours_pch)
   } else {colours_cim = data.frame(colours_class)}
 
+  # hide column (sample) names by default (will run off page otherwise)
+  if (max(unlist(lapply(data_splsda$names$colnames$X, nchar))) > 8) {
+    show_cols = FALSE
+  } else {
+    show_cols = TRUE
+  }
   cim(data_splsda, title="sPLSDA", row.sideColors=colours_cim,
-    legend=list(title="Status")
+    legend=list(title="Status"), col.names=show_cols
   )
 
   short = make.names(sapply(colnames(data), strtrim, 6, USE.NAMES=FALSE), unique=TRUE)
@@ -764,6 +776,14 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   cyto_out = paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
   write.graph(cyto$gR, cyto_out, format="graphml")
   print("Plotting overall heatmap...")
+
+  # hide column (sample) names by default (will run off page otherwise)
+  if (max(unlist(lapply(diablo$names$colnames$X, nchar))) > 8) {
+    show_cols = FALSE
+  } else {
+    show_cols = TRUE
+  }
+
   cimDiablo(data, size.legend=0.5)
 
   block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
