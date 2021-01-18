@@ -363,7 +363,10 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   sink()
 
   # consider using plotvar for some datasets
-  plotArrow(data_plsda, legend=TRUE)
+  if (ncomp > 1) {
+    print("Plotting arrow plot...")
+    plotArrow(data_plsda, ind.names=FALSE, legend=TRUE, title="PLSDA")
+  }
   # plotVar(data_plsda, legend=TRUE)
 
   print("Getting loadings and plotting clustered image maps")
@@ -511,7 +514,10 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   sink()
 
-  plotArrow(data_splsda, legend=TRUE)
+  if (ncomp > 1) {
+    print("Plotting arrow plot...")
+    plotArrow(data_splsda, ind.names=FALSE, legend=TRUE, title="sPLSDA")
+  }
   # plotVar(data_plsda, legend=TRUE)
 
   print("Getting loadings and plotting clustered image maps")
@@ -752,12 +758,12 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   # plotDiablo(data, ncomp = 1)
-  if (ncomp > 2) {
+  if (ncomp > 1) {
     print("Plotting individual samples into space spanned by block components...")
     plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
+    print("Plotting arrow plot...")
+    plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   }
-  print("Plotting arrow plot...")
-  plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
   plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
     title="DIABLO 1/2", var.names=FALSE
