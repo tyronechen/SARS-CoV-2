@@ -499,13 +499,13 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
   print("Plotting stability of sPLSDA...")
   plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
-    ylab="Stability", xlab="Features"
+    ylab="Stability", xlab="Features", xaxt='n'
   )
   plot(metrics$features$stable[[2]], type="h", main="Comp 2", las=2,
-    ylab="Stability", xlab="Features"
+    ylab="Stability", xlab="Features", xaxt='n'
   )
   plot(metrics$features$stable[[3]], type="h", main="Comp 3", las=2,
-    ylab="Stability", xlab="Features"
+    ylab="Stability", xlab="Features", xaxt='n'
   )
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
@@ -632,19 +632,19 @@ tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
     for (j in names(perf_diablo$features$stable$nrep1)) {
       if (any(is.infinite(i$comp1)) == FALSE) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
-          main=paste(j, "Comp 1")
+          main=paste(j, "Comp 1"), xaxt='n'
         )
         print(paste(j, "Comp 1"))
       }
       if (any(is.infinite(i$comp2)) == FALSE) {
         plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
-          main=paste(j, "Comp 2")
+          main=paste(j, "Comp 2"), xaxt='n'
         )
         print(paste(j, "Comp 2"))
       }
       if (any(is.infinite(i$comp3)) == FALSE) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
-          main=paste(j, "Comp 3")
+          main=paste(j, "Comp 3"), xaxt='n'
         )
         print(paste(j, "Comp 3"))
       }
