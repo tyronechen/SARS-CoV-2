@@ -764,8 +764,10 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
   }
   print("Plotting circos from similarity matrix...")
+  # cant remove feature labels, need to make label size 0.001 or lower
   corr_diablo = circosPlot(
-    data, cutoff=0.95, line=TRUE, size.legend=0.5, var.names=truncated
+    data, cutoff=0.95, line=TRUE, size.legend=0.5, size.variables=0.001,
+    var.names=truncated
   )
   corr_out = file=paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
@@ -784,7 +786,7 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     show_cols = TRUE
   }
 
-  cimDiablo(data, size.legend=0.5)
+  cimDiablo(data, size.legend=0.5, col.names=show_cols)
 
   block_to_trim = names(trimmed_names[lapply(trimmed_names, length) > 0])
 
