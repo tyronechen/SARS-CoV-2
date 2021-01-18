@@ -259,7 +259,8 @@ plot_pca_single = function(data, classes, pch=NA, title="", ncomp=0, show=FALSE)
 plot_additional = function(data, data_pca, names) {
   # correlation circle and biplots: dataframe, list, vector -> outfile_path.pdf
   print("Plotting correlation circle plots...")
-  mapply(function(x, y) plotVar(x, comp=c(1, 2), title=paste(y, "PCA 1/2")),
+  mapply(function(x, y) plotVar(x, comp=c(1, 2), title=paste(y, "PCA 1/2"),
+    var.names=FALSE),
     data_pca, names)
 
   print("Plotting biplots...")
@@ -758,10 +759,16 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting arrow plot...")
   plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
   print("Plotting correlation circle plot...")
-  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2), title="DIABLO 1/2")
+  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
+    title="DIABLO 1/2", var.names=FALSE
+  )
   if (ncomp > 2) {
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3), title="DIABLO 1/3")
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3), title="DIABLO 2/3")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3),
+      title="DIABLO 1/3", var.names=FALSE
+    )
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3),
+      title="DIABLO 2/3", var.names=FALSE
+    )
   }
   print("Plotting circos from similarity matrix...")
   # cant remove feature labels, need to make label size 0.001 or lower
