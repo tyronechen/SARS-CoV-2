@@ -763,11 +763,12 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE)
     print("Plotting arrow plot...")
     plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
+    print("Plotting correlation circle plot...")
+    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
+      title="DIABLO 1/2", var.names=FALSE
+    )
   }
-  print("Plotting correlation circle plot...")
-  plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
-    title="DIABLO 1/2", var.names=FALSE
-  )
+
   if (ncomp > 2) {
     plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3),
       title="DIABLO 1/3", var.names=FALSE
