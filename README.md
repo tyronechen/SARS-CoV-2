@@ -10,9 +10,40 @@ This work was presented at the [ABACBS (Australian Bioinformatics and Computatio
 
 Future work will involve the application of deep learning to better identify latent patterns in high dimensional data. [An example of some of our preliminary work on this topic is available here.](https://gitlab.com/tyagilab/integrativeepigenomics)
 
-## Overview
+## Overview of the pipeline
 
-Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly, so both datasets measure protein molecule abundances.
+This pipeline ingests data in the format of at least two matrices, each corresponding to individual omics data. In the matrices, samples correspond to rows and features to columns.
+
+Sample input data:
+
+|                 | Feature1         | Feature2         |
+|-----------------|------------------|------------------|
+| Sample1         | 3.142            | 2.7              |
+| Sample2         | 10000            | 88.88            |
+
+Metadata is provided as a table of sample types. Data is expected to be tab-separated, cleaned, preprocessed and be non-sparse.
+
+Sample input metadata:
+
+|                 | Sample Type      |
+|-----------------|------------------|
+| Sample1         | TreatmentA       |
+| Sample2         | TreatmentB       |
+
+Initial parameters are provided by the user and further tuned during data processing. Results are output as a series of plots in a `pdf` file, and a series of tab separated `txt` files for any downstream analyses.
+
+Regarding experimental design, if repeated measurements are involved, this information can be provided to the pipeline which will attempt to correct for this effect.
+
+Sample input metadata (repeated measurements):
+
+|                 | Sample Type      |
+|-----------------|------------------|
+| Sample1         | PatientX         |
+| Sample2         | PatientY         |
+
+A visual summary of the pipeline is below:
+
+![Flowchart describing the input, processing steps and output of the pipeline](images/pipeline_technical_notes.png)
 
 ## Contents:
 
@@ -27,6 +58,56 @@ Integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and t
 - Walkthrough
 - Reproducing our results
 - Acknowledgements -->
+
+## Installation
+
+Clone the git repository with:
+
+```
+git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
+```
+
+[With conda](https://bioconda.github.io/user/install.html) (recommended):
+
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+
+conda create -n my_new_environment install r-igraph r-mixOmics r-argparser r-ggplot2 r-reshape
+```
+
+Manual install (within R):
+
+```
+install.packages("argparser")
+install.packages("igraph")
+install.packages("ggplot2")
+install.packages("reshape2")
+
+## install BiocManager if not installed
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+## ensure the following returns TRUE, or follow guidelines
+BiocManager::valid()
+
+## install mixOmics (latest stable version)
+BiocManager::install("mixOmicsTeam/mixOmics")
+```
+
+You can then run the script directly:
+
+```
+Rscript diablo_train.R -h
+```
+
+For a sample submission script, see `[example.sh]`(https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/src/example.sh). This example may take about half an hour to run! As a result the study below will be replicated, but minor differences may be visible as this pipeline is non-deterministic.
+
+> _**NOTE**_: `R` should be version 3.6 or greater. `diablo_train.R` and `multiomics_sars-cov-2.R` should be in the same directory.
+
+## Overview of the case study
+
+We apply this pipeline to a small example where we integrate multi-omics data for SARS-Cov-2. 2 modalities are used, proteome and translatome. Note that while classical translatome assays measure RNA attached to the ribosome, the authors use a custom method which measures nascent protein directly, so both datasets measure protein molecule abundances.
 
 ## Experimental design
 
@@ -52,6 +133,8 @@ n=3 for all classes:
 
 ## Software availability
 
+Python, pandas and jupyter notebooks are used as part of data preprocessing for this case study.
+
 ```
 python 3.8.2
   jupyter-notebook 1.0.0
@@ -62,6 +145,20 @@ R 3.6.3
   igraph_1.2.5
   mixOmics 6.13.3
 ```
+
+If you want to replicate the data preprocessing step, these can be installed with conda (recommended):
+
+```
+conda install jupyter-notebook pandas
+```
+
+Or pip:
+
+```
+pip install pandas
+pip install jupyter-notebook
+```
+
 
 ## Method references
 
