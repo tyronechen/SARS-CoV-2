@@ -387,11 +387,12 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   }
 
   cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
-    legend=list(title="Status")
+    legend=list(title="Status"), col.names=show_cols
   )
   for (comp in seq(ncomp)) {
     cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
-      row.sideColors=colours_cim, legend=list(title="Status")
+      row.sideColors=colours_cim, legend=list(title="Status"),
+      col.names=show_cols
     )
     plotLoadings(data_plsda, contrib="max", comp=comp, max.name.length=16,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
@@ -543,7 +544,8 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   short = make.names(sapply(colnames(data), strtrim, 6, USE.NAMES=FALSE), unique=TRUE)
   for (comp in seq(ncomp)) {
     cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
-      row.sideColors=colours_cim, legend=list(title="Status")
+      row.sideColors=colours_cim, legend=list(title="Status"),
+      col.names=show_cols
     )
     plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
@@ -809,7 +811,7 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     for (i in block_to_trim) {
       data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
     }
-    cimDiablo(data, comp=comp, size.legend=0.5)
+    cimDiablo(data, comp=comp, size.legend=0.5, col.names=show_cols)
     plotLoadings(data, contrib="max", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
