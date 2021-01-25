@@ -302,7 +302,8 @@ plot_pca_multilevel = function(data, classes, pch, title="", ncomp=0, show=FALSE
 classify_plsda = function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
   mapply(function(x, y) classify_plsda_(
-    x, classes, pch, y, ncomp, contrib, outdir, bg), data, title)
+    x, classes, pch, y, ncomp, contrib, outdir, bg), data, title,
+    SIMPLIFY=FALSE)
 }
 
 classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
@@ -355,6 +356,7 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
   print("Getting performance metrics")
   print("Plotting error rates...")
   metrics = perf(data_plsda, validation="loo", progressBar=TRUE, auc=TRUE)
+  print(metrics$error.rate)
   plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
 
   # supporess roc printing automatically to stdout
@@ -413,7 +415,6 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     write.table(as.data.frame(loading_max), file=path_max, quote=FALSE, sep="\t")
     write.table(as.data.frame(loading_min), file=path_min, quote=FALSE, sep="\t")
   }
-  print(metrics)
   return(list(data_plsda=data_plsda, perf_plsda=metrics))
 }
 
@@ -444,7 +445,7 @@ classify_splsda = function(data, classes, pch=NA, title="", ncomp=NULL,
   bg=TRUE) {
   mapply(function(x, y, c, k) classify_splsda_(
     x, classes, pch, y, c, k, contrib, outdir
-  ), data, title, ncomp, keepX)
+  ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
 }
 
 classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
@@ -628,7 +629,7 @@ tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
 
   # this code takes a couple of min to run
   perf_diablo = perf(sgccda_res, validation = 'loo', folds = 10, nrepeat = 10)
-
+  print(perf_diablo$error.rate)
   # print(perf.diablo)  # lists the different outputs
   plot(perf_diablo, main="DIABLO optimal components")
   # perf_diablo$choice.ncomp$WeightedVote
@@ -757,7 +758,7 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   data_vis = data_vis_names$data_vis
   truncated = data_vis_names$truncated
   print("Plotting correlation between components...")
-  # roc = mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
+  roc = mapply(function(x) auroc(data, roc.comp=x), seq(ncomp))
   mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   # plotDiablo(data, ncomp = 1)
   if (ncomp > 1) {

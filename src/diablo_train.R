@@ -287,14 +287,10 @@ main = function() {
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
       )
     }
-    perf_plsda = data_plsda$perf_plsda
-    print(names(perf_plsda))
-    data_plsda = data_plsda$data_plsda
   } else { data_plsda = NA }
 
   save(classes, pch, data, linkage, input_data, data_pca_multilevel, data_plsda,
-    pca_withna, pca_impute, dist_splsda, dist_diablo, perf_plsda, argv,
-    mappings, file=rdata
+    pca_withna, pca_impute, dist_splsda, dist_diablo, argv, mappings, file=rdata
   )
 
   # sparse partial least squares discriminant analysis
@@ -349,9 +345,6 @@ main = function() {
           splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
         )
       }
-      perf_splsda = data_splsda$perf_splsda
-      print(names(perf_splsda))
-      data_splsda = data_splsda$data_splsda
   } else {
     data_splsda = NA
     tuned_splsda = NA
@@ -359,7 +352,7 @@ main = function() {
 
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, pca_withna, pca_impute, dist_splsda, dist_diablo,
-    perf_plsda, perf_splsda, argv, mappings, file=rdata
+    argv, mappings, file=rdata
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
@@ -379,8 +372,7 @@ main = function() {
   # data = lapply(data, remove_novar)
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_plsda, perf_splsda, perf_diablo, argv,
-    mappings, file=rdata
+    dist_splsda, dist_diablo, perf_diablo, argv, mappings, file=rdata
   )
 
   # block-wise splsda doesnt do internal multilevel decomposition
@@ -405,8 +397,7 @@ main = function() {
 
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_plsda, perf_splsda, perf_diablo, argv,
-    mappings, diablo_all, file=rdata
+    dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo_all, file=rdata
   )
 
   # tune diablo parameters and run diablo
@@ -425,8 +416,8 @@ main = function() {
   # save RData object for future reference
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_plsda, perf_splsda, perf_diablo, argv,
-    mappings, diablo_all, diablo, file=rdata
+    dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo_all, diablo,
+    file=rdata
   )
   dev.off()
 }
