@@ -68,8 +68,11 @@ parse_argv = function() {
   p = add_argument(p, "--splsda_keepx", type="vector", default=NA, nargs="+",
     help="variables to keep for splsda"
   )
+  p = add_argument(p, "--dist_plsda", type="character", default="centroids.dist",
+    help="plsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
+  )
   p = add_argument(p, "--dist_splsda", type="character", default="centroids.dist",
-    help="s/plsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
+    help="splsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p = add_argument(p, "--dist_diablo", type="character", default="centroids.dist",
     help="diablo distance metric [max.dist, centroids.dist, mahalanobis.dist]"
@@ -135,9 +138,12 @@ main = function() {
   print("Degree of linkage for omics blocks:")
   linkage = argv$linkage
   print(linkage)
+  dist_plsda = argv$dist_plsda
   dist_splsda = argv$dist_splsda
   dist_diablo = argv$dist_diablo
-  print("Distance measure (s/PLSDA):")
+  print("Distance measure (PLSDA):")
+  print(dist_plsda)
+  print("Distance measure (sPLSDA):")
   print(dist_splsda)
   print("Distance measure (DIABLO):")
   print(dist_diablo)
@@ -182,13 +188,17 @@ main = function() {
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data = lapply(data, remove_na_class, classes)
-    save(classes, pch, data, dist_splsda, dist_diablo, argv, file=rdata)
+    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
+      file=rdata
+    )
   }
 
   # drop features / columns >= a threshold of NA values
   if (argv$dropna_prop > 0) {
     data = remove_na_prop(data, classes, pch=pch, na_prop=argv$dropna_prop)
-    save(classes, pch, data, dist_splsda, dist_diablo, argv, file=rdata)
+    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
+      file=rdata
+    )
   }
 
   if (!is.na(argv$mappings)) {
@@ -228,8 +238,9 @@ main = function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, pch, data, linkage, pca_withna, dist_splsda, dist_diablo, argv, mappings,
-    file=rdata)
+  save(classes, pch, data, linkage, pca_withna, dist_plsda, dist_splsda,
+    dist_diablo, argv, mappings, file=rdata
+  )
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -249,7 +260,8 @@ main = function() {
     pca_impute = NA
   }
   save(classes, pch, data, linkage, data_imp, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, argv, mappings, file=rdata)
+    dist_plsda, dist_splsda, dist_diablo, argv, mappings, file=rdata
+  )
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -273,7 +285,8 @@ main = function() {
     }
   } else { data_pca_multilevel = NA }
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, dist_splsda, dist_diablo, argv, mappings, file=rdata
+    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
+    mappings, file=rdata
   )
 
   # partial least squares discriminant analysis
@@ -290,7 +303,8 @@ main = function() {
   } else { data_plsda = NA }
 
   save(classes, pch, data, linkage, input_data, data_pca_multilevel, data_plsda,
-    pca_withna, pca_impute, dist_splsda, dist_diablo, argv, mappings, file=rdata
+    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
+    mappings, file=rdata
   )
 
   # sparse partial least squares discriminant analysis
@@ -351,8 +365,8 @@ main = function() {
   }
 
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, pca_withna, pca_impute, dist_splsda, dist_diablo,
-    argv, mappings, file=rdata
+    data_splsda, tuned_splsda, pca_withna, pca_impute, dist_plsda, dist_splsda,
+    dist_diablo, argv, mappings, file=rdata
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
@@ -372,7 +386,8 @@ main = function() {
   # data = lapply(data, remove_novar)
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_diablo, argv, mappings, file=rdata
+    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
+    file=rdata
   )
 
   # block-wise splsda doesnt do internal multilevel decomposition
@@ -386,19 +401,11 @@ main = function() {
   if (argv$force_unique == TRUE) {
     diablo_input = force_unique_blocks(data)
   }
-  # print("Run DIABLO keeping all features")
-  # diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
-
-  # plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
-  # assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
-  # predict_diablo(diablo_all, diablo_input, classes)
-  # print("Diablo design:")
-  # print(diablo_all$design)
 
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_diablo, argv, mappings, file=rdata
-    #, diablo_all
+    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
+    file=rdata
   )
 
   # tune diablo parameters and run diablo
@@ -417,7 +424,7 @@ main = function() {
   # save RData object for future reference
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo_all, diablo,
+    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo,
     file=rdata
   )
   dev.off()
