@@ -386,18 +386,19 @@ main = function() {
   if (argv$force_unique == TRUE) {
     diablo_input = force_unique_blocks(data)
   }
-  print("Run DIABLO keeping all features")
-  diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
+  # print("Run DIABLO keeping all features")
+  # diablo_all = run_diablo(diablo_input, classes, diablo_ncomp, design)
 
-  plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
+  # plot_diablo(diablo_all, diablo_ncomp, outdir, data_names, "all")
   # assess_performance(diablo_all, dist=dist_diablo, diablo_ncomp)
   # predict_diablo(diablo_all, diablo_input, classes)
-  print("Diablo design:")
-  print(diablo_all$design)
+  # print("Diablo design:")
+  # print(diablo_all$design)
 
   save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
     data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo_all, file=rdata
+    dist_splsda, dist_diablo, perf_diablo, argv, mappings, file=rdata
+    #, diablo_all
   )
 
   # tune diablo parameters and run diablo
