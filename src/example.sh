@@ -4,6 +4,7 @@ Rscript diablo_train.R \
    --dropna_classes TRUE \
    --dropna_prop 0 \
    --data ../data/diablo_proteome.txt ../data/diablo_translatome.txt \
+   --data_names proteome translatome \
    --mappings ../data/proteome_mapfile.txt ../data/translatome_mapfile.txt \
    --ncpus 6 \
    --diablocomp 0 \
@@ -13,10 +14,11 @@ Rscript diablo_train.R \
    --plsdacomp 4 \
    --splsdacomp 4 \
    --splsda_keepx 10 25 50 100 \
+   --dist_plsda centroids.dist \
    --dist_splsda centroids.dist \
    --dist_diablo mahalanobis.dist \
    --contrib max \
-   --outfile_dir ../results/splsdacentroids_diablomahalanobis_i24_comp4_splsdakeepx10_100_diablokeepx5_30_corrected \
+   --outfile_dir ../results/EXAMPLE \
    --rdata RData.RData \
    --plot Rplots.pdf \
    --args Rscript.sh

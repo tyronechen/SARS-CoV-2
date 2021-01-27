@@ -823,32 +823,32 @@ plot_diablo = function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
       data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
     }
 
-    for (i in data_names) {
+    for (j in data_names) {
       for (i in block_to_trim) {
         data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
       }
-      plotLoadings(data, contrib="max", comp=comp, block=i, max.name.length=8,
+      plotLoadings(data, contrib="max", comp=comp, block=j, max.name.length=8,
         method='median', ndisplay=20, name.var=colnames(data), plot=TRUE,
-        title=paste(comp, i, "DIABLO max loadings"), size.name=0.6
+        title=paste(comp, j, "DIABLO max loadings"), size.name=0.6
       )
-      plotLoadings(data, contrib="min", comp=comp, block=i, max.name.length=8,
+      plotLoadings(data, contrib="min", comp=comp, block=j, max.name.length=8,
         method='median', ndisplay=20, name.var=colnames(data), plot=TRUE,
-        title=paste(comp, i, "DIABLO min loadings"), size.name=0.6
+        title=paste(comp, j, "DIABLO min loadings"), size.name=0.6
       )
       for (i in block_to_trim) {
         data$names$colnames[[i]] = trimmed_names[[i]][["all_names"]]
       }
 
-      loading_max = plotLoadings(data, contrib="max", comp=comp, block=i,
+      loading_max = plotLoadings(data, contrib="max", comp=comp, block=j,
         method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
-      loading_min = plotLoadings(data, contrib="min", comp=comp, block=i,
+      loading_min = plotLoadings(data, contrib="min", comp=comp, block=j,
         method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
-      # title = gsub(" ", "_", title)
+
       path_max = paste(
-        outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
+        outdir, "/", j, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
       )
       path_min = paste(
-        outdir, "/", i, "_", comp, "_DIABLO_var_", keepvar, "_min.txt", sep=""
+        outdir, "/", j, "_", comp, "_DIABLO_var_", keepvar, "_min.txt", sep=""
       )
       print("Writing DIABLO loadings to:")
       print(path_max)
