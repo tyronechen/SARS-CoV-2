@@ -323,9 +323,10 @@ main = function() {
         splsda_ncomp = length(splsda_keepx)
       } else {
         splsda_keepx = lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
-        splsda_ncomp = length(splsda_keepx)
+        # splsda_ncomp = length(splsda_keepx)
       }
 
+      splsda_ncomp = argv$splsdacomp
       print("sPLSDA keepX:")
       print(splsda_keepx)
       print("sPLSDA ncomp:")
