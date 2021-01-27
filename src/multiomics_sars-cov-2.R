@@ -315,42 +315,60 @@ classify_plsda_ = function(data, classes, pch=NA, title="", ncomp=0,
     pch = c(as.factor(pch))
     title_plt = paste(title, "PLSDA multi")
     data_plsda = plsda(data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp)
-    if (!is.na(bg)) {
-      bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+
+    if (ncomp > 1) {
+      if (!is.na(bg)) {
+        bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+        plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+          pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
+          background=bg
+        )
+      }
+    }
+
+    if (ncomp > 1) {
       plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
-        background=bg
       )
     }
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
-    )
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
-    )
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
-    )
+
+    if (ncomp > 2) {
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
+      )
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
+      )
+    }
+
   } else {
     print("Plotting multi level partial least squares discriminant analysis")
     title_plt = paste(title, "PLSDA single")
     data_plsda = plsda(data, Y=classes, ncomp=ncomp)
-    if (!is.na(bg)) {
-      bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+
+    if (ncomp > 1) {
+      if (!is.na(bg)) {
+        bg = background.predict(data_plsda, comp.predicted=2, dist=dist)
+        plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+          title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
+          background=bg
+        )
+      }
+    }
+
+    if (ncomp > 1) {
       plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
-        background=bg
       )
     }
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
-    )
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
-    )
-    plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
-      title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
-    )
+    if (ncomp > 2) {
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
+      )
+      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+        title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
+      )
+    }
   }
 
   print("Getting performance metrics")
@@ -474,28 +492,35 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
     data_splsda = splsda(data, Y=classes, ncomp=ncomp, keepX=keepX)
   }
 
-  if (!is.na(bg)) {
-    bg = background.predict(data_splsda, comp.predicted=2, dist=dist)
+  if (ncomp > 1) {
+    if (!is.na(bg)) {
+      bg = background.predict(data_splsda, comp.predicted=2, dist=dist)
+      plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
+        ellipse=TRUE, background=bg
+      )
+    } else {
+      plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+        pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
+        ellipse=TRUE, background=NULL
+      )
+    }
+  }
+
+  if (ncomp > 1) {
     plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
-      ellipse=TRUE, background=bg
-    )
-  } else {
-    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2),
-      ellipse=TRUE, background=NULL
+      pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE
     )
   }
 
-  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE
-  )
-  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3), ellipse=TRUE
-  )
-  plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
-    pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
-  )
+  if (ncomp > 2) {
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3), ellipse=TRUE
+    )
+    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+      pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
+    )
+  }
 
   print("Getting performance metrics")
   print("Plotting error rates...")
@@ -506,12 +531,16 @@ classify_splsda_ = function(data, classes, pch=NA, title="", ncomp=NULL,
   plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
     ylab="Stability", xlab="Features", xaxt='n'
   )
-  plot(metrics$features$stable[[2]], type="h", main="Comp 2", las=2,
-    ylab="Stability", xlab="Features", xaxt='n'
-  )
-  plot(metrics$features$stable[[3]], type="h", main="Comp 3", las=2,
-    ylab="Stability", xlab="Features", xaxt='n'
-  )
+  if (ncomp > 1) {
+    plot(metrics$features$stable[[2]], type="h", main="Comp 2", las=2,
+      ylab="Stability", xlab="Features", xaxt='n'
+    )
+  }
+  if (ncomp > 2) {
+    plot(metrics$features$stable[[3]], type="h", main="Comp 3", las=2,
+      ylab="Stability", xlab="Features", xaxt='n'
+    )
+  }
   sink("/dev/null")
   roc = mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   sink()
