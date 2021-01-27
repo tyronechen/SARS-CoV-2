@@ -34,8 +34,12 @@ parse_argv = function() {
     drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
     --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
   )
-  p = add_argument(p, "--data", type="character", nargs=Inf,
-    help="paths to omics data. names format: SAMPLEID_OMICTYPE_OPTIONALFIELDS"
+  p = add_argument(p, "--data", type="character", nargs=Inf, default=NA,
+    help="paths to omics data (must match order of names in --data_names)."
+  )
+  p = add_argument(p, "--data_names", type="character", nargs=Inf, default=NA,
+    help="names of the individual omics data blocks \
+    (must match order of data in --data)."
   )
   p = add_argument(p, "--force_unique", type="bool", default=TRUE,
     help="force values to be unique in each omics data block (default TRUE)"
@@ -165,14 +169,18 @@ main = function() {
     data_splsda = NA
   }
 
-  # TODO: make naming independent of file names
-  # parse out identifiers coded within the file paths (hardcoded)
-  data_names = sapply(sapply(lapply(paths, strsplit, "/"), tail, 1), tail, 1)
-  data_names = unname(lapply(sapply(data_names,strsplit,".",fixed=TRUE),head,1))
-  data_names = unname(sapply(sapply(data_names, head, 1), strsplit, "_"))
-  data_names = unlist(lapply(lapply(data_names, tail, -1), paste, collapse="_"))
+  data_names = argv$data_names
   print("Omics data types")
   print(data_names)
+
+  if (length(data_names) != length(paths) | any(duplicated(data_names)) | any(duplicated(paths))) {
+    stop("Data names must correspond to paths and be unique!")
+    print("Data names:")
+    print(data_names)
+    print("Data paths:")
+    print(paths)
+    quit(save="no", status=1)
+  }
 
   # initialise plots
   print(paste("Saving plots to (overwriting existing):", plot))
