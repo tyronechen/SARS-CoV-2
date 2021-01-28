@@ -1143,7 +1143,11 @@ Note that this may yield slightly different results, as the algorithm is not det
 
 #### Parsing the output
 
-To annotate and organise correlation tables for further analysis, run the jupyter notebook `src/parse_results_from_diablo.ipynb`.
+To annotate and organise correlation tables for further analysis, run the jupyter notebook `src/annotate_multiomics_correlations.ipynb`.
+
+## Downstream analyses
+
+> **NOTE**: This section describes the downstream analyses performed in our publication and is not part of the pipeline.
 
 ## Acknowledgements
 
