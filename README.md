@@ -74,7 +74,16 @@ conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
 
-conda create -n my_new_environment install r-igraph r-mixOmics r-argparser r-ggplot2 r-reshape
+conda create -n mixomics_environment install \
+  r-igraph \
+  r-argparser \
+  r-ggplot2 \
+  r-reshape \
+  r-diffobj \
+  r-waldo \
+  r-brio \
+  r-cpp11 \
+  r-mixomics
 ```
 
 Manual install (within R):
@@ -94,6 +103,8 @@ BiocManager::valid()
 ## install mixOmics (latest stable version)
 BiocManager::install("mixOmicsTeam/mixOmics")
 ```
+
+> **NOTE:** You can also install the development version of [mixOmics by following the instructions on their website](http://mixomics.org/install/).
 
 You can then run the script directly:
 
@@ -1129,6 +1140,7 @@ Rscript diablo_train.R \
    --plsdacomp 4 \
    --splsdacomp 4 \
    --splsda_keepx 10 25 50 100 \
+   --dist_plsda centroids.dist \
    --dist_splsda centroids.dist \
    --dist_diablo mahalanobis.dist \
    --contrib max \
@@ -1139,7 +1151,7 @@ Rscript diablo_train.R \
 ```
 </details>
 
-Note that this may yield slightly different results, as the algorithm is not deterministic. As of `R >=3.6`, setting seeds will not replicate results across different `R` versions.
+> **NOTE**: This may yield slightly different results, as the algorithm is not deterministic. As of `R >=3.6`, setting seeds will not replicate results across different `R` versions.
 
 #### Parsing the output
 
@@ -1147,8 +1159,10 @@ To annotate and organise correlation tables for further analysis, run the jupyte
 
 ## Downstream analyses
 
-> **NOTE**: This section describes the downstream analyses performed in our publication and is not part of the pipeline.
+*To be written*
+
+> **NOTE**: This section describes the downstream steps performed in our publication and is not part of the pipeline.
 
 ## Acknowledgements
 
-[We thank Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116) for contributions to the code and analysis. [We thank David A. Matthews](https://orcid.org/0000-0003-4611-8795) for helpful discussions and feedback. [We thank Yashpal Ramakrishnaiah](https://orcid.org/0000-0002-2213-8348) for performing an extended analysis of the primary data. [We thank Melcy Philip](https://orcid.org/0000-0002-0827-866X) for performing downstream analysis of the data. The authors thank the HPC team at Monash eResearch Centre for their continuous personnel support. This work was supported by the [MASSIVE HPC facility](www.massive.org.au). [We acknowledge and pay respects to the Elders and Traditional Owners of the land on which our 4 Australian campuses stand](https://www.monash.edu/indigenous-australians/about-us/recognising-traditional-owners).
+[We thank Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116) for contributions to the code and analysis. [We thank David A. Matthews](https://orcid.org/0000-0003-4611-8795) for helpful discussions and feedback. [We thank Yashpal Ramakrishnaiah](https://orcid.org/0000-0002-2213-8348) for performing an extended analysis of the primary data. [We thank Melcy Philip](https://orcid.org/0000-0002-0827-866X) for performing downstream analysis of the data. This work was supported by the [MASSIVE HPC facility](www.massive.org.au) and the authors thank the HPC team at Monash eResearch Centre for their continuous personnel support. This work was supported by the [MASSIVE HPC facility](www.massive.org.au). [We acknowledge and pay respects to the Elders and Traditional Owners of the land on which our 4 Australian campuses stand](https://www.monash.edu/indigenous-australians/about-us/recognising-traditional-owners).
