@@ -60,7 +60,7 @@ parse_argv = function() {
   p = add_argument(p, "--icomp", type="integer", default=10,
     help="component number for imputing (set 0 for no imputation)"
   )
-  p = add_argument(p, "--zero_as_na", type=logical, default=TRUE,
+  p = add_argument(p, "--zero_as_na", default=TRUE,
     help="treat zero values as missing values for imputation (DEFAULT: TRUE)"
   )
   p = add_argument(p, "--pcomp", type="integer", default=0,
