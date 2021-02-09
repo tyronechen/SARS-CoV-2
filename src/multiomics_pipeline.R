@@ -49,14 +49,16 @@ show_na_prop = function(data_na, name) {
     main=paste(name, 'NA rate per variable on unfiltered data'))
 }
 
-remove_na_prop = function(data, class, pch=NA, na_prop=0.3) {
+remove_na_prop = function(data, class, pch=NA, na_prop=0.3, zero_as_na=TRUE) {
   mapply(function(x) remove_na_prop_(x, class, pch, na_prop), data)
 }
 
-remove_na_prop_ = function(data, class, pch=NA, na_prop=0.3) {
+remove_na_prop_ = function(data, class, pch=NA, na_prop=0.3, zero_as_na=TRUE) {
   # we want to compare dimensions later to see how many features were dropped
   data_na = data
 
+  if (zero_as_na == TRUE) {data_na[data_na == 0] <- NA}
+  
   # first, sum the number of missing values per variable
   sum_na_per_var = apply(data_na, 2, function(x){sum(is.na(x))})
 
@@ -81,29 +83,29 @@ remove_na_prop_ = function(data, class, pch=NA, na_prop=0.3) {
   print(sum(is.na(data_na)) / (nrow(data_na) * ncol(data_na)))
 
   return(data_na)
-  q()
+  # q()
   # do imputation
-  nipals_X = nipals(data_na, reconst = TRUE, ncomp = 3)$rec
-
-  # replace NA values only with imputed values
-  id_na = is.na(data_na)
-  nipals_X[!id_na] = data_na[!id_na]
-
-  # compare pcas before and after imputation
-  if (!is.na(pch)) {
-    pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
-    pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
-  } else {
-    pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
-    pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
-  }
-
-  print(pca_with_na$cum.var)
-  print(pca_no_na$cum.var)
-  plotIndiv(pca_with_na, group = class, legend = TRUE)
-  plotIndiv(pca_no_na, group = class, legend = TRUE)
-
-  plot(cor(pca_with_na$variates$X, pca_no_na$variates$X))
+  # nipals_X = nipals(data_na, reconst = TRUE, ncomp = 3)$rec
+  #
+  # # replace NA values only with imputed values
+  # id_na = is.na(data_na)
+  # nipals_X[!id_na] = data_na[!id_na]
+  #
+  # # compare pcas before and after imputation
+  # if (!is.na(pch)) {
+  #   pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  #   pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  # } else {
+  #   pca_with_na <- pca(data_na, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  #   pca_no_na <- pca(nipals_X, ncomp=3, center=TRUE, scale=TRUE, pch=pch)
+  # }
+  #
+  # print(pca_with_na$cum.var)
+  # print(pca_no_na$cum.var)
+  # plotIndiv(pca_with_na, group = class, legend = TRUE)
+  # plotIndiv(pca_no_na, group = class, legend = TRUE)
+  #
+  # plot(cor(pca_with_na$variates$X, pca_no_na$variates$X))
 }
 
 remove_na_class = function(data, classes, missing_as=NA) {
