@@ -4,7 +4,7 @@ library(argparser, quietly=TRUE)
 library(ggplot2)
 library(parallel)
 library(reshape2)
-source(file="multiomics_sars-cov-2.R")
+source(file="multiomics_pipeline.R")
 
 parse_argv = function() {
   library(argparser, quietly=TRUE)
