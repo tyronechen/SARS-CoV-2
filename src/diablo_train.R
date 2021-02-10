@@ -12,12 +12,7 @@ parse_argv = function() {
   Imputes data, Run DIABLO on multi-omics data. Take tsv file of classes, \
   tsv files of omics data (at least 2!) and identify correlation between \
   features. For more information please refer to mixOmics and case studies at \
-  http://mixomics.org/mixdiablo/case-study-tcga/. \
-  To cite mixOmics in publications, please use:
-
-    Rohart F, Gautier B, Singh A, and Le Cao K-A (2017) mixOmics: An R
-    package for 'omics feature selection and multiple data integration.
-    PLoS computational biology 13(11):e1005752")
+  http://mixomics.org/mixdiablo/case-study-tcga/.")
 
   # Add command line arguments
   p = add_argument(p, "classes", help="sample information", type="character")
@@ -62,6 +57,9 @@ parse_argv = function() {
   )
   p = add_argument(p, "--zero_as_na", default=TRUE,
     help="treat zero values as missing values for imputation (DEFAULT: TRUE)"
+  )
+  p = add_argument(p, "--replace_missing", default=TRUE,
+    help="replace missing values only in imputation, else replace all values (DEFAULT: TRUE)"
   )
   p = add_argument(p, "--pcomp", type="integer", default=0,
     help="number of principal components (defaults to number of samples)"
@@ -261,7 +259,11 @@ main = function() {
   if (argv$icomp > 0) {
     print("Impute components set, imputing NA values (set -i 0 to disable)")
     data_imp = impute_missing(data, rep(argv$icomp, length(data)), outdir)
-    data = replace_missing(data, data_imp)
+
+    if (argv$replace_missing == TRUE) {
+      data_imp = replace_missing(data, data_imp)
+    }
+
     pca_impute = plot_pca_single(
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
       title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
