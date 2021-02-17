@@ -387,7 +387,7 @@ main = function() {
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (argv$diablocomp == 0) {
-    tuned_diablo = tune_diablo_ncomp(data, classes, design, argv$diablocomp)
+    tuned_diablo = tune_diablo_ncomp(data, classes, design, argv$diablocomp, cpus=argv$ncpus)
     perf_diablo = tuned_diablo
     print("Parameters with lowest error rate:")
     tuned_diablo = tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
