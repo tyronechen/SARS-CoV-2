@@ -170,9 +170,8 @@ replace_names_ <- function(data, trim=16) {
   return(list(data_vis=data_vis, truncated=truncated))
 }
 
-main <- function() {
+make_case_study_1 <- function() {
   infile_path_1 <- "../results/RData.RData"
-  infile_path_2 <- ""
   outfile_dir <- "../results/manuscript_figures/"
   
   # case study 1
@@ -229,10 +228,21 @@ main <- function() {
 
   # clear environment to avoid clashes with case study 2
   rm(list=ls())
+}
 
+make_case_study_2 <- function() {
+  
+  infile_path_2 <- "../results/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+  
   # case study 2
   #load(infile_path_2)
   #load("./RData.RData")
+}
+
+main <- function() {
+  #make_case_study_1()
+  make_case_study_2()
 }
 
 main()
