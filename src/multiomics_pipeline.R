@@ -58,7 +58,7 @@ remove_na_prop_ = function(data, class, pch=NA, na_prop=0.3, zero_as_na=TRUE) {
   data_na = data
 
   if (zero_as_na == TRUE) {data_na[data_na == 0] <- NA}
-  
+
   # first, sum the number of missing values per variable
   sum_na_per_var = apply(data_na, 2, function(x){sum(is.na(x))})
 
@@ -650,7 +650,7 @@ cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
   pca_withna, pca_impute, names)
 }
 
-tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
+tune_diablo_ncomp = function(data, classes, design, ncomp=0, cpus=1) {
   # First, we fit a DIABLO model without variable selection to assess the global
   # performance and choose the number of components for the final DIABLO model.
   # The function perf is run with 10-fold cross validation repeated 10 times.
@@ -659,7 +659,7 @@ tune_diablo_ncomp = function(data, classes, design, ncomp=0) {
   sgccda_res = block.splsda(X=data, Y=classes, ncomp=ncomp, design=design)
 
   # this code takes a couple of min to run
-  perf_diablo = perf(sgccda_res, validation = 'loo', folds = 10, nrepeat = 10)
+  perf_diablo = perf(sgccda_res, validation='loo', folds=10, nrepeat=10, cpus=cpus)
   print(perf_diablo$error.rate)
   # print(perf.diablo)  # lists the different outputs
   plot(perf_diablo, main="DIABLO optimal components")
