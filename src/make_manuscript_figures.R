@@ -262,7 +262,7 @@ make_case_study_1 <- function() {
 
 make_case_study_1_extra <- function() {
   # case study 1 extra plots
-  infile_path_1 <- "../results/reformatted_output/RData.RData"
+  infile_path_1 <- "../results/RData.RData"
   unimputed_prot_path <- "../data/diablo_proteome.tsv"
   unimputed_prot <- read.table(unimputed_prot_path, sep="\t", header=TRUE, row.names=1)
   unimputed_tran_path <- "../data/diablo_translatome.tsv"
@@ -272,7 +272,7 @@ make_case_study_1_extra <- function() {
   # case study 1
   load(infile_path_1)
   
-  pdf(paste(outfile_dir, "case_1_extra_plots.pdf"))
+  pdf(paste(outfile_dir, "case_1_extra_plots.pdf", sep=""))
   
   unimputed_prot[unimputed_prot == 0] <- NA
   unimputed_tran[unimputed_tran == 0] <- NA
