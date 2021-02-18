@@ -6,8 +6,11 @@ make_indiv <- function(data, classes, title, dist="centroids.dist",
 		       pch=NA, bg=FALSE) {
   # take a mixomics data object and make plots
   if (bg == TRUE) {
-    bg = background.predict(data, comp.predicted=2, dist=dist)
+    bg <- background.predict(data, comp.predicted=2, dist=dist)
   } else { bg <- NULL }
+  if (is.na(pch)) {
+    pch <- seq(unique(classes))
+  }
   data <- plotIndiv(
     data, ind.names=FALSE, group=classes, legend=TRUE,
     pch=pch, title=paste(title, "1/2"), comp=c(1,2), ellipse=TRUE,
@@ -88,14 +91,12 @@ make_error <- function(data, title="", cpus=6, stability=FALSE) {
   )
   data_error <- plot(data, main=paste("Error rate", title), 
        col=color.mixo(5:7), sd=TRUE)
-
   if (stability == TRUE && is_diablo == FALSE) {
     data_stability <- plot(data$features$stable[[1]], 
       type="h", main=paste("Stability Comp 1", title), las=2,
       ylab="Stability", xlab="Features", xaxt='n'
     )
   } else {data_stability <- NA}
-
   if (stability == TRUE && is_diablo == TRUE) {
     blocks <- names(data$features$stable$nrep1)
     for (i in blocks) {
@@ -114,8 +115,9 @@ make_tuned <- function(data, title="") {
   return(data)
 }
 
-make_auroc <- function(data, title="", pch=NULL) {
+make_auroc <- function(data, title="", pch=NA) {
   # take tuned mixomics object and plot roc curve
+  if (is.na(pch)) {pch <- NULL}
   data <- auroc(data, title=paste("ROC comp 1", title),
   		multilevel=pch)
   return(data)
@@ -124,8 +126,9 @@ make_auroc <- function(data, title="", pch=NULL) {
 make_all <- function(data, title, classes, outfile_path, 
 		     pch=NULL, cpus=6, dist="centroids.dist", 
 		     show_cols=FALSE, tuned=NA, bg=FALSE,
-		     stability=FALSE, force_short=FALSE) {
+		     stability=FALSE, force_short=FALSE, auc=TRUE) {
   # aggregate all functions into master plotting function
+  print(paste("Making plots for:", title))
   pdf(outfile_path)
   make_indiv(data=data, classes=classes, dist=dist,
              title=title, pch=pch, bg=bg)
@@ -134,8 +137,9 @@ make_all <- function(data, title, classes, outfile_path,
   make_loadings(data=data, title=title, force_short=force_short)
   make_error(data=data, title=title, stability=stability)
   if (!is.na(tuned)) {make_tuned(data=tuned, title=title)}
-  make_auroc(data=data, title=title, pch=pch)
+  if (auc == TRUE) {make_auroc(data=data, title=title, pch=pch)}
   dev.off()
+  print(paste("Plots written to:", outfile_path))
 }
 
 # replace names in all associated columns for visualisation only
@@ -232,16 +236,81 @@ make_case_study_1 <- function() {
 
 make_case_study_2 <- function() {
   
-  infile_path_2 <- "../results/RData.RData"
+  infile_path_2 <- "../results/MSV000085703/reformatted_output/RData.RData"
   outfile_dir <- "../results/manuscript_figures/"
   
   # case study 2
-  #load(infile_path_2)
-  #load("./RData.RData")
+  load(infile_path_2)
+  
+  lipi_plsda_data <- data_plsda$lipidome$data_plsda
+  meta_plsda_data <- data_plsda$metabolome$data_plsda
+  prot_plsda_data <- data_plsda$proteome$data_plsda
+  tran_plsda_data <- data_plsda$transcriptome$data_plsda
+  omic_plsda_data <- list(
+    lipi_plsda_data, meta_plsda_data, prot_plsda_data, tran_plsda_data
+  )
+
+  lipi_plsda_perf <- data_plsda$lipidome$perf_plsda
+  meta_plsda_perf <- data_plsda$metabolome$perf_plsda
+  prot_plsda_perf <- data_plsda$proteome$perf_plsda
+  tran_plsda_perf <- data_plsda$transcriptome$perf_plsda
+  omic_plsda_perf <- list(
+    lipi_plsda_perf, meta_plsda_perf, prot_plsda_perf, tran_plsda_perf
+  )
+
+  lipi_splsda_data <- data_splsda$lipidome$data_splsda
+  meta_splsda_data <- data_splsda$metabolome$data_splsda
+  prot_splsda_data <- data_splsda$proteome$data_splsda
+  tran_splsda_data <- data_splsda$transcriptome$data_splsda
+  omic_splsda_data <- list(
+    lipi_splsda_data, meta_splsda_data, prot_splsda_data, tran_splsda_data
+  )
+
+  lipi_splsda_perf <- data_splsda$lipidome$perf_splsda
+  meta_splsda_perf <- data_splsda$metabolome$perf_splsda
+  prot_splsda_perf <- data_splsda$proteome$perf_splsda
+  tran_splsda_perf <- data_splsda$transcriptome$perf_splsda
+  omic_splsda_perf <- list(
+    lipi_splsda_perf, meta_splsda_perf, prot_splsda_perf, tran_splsda_perf
+  )
+
+  blocks_plsda <- names(data_plsda)
+  mapply(function(x, y) make_all(
+    outfile_path=paste(outfile_dir, "case_2_plsda_", y, ".pdf", sep=""),
+    data=x, title=paste(y, "PLSDA"), classes=classes, pch=pch,
+    cpus=6, dist="centroids.dist", show_cols=FALSE, bg=TRUE,
+    tuned=NA, stability=FALSE
+    ),
+    omic_plsda_data, blocks_plsda, SIMPLIFY=FALSE
+  )
+
+  blocks_splsda <- names(data_splsda)
+  mapply(function(x, y) make_all(
+    outfile_path=paste(outfile_dir, "case_2_splsda_", y, ".pdf", sep=""),
+    data=x, title=paste(y, "sPLSDA"), classes=classes, pch=pch,
+    cpus=6, dist="centroids.dist", show_cols=FALSE, bg=TRUE,
+    tuned=NA, stability=TRUE
+    ),
+    omic_splsda_data, blocks_splsda, SIMPLIFY=FALSE
+  )
+
+  make_all(
+    outfile_path=paste(outfile_dir, "case_2_diablo.pdf", sep=""),
+    data=diablo, title="Multiblock sPLSDA", classes=classes,
+    pch=pch, cpus=6, dist="mahalanobis.dist", show_cols=FALSE,
+    tuned=NA, bg=FALSE, force_short=TRUE, stability=TRUE, auc=FALSE
+  )
+
+  # clear environment
+  rm(list=ls())
 }
 
 main <- function() {
-  #make_case_study_1()
+  # case study 1 was generated with an old version of the code
+  # some data structure change but underlying info is the same
+  make_case_study_1()
+  
+  # case study 2 was generated with an up to date code version
   make_case_study_2()
 }
 
