@@ -180,8 +180,41 @@ show_na_prop <- function(data_na, name) {
   sum_na_per_var <- apply(data_na, 2, function(x) {sum(is.na(x))})
   # show proportion of NA values across all samples (y) for a variable (x)
   plot(sum_na_per_var/nrow(data_na), type='h', xlab='variable index',
-    ylab='NA proportion (across all samples for a variable)',
-    main=paste(name, 'NA rate per variable on unfiltered data'))
+    ylab='missing values proportion (across all samples for a variable)',
+    main=paste(name, 'missing values per variable on unfiltered data'))
+}
+
+remove_na_class <- function(data, classes, missing_as=NA) {
+  # where there is NA for a whole class of features, remove feature column
+  if (is.na(missing_as)) {
+    data[is.na(data)] = 0
+  } else {
+    data[which(data == missing_as, arr.ind=TRUE)] = 0
+  }
+  print(dim(data))
+  print("Dropping features where at least one class is NA")
+  uniq = unique(classes)
+  subsets = list()
+  for (i in uniq) {subsets[[i]] = data[grep(i, rownames(data)), ]}
+  subsets = lapply(lapply(lapply(subsets, colSums), data.frame), t)
+  subsets = do.call("rbind", subsets)
+  rownames(subsets) = uniq
+
+  if (is.na(missing_as)) {
+    subsets[which(subsets == 0, arr.ind=TRUE)] = NA
+  } else {
+    subsets[which(subsets == 0, arr.ind=TRUE)] = missing_as
+  }
+
+  subsets = t(na.omit(t(subsets)))
+  data = data[, c(colnames(subsets))]
+
+  if (is.na(missing_as)) {
+    data[which(data == 0, arr.ind=TRUE)] = NA
+  } else {
+    data[which(data == 0, arr.ind=TRUE)] = missing_as
+  }
+  return(data)
 }
 
 cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
@@ -263,9 +296,9 @@ make_case_study_1 <- function() {
 make_case_study_1_extra <- function() {
   # case study 1 extra plots
   infile_path_1 <- "../results/RData.RData"
-  unimputed_prot_path <- "../data/diablo_proteome.tsv"
+  unimputed_prot_path <- "../data/diablo_proteome.txt"
   unimputed_prot <- read.table(unimputed_prot_path, sep="\t", header=TRUE, row.names=1)
-  unimputed_tran_path <- "../data/diablo_translatome.tsv"
+  unimputed_tran_path <- "../data/diablo_translatome.txt"
   unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
   outfile_dir <- "../results/manuscript_figures/"
 
@@ -277,11 +310,16 @@ make_case_study_1_extra <- function() {
   unimputed_prot[unimputed_prot == 0] <- NA
   unimputed_tran[unimputed_tran == 0] <- NA
   na_prop_prot <- show_na_prop(
-    unimputed_prot, "Missing values in original proteome data"
+    unimputed_prot, "Proteome"
   )
   na_prop_tran <- show_na_prop(
-    unimputed_tran, "Missing values in original translatome data"
+    unimputed_tran, "Translatome"
   )
+
+  # need to drop col where all missing
+  unimputed_prot <- remove_na_class(unimputed_prot, classes, missing_as=NA)
+  unimputed_tran <- remove_na_class(unimputed_tran, classes, missing_as=NA)
+
   pca_unimputed_prot <- pca(unimputed_prot, ncomp=10)
   pca_unimputed_tran <- pca(unimputed_tran, ncomp=10)
   pca_imputed_prot <- pca(data$proteome, ncomp=10)
@@ -386,8 +424,9 @@ make_case_study_2_extra <- function() {
 
   unimputed[unimputed == 0] <- NA
   na_prop <- show_na_prop(
-    unimputed, "Missing values in original transcriptome data"
+    unimputed, "Transcriptome"
   )
+  unimputed <- remove_na_class(unimputed, classes, missing_as=NA)
   pca_imputed <- pca(data$transcriptome, ncomp=10)
   pca_unimputed <- pca(unimputed, ncomp=10)
   
