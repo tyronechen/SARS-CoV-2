@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
 # regenerate plots for this manuscript
 library(mixOmics)
+library(reshape2)
 
 make_indiv <- function(data, classes, title, dist="centroids.dist", 
 		       pch=NA, bg=FALSE) {
@@ -174,6 +175,31 @@ replace_names_ <- function(data, trim=16) {
   return(list(data_vis=data_vis, truncated=truncated))
 }
 
+show_na_prop <- function(data_na, name) {
+  # first, sum the number of missing values per variable
+  sum_na_per_var <- apply(data_na, 2, function(x) {sum(is.na(x))})
+  # show proportion of NA values across all samples (y) for a variable (x)
+  plot(sum_na_per_var/nrow(data_na), type='h', xlab='variable index',
+    ylab='NA proportion (across all samples for a variable)',
+    main=paste(name, 'NA rate per variable on unfiltered data'))
+}
+
+cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
+  # plots a heatmap of correlations: -> df, df, name
+  x <- pca_withna
+  y <- pca_impute
+  z <- names
+  print("Plotting correlation between unimputed and imputed components")
+  print(ggplot(melt(cor(x$variates$X, y$variates$X)),
+    aes(Var1, Var2, fill=value)) +
+    ggtitle(paste(z, "Correlation between imputed and unimputed data")) +
+    geom_tile() +
+    scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
+      limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
+    theme_minimal()
+  )
+}
+
 make_case_study_1 <- function() {
   infile_path_1 <- "../results/RData.RData"
   outfile_dir <- "../results/manuscript_figures/"
@@ -231,6 +257,47 @@ make_case_study_1 <- function() {
   )
 
   # clear environment to avoid clashes with case study 2
+  rm(list=ls())
+}
+
+make_case_study_1_extra <- function() {
+  # case study 1 extra plots
+  infile_path_1 <- "../results/reformatted_output/RData.RData"
+  unimputed_prot_path <- "../data/diablo_proteome.tsv"
+  unimputed_prot <- read.table(unimputed_prot_path, sep="\t", header=TRUE, row.names=1)
+  unimputed_tran_path <- "../data/diablo_translatome.tsv"
+  unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_1)
+  
+  pdf(paste(outfile_dir, "case_1_extra_plots.pdf"))
+  
+  unimputed_prot[unimputed_prot == 0] <- NA
+  unimputed_tran[unimputed_tran == 0] <- NA
+  na_prop_prot <- show_na_prop(
+    unimputed_prot, "Missing values in original proteome data"
+  )
+  na_prop_tran <- show_na_prop(
+    unimputed_tran, "Missing values in original translatome data"
+  )
+  pca_unimputed_prot <- pca(unimputed_prot, ncomp=10)
+  pca_unimputed_tran <- pca(unimputed_tran, ncomp=10)
+  pca_imputed_prot <- pca(data$proteome, ncomp=10)
+  pca_imputed_tran <- pca(data$translatome, ncomp=10)
+  
+  prot <- "Proteome correlation imputed vs unimputed data"
+  tran <- "Translatome correlation imputed vs unimputed data"
+  cor_imputed_unimputed(
+    pca_imputed_prot, pca_unimputed_prot, prot
+  )
+  cor_imputed_unimputed(
+    pca_imputed_tran, pca_unimputed_tran, tran
+  )
+  dev.off()
+
+  # clear environment
   rm(list=ls())
 }
 
@@ -305,13 +372,42 @@ make_case_study_2 <- function() {
   rm(list=ls())
 }
 
+make_case_study_2_extra <- function() {
+  # case study 2 extra plots
+  infile_path_2 <- "../results/MSV000085703/reformatted_output/RData.RData"
+  unimputed_path <- "../data/MSV000085703/hfd45/data_transcriptomics.tsv"
+  unimputed <- read.table(unimputed_path, sep="\t", header=TRUE, row.names=1)
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 2
+  load(infile_path_2)
+
+  pdf(paste(outfile_dir, "case_2_extra_plots.pdf", sep=""))
+
+  unimputed[unimputed == 0] <- NA
+  na_prop <- show_na_prop(
+    unimputed, "Missing values in original transcriptome data"
+  )
+  pca_imputed <- pca(data$transcriptome, ncomp=10)
+  pca_unimputed <- pca(unimputed, ncomp=10)
+  
+  name <- "Transcriptome correlation imputed vs unimputed data"
+  cor_imputed_unimputed(pca_imputed, pca_unimputed, name)
+  dev.off()
+
+  # clear environment
+  rm(list=ls())
+}
+
 main <- function() {
   # case study 1 was generated with an old version of the code
   # some data structure change but underlying info is the same
   make_case_study_1()
-  
+  make_case_study_1_extra()  
+
   # case study 2 was generated with an up to date code version
   make_case_study_2()
+  make_case_study_2_extra()
 }
 
 main()
