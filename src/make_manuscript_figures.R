@@ -225,7 +225,7 @@ cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
   print("Plotting correlation between unimputed and imputed components")
   print(ggplot(melt(cor(x$variates$X, y$variates$X)),
     aes(Var1, Var2, fill=value)) +
-    ggtitle(paste(z, "Correlation between imputed and unimputed data")) +
+    ggtitle(paste(z, "correlation between imputed and unimputed data")) +
     geom_tile() +
     scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
       limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
@@ -325,8 +325,8 @@ make_case_study_1_extra <- function() {
   pca_imputed_prot <- pca(data$proteome, ncomp=10)
   pca_imputed_tran <- pca(data$translatome, ncomp=10)
   
-  prot <- "Proteome correlation imputed vs unimputed data"
-  tran <- "Translatome correlation imputed vs unimputed data"
+  prot <- "Proteome"
+  tran <- "Translatome"
   cor_imputed_unimputed(
     pca_imputed_prot, pca_unimputed_prot, prot
   )
@@ -426,11 +426,11 @@ make_case_study_2_extra <- function() {
   na_prop <- show_na_prop(
     unimputed, "Transcriptome"
   )
-  unimputed <- remove_na_class(unimputed, classes, missing_as=NA)
+  #unimputed <- remove_na_class(unimputed, classes, missing_as=NA)
   pca_imputed <- pca(data$transcriptome, ncomp=10)
   pca_unimputed <- pca(unimputed, ncomp=10)
   
-  name <- "Transcriptome correlation imputed vs unimputed data"
+  name <- "Transcriptome"
   cor_imputed_unimputed(pca_imputed, pca_unimputed, name)
   dev.off()
 
