@@ -1,0 +1,26 @@
+Rscript diablo_train.R \
+   ../data/MSV000085703/hfd45/classes_diablo.tsv  \
+   --classes_secondary NA \
+   --dropna_classes FALSE \
+   --dropna_prop 0 \
+   --data ../data/MSV000085703/hfd45/data_lipidomics.tsv ../data/MSV000085703/hfd45/data_metabolomics.tsv ../data/MSV000085703/hfd45/data_proteomics.tsv ../data/MSV000085703/hfd45/data_transcriptomics.tsv \
+   --data_names lipidome metabolome proteome transcriptome \
+   --force_unique FALSE \
+   --mappings NA \
+   --ncpus 16 \
+   --diablocomp 0 \
+   --linkage 0.1 \
+   --diablo_keepx 5 6 7 8 9 10 30 \
+   --icomp 0 \
+   --pcomp 10 \
+   --plsdacomp 2 \
+   --splsdacomp 2 \
+   --splsda_keepx 5 6 7 8 9 10 30 \
+   --dist_plsda centroids.dist \
+   --dist_splsda centroids.dist \
+   --dist_diablo centroids.dist \
+   --contrib max \
+   --outfile_dir ../results/MSV000085703/final/MSV_4M_01_small \
+   --rdata RData.RData \
+   --plot Rplots.pdf \
+   --args Rscript.sh
