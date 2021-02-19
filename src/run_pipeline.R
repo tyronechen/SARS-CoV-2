@@ -4,14 +4,24 @@ library(argparser, quietly=TRUE)
 library(ggplot2)
 library(parallel)
 library(reshape2)
-source(file="multiomics_pipeline.R")
+
+# this allows this script to be called from anywhere, it will find the library
+library_code <- "multiomics_pipeline.R"
+initial_options <- commandArgs(trailingOnly = FALSE)
+file_arg_name <- "--file="
+script_name <- sub(file_arg_name, "", initial_options[grep(file_arg_name, initial_options)])
+script_basename <- dirname(script_name)
+other_name <- file.path(script_basename, library_code)
+print(paste("Sourcing", other_name, "from", script_name))
+source(other_name)
 
 parse_argv = function() {
   library(argparser, quietly=TRUE)
   p = arg_parser("Assess the quality of individual omics data modality blocks, \
-  Imputes data, Run DIABLO on multi-omics data. Take tsv file of classes, \
-  tsv files of omics data (at least 2!) and identify correlation between \
-  features. For more information please refer to mixOmics and case studies at \
+  Run DIABLO on multi-omics data. Take tsv file of classes, tsv files of omcis \
+  data (at least 2) and identify correlation between features. Note that \
+  multiomics_pipeline.R and run_pipeline.R must be in the same directory! \
+  For more information please refer to mixOmics and case studies at \
   http://mixomics.org/mixdiablo/case-study-tcga/.")
 
   # Add command line arguments
