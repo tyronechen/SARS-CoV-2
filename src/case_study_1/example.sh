@@ -1,11 +1,11 @@
-Rscript diablo_train.R \
-   ../data/classes_diablo.txt  \
-   --classes_secondary ../data/pch.txt \
+Rscript ../run_pipeline.R \
+   ../../data/case_study_1/classes_diablo.txt  \
+   --classes_secondary ../../data/case_study_1/pch.txt \
    --dropna_classes TRUE \
    --dropna_prop 0 \
-   --data ../data/diablo_proteome.txt ../data/diablo_translatome.txt \
+   --data ../../data/case_study_1/diablo_proteome.txt ../../data/case_study_1/diablo_translatome.txt \
    --data_names proteome translatome \
-   --mappings ../data/proteome_mapfile.txt ../data/translatome_mapfile.txt \
+   --mappings ../../data/case_study_1/proteome_mapfile.txt ../../data/case_study_1/translatome_mapfile.txt \
    --ncpus 6 \
    --diablocomp 0 \
    --diablo_keepx 5 10 12 14 16 18 20 30 \
@@ -18,7 +18,7 @@ Rscript diablo_train.R \
    --dist_splsda centroids.dist \
    --dist_diablo mahalanobis.dist \
    --contrib max \
-   --outfile_dir ../results/EXAMPLE \
+   --outfile_dir ../../results/case_study_1/EXAMPLE \
    --rdata RData.RData \
    --plot Rplots.pdf \
    --args Rscript.sh
