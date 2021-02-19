@@ -1159,9 +1159,11 @@ To annotate and organise correlation tables for further analysis, run the jupyte
 
 ## Downstream analyses
 
-*To be written*
+> **NOTE**: This section describes the downstream steps performed in our publication and is not directly a part of the pipeline.
 
-> **NOTE**: This section describes the downstream steps performed in our publication and is not part of the pipeline.
+Molecular docking analyses were carried out with four docking tools [SWISSDOCK](http://www.swissdock.ch/), [PATCHDOCK](https://bioinfo3d.cs.tau.ac.il/PatchDock/), [MTiAutoDock](https://bioserv.rpbs.univ-paris-diderot.fr/services/MTiOpenScreen/) and [Achilles Blind Docking](https://bio-hpc.ucam.edu/achilles/). In each case, the web server was used. Each docking tool applies a different strategy. For detailed information on the strategies used, please refer to the source manuscripts cited in the publication.
+
+A consensus result among all the four tools was used to obtain increased layers of confidence in the final results. To illustrate drug viability in human physiological environments, *in silico* pharmacokinetic analysis of the drugs was done by analysing their ADME properties (absorption, distribution, metabolism and excretion) with the [admetSAR tool](http://lmmd.ecust.edu.cn/admetsar2/).
 
 ## Acknowledgements
 
