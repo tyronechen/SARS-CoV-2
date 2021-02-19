@@ -1,9 +1,9 @@
-Rscript diablo_train.R \
-   ../data/MSV000085703/hfd45/classes_diablo.tsv  \
+Rscript ../run_pipeline.R \
+   ../../data/case_study_2/classes_diablo.tsv  \
    --classes_secondary NA \
    --dropna_classes FALSE \
    --dropna_prop 0 \
-   --data ../data/MSV000085703/hfd45/data_lipidomics.tsv ../data/MSV000085703/hfd45/data_metabolomics.tsv ../data/MSV000085703/hfd45/data_proteomics.tsv ../data/MSV000085703/hfd45/data_transcriptomics.tsv \
+   --data ../../../data/case_study_2/data_lipidomics.tsv ../../data/case_study_2/data_metabolomics.tsv ../../data/case_study_2/data_proteomics.tsv ../../data/case_study_2/data_transcriptomics_imputed_all.tsv \
    --data_names lipidome metabolome proteome transcriptome \
    --force_unique FALSE \
    --mappings NA \
@@ -20,7 +20,7 @@ Rscript diablo_train.R \
    --dist_splsda centroids.dist \
    --dist_diablo centroids.dist \
    --contrib max \
-   --outfile_dir ../results/MSV000085703/final/MSV_4M_01_small \
+   --outfile_dir ../../results/case_study_2/EXAMPLE/ \
    --rdata RData.RData \
    --plot Rplots.pdf \
    --args Rscript.sh
