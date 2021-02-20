@@ -234,7 +234,7 @@ cor_imputed_unimputed = function(pca_withna, pca_impute, names) {
 }
 
 make_case_study_1 <- function() {
-  infile_path_1 <- "../results/RData.RData"
+  infile_path_1 <- "../results/case_study_1/RData.RData"
   outfile_dir <- "../results/manuscript_figures/"
   
   # case study 1
@@ -295,10 +295,10 @@ make_case_study_1 <- function() {
 
 make_case_study_1_extra <- function() {
   # case study 1 extra plots
-  infile_path_1 <- "../results/RData.RData"
-  unimputed_prot_path <- "../data/diablo_proteome.txt"
+  infile_path_1 <- "../results/case_study_1/RData.RData"
+  unimputed_prot_path <- "../data/case_study_1/diablo_proteome.txt"
   unimputed_prot <- read.table(unimputed_prot_path, sep="\t", header=TRUE, row.names=1)
-  unimputed_tran_path <- "../data/diablo_translatome.txt"
+  unimputed_tran_path <- "../data/case_study_1/diablo_translatome.txt"
   unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
   outfile_dir <- "../results/manuscript_figures/"
 
@@ -341,7 +341,7 @@ make_case_study_1_extra <- function() {
 
 make_case_study_2 <- function() {
   
-  infile_path_2 <- "../results/MSV000085703/reformatted_output/RData.RData"
+  infile_path_2 <- "../results/case_study_2/RData.RData"
   outfile_dir <- "../results/manuscript_figures/"
   
   # case study 2
@@ -412,8 +412,8 @@ make_case_study_2 <- function() {
 
 make_case_study_2_extra <- function() {
   # case study 2 extra plots
-  infile_path_2 <- "../results/MSV000085703/reformatted_output/RData.RData"
-  unimputed_path <- "../data/MSV000085703/hfd45/data_transcriptomics.tsv"
+  infile_path_2 <- "../results/case_study_2/RData.RData"
+  unimputed_path <- "../data/case_study_2/data_transcriptomics.tsv"
   unimputed <- read.table(unimputed_path, sep="\t", header=TRUE, row.names=1)
   outfile_dir <- "../results/manuscript_figures/"
 
