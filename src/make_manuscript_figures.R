@@ -339,6 +339,46 @@ make_case_study_1_extra <- function() {
   rm(list=ls())
 }
 
+make_case_study_1_multilevel <- function() {
+  # case study 1 multilevel plots
+  infile_path_1 <- "../results/case_study_1/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_1)
+
+  pdf(paste(outfile_dir, "case_1_multilevel.pdf", sep=""))
+
+  data_prot <- pca(data_imp$proteome, ncomp=10, scale=TRUE, center=TRUE)
+  plotIndiv(
+    data_prot, ind.names=FALSE, group=classes, legend=TRUE,
+    pch=pch, title=paste("Proteome (uncorrected)", "1/2"), comp=c(1,2),
+    ellipse=FALSE, background=FALSE
+  )
+  plotIndiv(
+    data_pca_multilevel$proteome, ind.names=FALSE, group=classes, legend=TRUE,
+    pch=pch, title=paste("Proteome (corrected)", "1/2"), comp=c(1,2), 
+    ellipse=FALSE, background=FALSE
+  )
+
+  data_tran <- pca(data_imp$translatome, ncomp=10, scale=TRUE, center=TRUE)
+  plotIndiv(
+    data_tran, ind.names=FALSE, group=classes, legend=TRUE,
+    pch=pch, title=paste("Translatome (uncorrected)", "1/2"), comp=c(1,2),
+    ellipse=FALSE, background=FALSE
+  )
+  plotIndiv(
+    data_pca_multilevel$translatome, ind.names=FALSE, group=classes, legend=TRUE,
+    pch=pch, title=paste("Translatome (corrected)", "1/2"), comp=c(1,2),
+    ellipse=FALSE, background=FALSE
+  )
+
+  dev.off()
+
+  # clear environment
+  rm(list=ls())
+}
+
 make_case_study_2 <- function() {
   
   infile_path_2 <- "../results/case_study_2/RData.RData"
@@ -443,6 +483,7 @@ main <- function() {
   # some data structure change but underlying info is the same
   make_case_study_1()
   make_case_study_1_extra()  
+  make_case_study_1_multilevel()
 
   # case study 2 was generated with an up to date code version
   make_case_study_2()
