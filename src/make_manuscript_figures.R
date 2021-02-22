@@ -379,6 +379,17 @@ make_case_study_1_multilevel <- function() {
   rm(list=ls())
 }
 
+make_case_study_1_diablo <- function () {
+  infile_path_1 <- "../results/case_study_1/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_1)
+  pdf(paste(outfile_dir, "case_1_diablo.pdf", sep=""))
+  circosPlot(diablo, cutoff=0.95, size.variables=0.01, size.labels=2)
+  dev.off()
+}
+
 make_case_study_2 <- function() {
   
   infile_path_2 <- "../results/case_study_2/RData.RData"
@@ -478,16 +489,29 @@ make_case_study_2_extra <- function() {
   rm(list=ls())
 }
 
+make_case_study_2_diablo <- function () {
+  infile_path_2 <- "../results/case_study_2/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_2)
+  pdf(paste(outfile_dir, "case_2_diablo.pdf", sep=""))
+  circosPlot(diablo, cutoff=0.8, size.variables=0.01, size.labels=2)
+  dev.off()
+}
+
 main <- function() {
   # case study 1 was generated with an old version of the code
   # some data structure change but underlying info is the same
   make_case_study_1()
   make_case_study_1_extra()  
   make_case_study_1_multilevel()
+  make_case_study_1_diablo()
 
   # case study 2 was generated with an up to date code version
   make_case_study_2()
   make_case_study_2_extra()
+  make_case_study_2_diablo()
 }
 
 main()
