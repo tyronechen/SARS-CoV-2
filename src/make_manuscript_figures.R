@@ -390,6 +390,83 @@ make_case_study_1_diablo <- function () {
   dev.off()
 }
 
+make_case_study_1_error <- function() {
+  infile_path_1 <- "../results/case_study_1/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_1)
+  pdf(paste(outfile_dir, "case_1_error.pdf", sep=""))
+
+  proteome_plsda <- data_plsda[,1]
+  class(proteome_plsda) <- c("mixo_plsda", "mixo_pls", "DA")
+  translatome_plsda <- data_plsda[,2]
+  class(translatome_plsda) <- c("mixo_plsda", "mixo_pls", "DA")
+  proteome_splsda <- data_splsda[,1]
+  class(proteome_splsda) <- c("mixo_splsda", "mixo_spls", "DA")
+  translatome_splsda <- data_splsda[,2]
+  class(translatome_splsda) <- c("mixo_splsda", "mixo_spls", "DA")
+  
+  perf_plsda_prot <- perf(
+    object=proteome_plsda, validation="loo", nrepeats=10, 
+    auc=TRUE, cpus=6, progressBar=TRUE
+  )
+  perf_plsda_tran <- perf(
+    object=translatome_plsda, validation="loo", nrepeats=10,
+    auc=TRUE, cpus=6, progressBar=TRUE
+  )
+  perf_splsda_prot <- perf(
+    object=proteome_splsda, validation="loo", nrepeats=10,
+    auc=TRUE, cpus=6, progressBar=TRUE
+  )
+  perf_splsda_tran <- perf(
+    object=translatome_splsda, validation="loo", nrepeats=10,
+    auc=TRUE, cpus=6, progressBar=TRUE
+  )
+  perf_diablo <- perf(
+    object=diablo, validation="loo", nrepeats=10,
+    auc=TRUE, cpus=6, progressBar=TRUE
+  )
+
+  error_plsda <- c(
+    apply(perf_plsda_prot$error.rate$overall, 1, min),
+    apply(perf_plsda_tran$error.rate$overall, 1, min)
+  )
+  error_splsda <- c(
+    apply(perf_splsda_prot$error.rate$overall, 1, min),
+    apply(perf_splsda_tran$error.rate$overall, 1, min)
+  )
+  error_singleomics <- data.frame(c(
+    as.vector(unlist(error_plsda)),
+    as.vector(unlist(error_splsda))
+  ))
+  error_diablo <- min(
+    perf_diablo$WeightedVote.error.rate$mahalanobis.dist["Overall.ER",]
+  )
+
+  # temporary variable for plotting only
+  colnames(error_singleomics) <- "es"
+  es <- error_singleomics
+  es_plot <- ggplot(es, aes(y=es)) +
+    geom_boxplot(color="orange") +
+    theme_minimal() +
+    ggtitle("Minimum error rates across all single omics data") +
+    geom_hline(aes(yintercept=error_diablo), color="blue") +
+    scale_y_continuous(
+      breaks=sort(c(seq(min(es$es), max(es$es), length.out=4), error_diablo))
+    ) +
+    geom_text(
+      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=1.5, vjust=-1)
+      ) +
+    xlab("Case study 1") +
+    ylab("Minimum error rates")
+  print(es_plot)
+  dev.off()
+
+  # clear environment
+  rm(list=ls())
+}
+
 make_case_study_2 <- function() {
   
   infile_path_2 <- "../results/case_study_2/RData.RData"
@@ -500,6 +577,56 @@ make_case_study_2_diablo <- function () {
   dev.off()
 }
 
+make_case_study_2_error <- function() {
+  infile_path_2 <- "../results/case_study_2/RData.RData"
+  outfile_dir <- "../results/manuscript_figures/"
+
+  # case study 1
+  load(infile_path_2)
+  pdf(paste(outfile_dir, "case_2_error.pdf", sep=""))
+  
+  error_plsda <- c(
+    apply(data_plsda$lipidome$perf_plsda$error.rate$overall, 1, min),
+    apply(data_plsda$metabolome$perf_plsda$error.rate$overall, 1, min),
+    apply(data_plsda$proteome$perf_plsda$error.rate$overall, 1, min),
+    apply(data_plsda$transcriptome$perf_plsda$error.rate$overall, 1, min)
+  )
+  error_splsda <- c(
+    apply(data_splsda$lipidome$perf_splsda$error.rate$overall, 1, min),
+    apply(data_splsda$metabolome$perf_splsda$error.rate$overall, 1, min),
+    apply(data_splsda$proteome$perf_splsda$error.rate$overall, 1, min),
+    apply(data_splsda$transcriptome$perf_splsda$error.rate$overall, 1, min)
+  )
+  error_singleomics <- data.frame(c(
+    as.vector(unlist(error_plsda)), 
+    as.vector(unlist(error_splsda))
+  ))
+  error_diablo <- min(
+    perf_diablo$WeightedVote.error.rate$centroids.dist["Overall.ER",]
+  )
+  # temporary variable for plotting only
+  colnames(error_singleomics) <- "es"
+  es <- error_singleomics
+  es_plot <- ggplot(es, aes(y=es)) + 
+    geom_boxplot(color="orange") + 
+    theme_minimal() + 
+    ggtitle("Minimum error rates across all single omics data") + 
+    geom_hline(aes(yintercept=error_diablo), color="blue") + 
+    scale_y_continuous(
+      breaks=sort(c(seq(min(es$es), max(es$es), length.out=4), error_diablo))
+    ) + 
+    geom_text(
+      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=1.5, vjust=-1)
+      ) + 
+    xlab("Case study 2") + 
+    ylab("Minimum error rates")
+  print(es_plot)
+  dev.off()
+  
+  # clear environment
+  rm(list=ls())
+}
+
 main <- function() {
   # case study 1 was generated with an old version of the code
   # some data structure change but underlying info is the same
@@ -507,11 +634,13 @@ main <- function() {
   make_case_study_1_extra()  
   make_case_study_1_multilevel()
   make_case_study_1_diablo()
+  make_case_study_1_error()
 
   # case study 2 was generated with an up to date code version
   make_case_study_2()
   make_case_study_2_extra()
   make_case_study_2_diablo()
+  make_case_study_2_error()
 }
 
 main()
