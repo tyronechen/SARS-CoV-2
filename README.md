@@ -70,7 +70,7 @@ install.packages(devtools)
 install_gitlab("tyagilab/sars-cov-2", subdir="multiomics")
 ```
 
-The actual script used to run the file is not directly callable but provided as a separate script.
+The actual script used to run the pipeline is not directly callable but provided as a separate script.
 
 ```
 # this will show you the path to the script
