@@ -61,11 +61,31 @@ A visual summary of the pipeline is below:
 
 ## Installation
 
-Clone the git repository with:
+### Gitlab
+
+You can install this directly as an R package from gitlab:
+
+```
+install.packages(devtools)
+install_gitlab("tyagilab/sars-cov-2", subdir="multiomics")
+```
+
+The actual script used to run the file is not directly callable but provided as a separate script.
+
+```
+# this will show you the path to the script
+system.file("scripts", "run_pipeline.R", package="multiomics")
+```
+
+### Git clone
+
+Alternatively, clone the git repository with:
 
 ```
 git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
 ```
+
+#### Install R packages with conda
 
 [With conda](https://bioconda.github.io/user/install.html) (recommended):
 
@@ -85,6 +105,8 @@ conda create -n mixomics_environment install \
   r-cpp11 \
   r-mixomics
 ```
+
+#### Install R packages with R
 
 Manual install (within R):
 
@@ -109,12 +131,12 @@ BiocManager::install("mixOmicsTeam/mixOmics")
 You can then run the script directly:
 
 ```
-Rscript diablo_train.R -h
+Rscript run_pipeline.R -h
 ```
 
-For a sample submission script, see `[example.sh]`(https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/src/example.sh). This example may take about half an hour to run! As a result the study below will be replicated, but minor differences may be visible as this pipeline is non-deterministic.
+For a sample submission script, see `[test_run.sh]`(https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/src/test_run.sh). This example may take a few minutes to run.
 
-> _**NOTE**_: `R` should be version 3.6 or greater. `diablo_train.R` and `multiomics_sars-cov-2.R` should be in the same directory.
+> _**NOTE**_: `R` should be version 3.6 or greater. `multiomics_pipeline.R` and `run_pipeline.R` should be in the same directory.
 
 ## Overview of the case study
 
