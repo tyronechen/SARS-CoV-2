@@ -1,0 +1,24 @@
+Rscript run_pipeline.R \
+   ../data/case_study_2/classes_diablo.tsv  \
+   --dropna_classes FALSE \
+   --dropna_prop 0 \
+   --data ../data/case_study_2/data_lipidomics.tsv ../data/case_study_2/data_metabolomics.tsv \
+   --data_names lipidome metabolome \
+   --force_unique FALSE \
+   --ncpus 6 \
+   --diablocomp 0 \
+   --linkage 0.1 \
+   --diablo_keepx 5 10 \
+   --icomp 0 \
+   --pcomp 10 \
+   --plsdacomp 2 \
+   --splsdacomp 2 \
+   --splsda_keepx 5 10 \
+   --dist_plsda centroids.dist \
+   --dist_splsda centroids.dist \
+   --dist_diablo centroids.dist \
+   --contrib max \
+   --outfile_dir ../results/test_run/ \
+   --rdata RData.RData \
+   --plot Rplots.pdf \
+   --args Rscript.sh
