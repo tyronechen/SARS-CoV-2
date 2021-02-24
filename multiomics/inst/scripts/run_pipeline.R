@@ -1,19 +1,19 @@
 #!/usr/bin/Rscript
 # combine multi-omics data
-library(argparser, quietly=TRUE)
-library(ggplot2)
-library(parallel)
-library(reshape2)
+#library(argparser, quietly=TRUE)
+#library(ggplot2)
+#library(parallel)
+#library(reshape2)
 
 # this allows this script to be called from anywhere, it will find the library
-library_code <- "multiomics_pipeline.R"
-initial_options <- commandArgs(trailingOnly = FALSE)
-file_arg_name <- "--file="
-script_name <- sub(file_arg_name, "", initial_options[grep(file_arg_name, initial_options)])
-script_basename <- dirname(script_name)
-other_name <- file.path(script_basename, library_code)
-print(paste("Sourcing", other_name, "from", script_name))
-source(other_name)
+#library_code <- "multiomics_pipeline.R"
+#initial_options <- commandArgs(trailingOnly = FALSE)
+#file_arg_name <- "--file="
+#script_name <- sub(file_arg_name, "", initial_options[grep(file_arg_name, initial_options)])
+#script_basename <- dirname(script_name)
+#other_name <- file.path(script_basename, library_code)
+#print(paste("Sourcing", other_name, "from", script_name))
+#source(other_name)
 
 parse_argv <- function() {
   library(argparser, quietly=TRUE)
