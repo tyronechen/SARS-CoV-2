@@ -447,8 +447,11 @@ make_case_study_1_error <- function() {
   # temporary variable for plotting only
   colnames(error_singleomics) <- "es"
   es <- error_singleomics
-  es_plot <- ggplot(es, aes(y=es)) +
-    geom_boxplot(color="orange") +
+  es <- cbind(x=as.factor(seq(1)), es)
+  es_plot <- ggplot(es, aes(x=x, y=es)) +
+    geom_boxplot(color="orange", width=.3) +
+    theme(axis.ticks.x=element_blank(), axis.title.x=element_blank()) +
+    scale_x_discrete(labels = NULL, breaks = NULL) + 
     theme_minimal() +
     ggtitle("Minimum error rates across all single omics data") +
     geom_hline(aes(yintercept=error_diablo), color="blue") +
@@ -456,7 +459,7 @@ make_case_study_1_error <- function() {
       breaks=sort(c(seq(min(es$es), max(es$es), length.out=4), error_diablo))
     ) +
     geom_text(
-      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=1.5, vjust=-1)
+      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=0, vjust=-1)
       ) +
     xlab("Case study 1") +
     ylab("Minimum error rates")
@@ -581,7 +584,7 @@ make_case_study_2_error <- function() {
   infile_path_2 <- "../results/case_study_2/RData.RData"
   outfile_dir <- "../results/manuscript_figures/"
 
-  # case study 1
+  # case study 2
   load(infile_path_2)
   pdf(paste(outfile_dir, "case_2_error.pdf", sep=""))
   
@@ -607,17 +610,20 @@ make_case_study_2_error <- function() {
   # temporary variable for plotting only
   colnames(error_singleomics) <- "es"
   es <- error_singleomics
-  es_plot <- ggplot(es, aes(y=es)) + 
-    geom_boxplot(color="orange") + 
-    theme_minimal() + 
-    ggtitle("Minimum error rates across all single omics data") + 
-    geom_hline(aes(yintercept=error_diablo), color="blue") + 
+  es <- cbind(x=as.factor(seq(1)), es)
+  es_plot <- ggplot(es, aes(x=x, y=es)) +
+    geom_boxplot(color="orange", width=.3) +
+    theme(axis.ticks.x=element_blank(), axis.title.x=element_blank()) +
+    scale_x_discrete(labels = NULL, breaks = NULL) +
+    theme_minimal() +
+    ggtitle("Minimum error rates across all single omics data") +
+    geom_hline(aes(yintercept=error_diablo), color="blue") +
     scale_y_continuous(
       breaks=sort(c(seq(min(es$es), max(es$es), length.out=4), error_diablo))
-    ) + 
+    ) +
     geom_text(
-      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=1.5, vjust=-1)
-      ) + 
+      aes(0,error_diablo,label="DIABLO minimum error rate", hjust=0, vjust=-1)
+      ) +
     xlab("Case study 2") + 
     ylab("Minimum error rates")
   print(es_plot)
