@@ -1,3 +1,5 @@
+[![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
+
 # SARS-CoV-2
 
 Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)
