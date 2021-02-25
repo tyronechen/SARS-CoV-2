@@ -1,0 +1,243 @@
+---
+title: "Introduction"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r init, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r global-options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='figs/',
+                      echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)
+
+Code in this package and git repository [https://gitlab.com/tyagilab/sars-cov-2/](https://gitlab.com/tyagilab/sars-cov-2/) is provided under a [MIT license](https://opensource.org/licenses/MIT). This documentation is provided under a [CC-BY-3.0 AU license](https://creativecommons.org/licenses/by/3.0/au/).
+
+[Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/) Contact Sonika Tyagi at [sonika.tyagi@monash.edu](mailto:sonika.tyagi@monash.edu).
+
+
+# Installation
+
+## Quick
+
+You can install this directly as an R package from gitlab:
+
+```
+install.packages(devtools)
+install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE)
+```
+
+The actual script used to run the pipeline is not directly callable but provided as a separate script.
+
+```
+# this will show you the path to the script
+system.file("scripts", "run_pipeline.R", package="multiomics")
+```
+
+## Manual
+
+Alternatively, clone the git repository with:
+
+```
+git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
+```
+
+### Install dependencies
+
+[With `conda`](https://bioconda.github.io/user/install.html):
+
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+
+conda create -n my_environment install \
+  r-argparser \
+  r-brio \
+  r-colorspace \
+  r-diffobj \
+  r-dplyr \
+  r-ellipsis \
+  r-farver \
+  r-ggplot2 \
+  r-ggrepel \
+  r-igraph \
+  r-isoband \
+  r-matrixStats \
+  r-mixOmics \
+  r-parallel \
+  r-plyr \
+  r-rARPACK \
+  r-Rcpp \
+  r-RcppEigen \
+  r-reshape2 \
+  r-RSpectra \
+  r-stringi \
+  r-testthat \
+  r-tibble \
+  r-tidyr \
+  r-utf8 \
+  r-vctrs \
+  r-zeallot
+```
+
+You can also install dependencies in `R` directly:
+
+```
+install_me <- c(
+  "argparser", "brio", "colorspace", "diffobj", "dplyr", "ellipsis", "farver",
+  "ggplot2", "ggrepel", "igraph", "isoband", "matrixStats", "mixOmics",
+  "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "RSpectra",
+  "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot"
+  )
+sapply(install_me, install.packages)
+```
+
+# Usage
+
+Load the library.
+
+```{r setup}
+library(multiomics)
+```
+
+If you installed this pipeline as an `R` package, an example pipeline script is included. You can find it by running this command in your `R` environment:
+
+```
+system.file("scripts", "run_pipeline.R", package="multiomics")
+```
+
+Otherwise, you can find a copy of this script in the public git repository: [https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/run_pipeline.R](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/run_pipeline.R)
+
+To inspect the arguments to the script, run this command:
+
+```
+Rscript run_pipeline.R --help
+```
+
+A minimal script to run the pipeline is shown. [You can also download this here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/test_run.sh). This may take a few minutes.
+
+```
+Rscript run_pipeline.R \
+   classes.tsv  \
+   --dropna_classes FALSE \
+   --dropna_prop 0 \
+   --data lipidomics.tsv metabolomics.tsv \
+   --data_names lipidomics metabolomics \
+   --force_unique FALSE \
+   --ncpus 2 \
+   --diablocomp 0 \
+   --linkage 0.1 \
+   --diablo_keepx 5 10 \
+   --icomp 0 \
+   --pcomp 10 \
+   --plsdacomp 2 \
+   --splsdacomp 2 \
+   --splsda_keepx 5 10 \
+   --dist_plsda centroids.dist \
+   --dist_splsda centroids.dist \
+   --dist_diablo centroids.dist \
+   --contrib max \
+   --outfile_dir ./results/test_run/ \
+   --rdata RData.RData \
+   --plot Rplots.pdf \
+   --args Rscript.sh
+```
+
+# Pipeline minimum input data
+
+## Input data
+
+The minimum input data needed is a file of classes and at least two files of quantitative omics data. Tab separated data is expected by default.
+
+A small example subset of test data is included in the package for reference.
+```{r load data object}
+data(two_omics)
+names(two_omics)
+```
+
+The class information is available as a vector:
+```{r class info}
+head(two_omics$classes)
+```
+
+The lipidomics and metabolomics data have 100 matched samples and an arbitrary number of features.
+```{r omics info}
+sapply(two_omics, dim)
+```
+
+```{r omics data}
+head(two_omics$lipidome[, 1:2])
+head(two_omics$metabolome[, 1:2])
+```
+
+Important notes on input data:
+
+1) Class information and the **sample order in each omics dataset must be identical**.
+2) Feature names in each omics dataset are truncated. Too long names may cause issues.
+3) `R` silently replaces all non-alphanumeric characters in feature names with `.`.
+
+To work around (2) and (3), you can rename your feature names to a short alphanumeric ID in your files, and remap them back later.
+
+## Input files
+
+For examples of input files, you can see them by running this command:
+
+```
+list.files(system.file("extdata", package="multiomics"), full.names=TRUE)
+```
+
+If you did not install the `R` package, you can obtain these files from gitlab:
+
+- [classes information](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/classes_diablo.tsv)
+- [lipidomics data](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_lipidomics.tsv)
+- [metabolomics data](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_metabolomics.tsv)
+
+# Pipeline output data
+
+Files output by the pipeline include:
+
+- a `pdf` file of all plots generated by the pipeline
+- tab-separated `txt` files containing feature contribution weights to each biological class
+- tab-separated `txt` file containing correlations between each omics data block
+
+[A `RData` object with all input and output is available in the git repository.](https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/results/case_study_2/RData.RData) This is not included directly in the `multiomics` package because of size constraints, and includes data from four omics datasets.
+
+# Acknowledgements
+
+[We thank David A. Matthews](https://orcid.org/0000-0003-4611-8795) for helpful discussions and feedback. [We thank Yashpal Ramakrishnaiah](https://orcid.org/0000-0002-2213-8348) for performing an extended analysis of the primary data. [We thank Melcy Philip](https://orcid.org/0000-0002-0827-866X) for performing downstream analysis of the data. This work was supported by the [MASSIVE HPC facility](www.massive.org.au) and the authors thank the HPC team at Monash eResearch Centre for their continuous personnel support. This R package was compiled referring to information from blog posts or books by [Hilary Parker](https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/), [Fong Chun Chan](https://tinyheero.github.io/jekyll/update/2015/07/26/making-your-first-R-package.html), [Karl Broman](https://kbroman.org/pkg_primer/pages/data.html), [Yihui Xie, J. J. Allaire, Garrett Grolemund](https://bookdown.org/yihui/rmarkdown/) as well as [Jenny Bryan and Hadley Wickham](https://r-pkgs.org/). [We acknowledge and pay respects to the Elders and Traditional Owners of the land on which our 4 Australian campuses stand](https://www.monash.edu/indigenous-australians/about-us/recognising-traditional-owners).
+
+# References
+
+## Data source in package
+
+- Overmyer, K.A., Shishkova, E., Miller, I.J., Balnis, J., Bernstein, M.N., Peters-Clarke, T.M., Meyer, J.G., Quan, Q., Muehlbauer, L.K., Trujillo, E.A. and He, Y., 2020. Large-scale multi-omic analysis of COVID-19 severity. Cell systems.
+
+## R package
+
+- [https://tinyheero.github.io/jekyll/update/2015/07/26/making-your-first-R-package.html](https://tinyheero.github.io/jekyll/update/2015/07/26/making-your-first-R-package.html)
+
+- [https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/](https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/)
+
+- [https://kbroman.org/pkg_primer/pages/data.html](https://kbroman.org/pkg_primer/pages/data.html)
+
+- Wickham, H., 2015. R packages: organize, test, document, and share your code. " O'Reilly Media, Inc.", [https://r-pkgs.org/](https://r-pkgs.org/).
+
+- Xie Y (2021). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.31, [https://yihui.org/knitr/](https://yihui.org/knitr/).
+
+- Xie Y (2015). Dynamic Documents with R and knitr, 2nd edition. Chapman and Hall/CRC, Boca Raton, Florida. ISBN 978-1498716963, [https://yihui.org/knitr/](https://yihui.org/knitr/).
+
+- Xie Y (2014). “knitr: A Comprehensive Tool for Reproducible Research in R.” In Stodden V, Leisch F, Peng RD (eds.), Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595, [http://www.crcpress.com/product/isbn/9781466561595](http://www.crcpress.com/product/isbn/9781466561595).
