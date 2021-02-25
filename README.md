@@ -94,16 +94,34 @@ conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
 
-conda create -n mixomics_environment install \
-  r-igraph \
+conda create -n my_environment install \
   r-argparser \
-  r-ggplot2 \
-  r-reshape \
-  r-diffobj \
-  r-waldo \
   r-brio \
-  r-cpp11 \
-  r-mixomics
+  r-colorspace \
+  r-diffobj \
+  r-dplyr \
+  r-ellipsis \
+  r-farver \
+  r-ggplot2 \
+  r-ggrepel \
+  r-igraph \
+  r-isoband \
+  r-matrixStats \
+  r-mixOmics \
+  r-parallel \
+  r-plyr \
+  r-rARPACK \
+  r-Rcpp \
+  r-RcppEigen \
+  r-reshape2 \
+  r-RSpectra \
+  r-stringi \
+  r-testthat \
+  r-tibble \
+  r-tidyr \
+  r-utf8 \
+  r-vctrs \
+  r-zeallot
 ```
 
 #### Install R packages with R
@@ -111,10 +129,13 @@ conda create -n mixomics_environment install \
 Manual install (within R):
 
 ```
-install.packages("argparser")
-install.packages("igraph")
-install.packages("ggplot2")
-install.packages("reshape2")
+install_me <- c(
+  "argparser", "brio", "colorspace", "diffobj", "dplyr", "ellipsis", "farver",
+  "ggplot2", "ggrepel", "igraph", "isoband", "matrixStats", "mixOmics",
+  "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "RSpectra",
+  "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot"
+  )
+sapply(install_me, install.packages)
 
 ## install BiocManager if not installed
 if (!requireNamespace("BiocManager", quietly = TRUE))
