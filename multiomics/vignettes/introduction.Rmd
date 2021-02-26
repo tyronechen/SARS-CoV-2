@@ -4,6 +4,7 @@ output:
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 2
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
@@ -22,12 +23,17 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='figs/',
                       echo=TRUE, warning=FALSE, message=FALSE)
 ```
 
-Copyright (c) 2020 [Tyrone Chen](https://orcid.org/0000-0002-9207-0385), [Kim-Anh Lê Cao](https://orcid.org/0000-0003-3923-1116), [Sonika Tyagi](https://orcid.org/0000-0003-0181-6258)
+Copyright (c) 2020 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-0181-6258">Sonika Tyagi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
 
 Code in this package and git repository [https://gitlab.com/tyagilab/sars-cov-2/](https://gitlab.com/tyagilab/sars-cov-2/) is provided under a [MIT license](https://opensource.org/licenses/MIT). This documentation is provided under a [CC-BY-3.0 AU license](https://creativecommons.org/licenses/by/3.0/au/).
 
 [Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/) Contact Sonika Tyagi at [sonika.tyagi@monash.edu](mailto:sonika.tyagi@monash.edu).
 
+# Index
+
+- [Introduction](introduction.html)
+- [Case study 1](case_study_1.html)
+- [Case study 2](case_study_2.html)
 
 # Installation
 
@@ -64,34 +70,12 @@ conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
 
-conda create -n my_environment install \
-  r-argparser \
-  r-brio \
-  r-colorspace \
-  r-diffobj \
-  r-dplyr \
-  r-ellipsis \
-  r-farver \
-  r-ggplot2 \
-  r-ggrepel \
-  r-igraph \
-  r-isoband \
-  r-matrixStats \
-  r-mixOmics \
-  r-parallel \
-  r-plyr \
-  r-rARPACK \
-  r-Rcpp \
-  r-RcppEigen \
-  r-reshape2 \
-  r-RSpectra \
-  r-stringi \
-  r-testthat \
-  r-tibble \
-  r-tidyr \
-  r-utf8 \
-  r-vctrs \
-  r-zeallot
+install_me="r-argparser r-brio r-colorspace r-diffobj r-dplyr r-ellipsis \
+ r-farver r-ggplot2 r-ggrepel r-igraph r-isoband r-matrixStats r-mixOmics \
+ r-parallel r-plyr r-rARPACK r-Rcpp r-RcppEigen r-reshape2 r-RSpectra \
+ r-stringi r-testthat r-tibble r-tidyr r-utf8 r-vctrs r-zeallot"
+
+conda create -n my_environment install ${install_me}
 ```
 
 You can also install dependencies in `R` directly:
@@ -222,9 +206,10 @@ Files output by the pipeline include:
 
 # References
 
-## Data source in package
+## Data source in package and case studies
 
-- Overmyer, K.A., Shishkova, E., Miller, I.J., Balnis, J., Bernstein, M.N., Peters-Clarke, T.M., Meyer, J.G., Quan, Q., Muehlbauer, L.K., Trujillo, E.A. and He, Y., 2020. Large-scale multi-omic analysis of COVID-19 severity. Cell systems.
+- [Bojkova, D., Klann, K., Koch, B. et al. Proteomics of SARS-CoV-2-infected host cells reveals therapy targets. Nature 583, 469–472 (2020). https://doi.org/10.1038/s41586-020-2332-7](https://doi.org/10.1038/s41586-020-2332-7)
+- [Overmyer, K.A., Shishkova, E., Miller, I.J., Balnis, J., Bernstein, M.N., Peters-Clarke, T.M., Meyer, J.G., Quan, Q., Muehlbauer, L.K., Trujillo, E.A. and He, Y., 2021. Large-scale multi-omic analysis of COVID-19 severity. Cell systems.](https://dx.doi.org/10.1016%2Fj.cels.2020.10.003)
 
 ## Methods used in package
 
