@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r global-options, include=FALSE}
-knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='figs/',
+knitr::opts_chunk$set(fig.width=8, fig.height=8, fig.path='figs/',
                       echo=TRUE, warning=FALSE, message=FALSE)
 ```
 
@@ -80,12 +80,12 @@ Rscript ../run_pipeline.R \
 
 The data used as input to this pipeline available in gitlab:
 
-- [biological class information]()
-- [longitudinal measurement information]()
-- [proteome mappings]()
-- [translatome mappings]()
-- [proteome]()
-- [translatome]()
+- [biological class information](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/classes_diablo.txt)
+- [longitudinal measurement information](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/pch.txt)
+- [proteome mappings](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/proteome_mapfile.txt)
+- [translatome mappings](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/translatome_mapfile.txt)
+- [proteome](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_proteome.txt)
+- [translatome](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_translatome.txt)
 
 ## Metadata
 
@@ -95,11 +95,133 @@ The class information is available as a vector:
 
 The proteome and translatome data have 24 matched samples and an arbitrary number of features.
 
+# Input data
+
+For reference, you can also access all these loaded data below and results in the `RData` object. Data objects in both this walkthrough and the `RData` object have identical names. The code blocks in this walkthrough will reproduce the same data structures. Not all values may be identical since some functions may be non-deterministic. This is true even if a seed is specified, since `R >=3.6` these are not reproducible across machines.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r load_data_obj, eval=FALSE}
+  load("RData.RData")
+  ```
+</details>
+
+Obtain the input data from the git repository.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r get_data, eval=FALSE}
+  url_rdata <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/results/case_study_1/RData.RData"
+  url_class <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/classes_diablo.txt"
+  url_pch <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/pch.txt"
+  url_prot_map <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/proteome_mapfile.txt"
+  url_tran_map <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/translatome_mapfile.txt"
+  url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_proteome.txt"
+  url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_translatome.txt"
+
+  urls <- c(url_rdata, url_class, url_pch, url_prot_map, url_tran_map, url_prot, url_tran)
+  file_names <- sapply(strsplit(urls, "/"), tail, 1)
+  mapply(function(x, y) download.file(x, y), urls, file_names, SIMPLIFY=FALSE)
+  if (any(file.exists(file_names)) != TRUE) {stop("Files incorrectly downloaded!")}
+  ```
+</details>
+
+Load the data and metadata with the following functions.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r load_data, message=FALSE}
+  paths <- c("diablo_proteome.txt", "diablo_translatome.txt")
+  mappings <- c("proteome_mapfile.txt", "translatome_mapfile.txt")
+  classes <- parse_classes("classes_diablo.txt")
+  pch <- parse_classes("pch.txt")
+  data <- lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
+  mapped <- lapply(mappings, parse_mappings)
+  data_names <- c("proteome", "translatome")
+  ```
+</details>
+
 # Data quality control
+
+Before analysing data further we perform standard checks for common quality issues.
 
 ## Accounting for missing values
 
+We discovered a high proportion of missing values within the translatome data. Missing values in data can bias analyses. There are multiple ways to address this. In our case we use a mixture of filtering and imputation.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r check_na, eval=TRUE}
+  # you may need this line if NA is represented as 0 in your data
+  # in this specific case study the data has already been cleaned
+  data <- mapply(function(x) zero_to_na(x), data, SIMPLIFY=FALSE)
+  missing <- lapply(data, count_missing)
+  mapply(function(x, y) show_na_prop(x, y), data, data_names, SIMPLIFY=FALSE)
+  ```
+</details>
+
+We corrected for the missing values in the translatome data (~47% of original data) by a mixture of filtering and imputation. We considered that filtering alone would be too aggressive and imputation alone would be ineffective. Filtering was performed by dropping all features which were not represented across each biological sample group.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r remove_na, eval=TRUE}
+  data <- lapply(data, remove_na_class, classes)
+  ```
+</details>
+
+This reduced the quantity of missing values to ~17% of the original data. An imputation was performed with the NIPALS algorithm, which is effective on data with < 20% missing values. Note that imputation can take some time, increasing with data size and component count.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r impute_na, eval=TRUE}
+  # this step is important, some functions use the names internally
+  names(data) <- data_names
+  data_imp <- impute_missing(data, rep(24, length(data)), outdir="./")
+  data <- replace_missing(data, data_imp)
+  ```
+</details>
+
+> **NOTE**: This step also writes out the imputed data. Since imputation can take some time, this is mainly for convenience. You can load the imputed data directly if it meets your requirements.
+
+To test that imputation has not introduced significant technical variation into the data, we observe the correlation between variates of the principal components.
+
+> **NOTE**: All PCAs are centered and scaled.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r compare_na, eval=TRUE}
+  missing <- lapply(data, count_missing)
+  pca_withna <- plot_pca_single(
+    data, classes, pch=pch, ncomp=10,
+    title=paste("With NA")
+  )
+  pca_impute <- plot_pca_single(
+    data_imp, classes, pch=pch, ncomp=10,
+    title=paste("Imputed")
+  )
+  heatmaps <- cor_imputed_unimputed(pca_withna, pca_impute, data_names)
+  ```
+</details>
+
+In both cases, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
+
 ## Accounting for unwanted variation
+
+We observed a "sample effect" in the data in the above PCA, which is likely caused by the longitudinal study design, where sets of cell cultures were resampled over a time series.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r sample_effect, eval=TRUE}
+  data_pca_multilevel <- plot_pca_multilevel(
+    data, classes, pch=pch, ncomp=10,
+    title=paste("With NA.")
+  )
+  data_pca_multilevel <- plot_pca_multilevel(
+    data_imp, classes, pch=pch, ncomp=10,
+    title=paste("Imputed.")
+  )
+  ```
+</details>
 
 # Single omics analyses
 
