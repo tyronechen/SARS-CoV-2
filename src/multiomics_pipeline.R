@@ -1069,7 +1069,9 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   data_vis <- data_vis_names$data_vis
   truncated <- data_vis_names$truncated
   print("Plotting correlation between components...")
+  sink("/dev/null")
   roc <- mapply(function(x) mixOmics::auroc(data, roc.comp=x), seq(ncomp))
+  sink()
   mapply(function(x) mixOmics::plotDiablo(data, ncomp=x), seq(ncomp))
 
   if (ncomp > 1) {
