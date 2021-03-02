@@ -93,6 +93,15 @@ This may take up to a few hours to run.
 
 ## 3.1 Biological context
 
+This dataset contains two omics data: proteome and translatome. There
+are three biological replicates for 8 sample types. Cell cultures
+(uninfected/infected with SARS-CoV-2) were resampled over four
+timepoints. The original publication with the source data is here:
+
+-   Bojkova, D., Klann, K., Koch, B. et al. Proteomics of
+    SARS-CoV-2-infected host cells reveals therapy targets. *Nature*
+    **583,** 469–472 (2020). <https://doi.org/10.1038/s41586-020-2332-7>
+
 ## 3.2 Summary
 
 The data used as input to this pipeline available in gitlab:
@@ -274,6 +283,11 @@ Click to expand code block
 
 ``` r
   na_prop_tran <- show_na_prop(unimputed_tran, "Translatome")
+```
+
+![](figs_1/check_na-2.png)<!-- -->
+
+``` r
   
   # need to drop col where all missing
   unimputed_prot <- remove_na_class(unimputed_prot, classes, missing_as=NA)
@@ -282,27 +296,8 @@ Click to expand code block
   unimputed_tran <- remove_na_class(unimputed_tran, classes, missing_as=NA)
   #> [1]   24 2712
   #> [1] "Dropping features where at least one class is NA"
-  pca_unimputed_prot <- mixOmics::pca(unimputed_prot, ncomp=10)
 ```
 
-![](figs_1/check_na-2.png)<!-- -->
-
-``` r
-  pca_unimputed_tran <- mixOmics::pca(unimputed_tran, ncomp=10)
-  pca_imputed_prot <- mixOmics::pca(data$proteome, ncomp=10)
-  pca_imputed_tran <- mixOmics::pca(data$translatome, ncomp=10)
-  cor_imputed_unimputed_(pca_imputed_prot, pca_unimputed_prot, "Proteome")
-  #> [1] "Plotting correlation between unimputed and imputed components"
-```
-
-![](figs_1/check_na-3.png)<!-- -->
-
-``` r
-  cor_imputed_unimputed_(pca_imputed_tran, pca_unimputed_tran, "Translatome")
-  #> [1] "Plotting correlation between unimputed and imputed components"
-```
-
-![](figs_1/check_na-4.png)<!-- -->
 </details>
 
 We corrected for the missing values in the translatome data (\~47% of
@@ -372,46 +367,24 @@ Click to expand code block
 </summary>
 
 ``` r
-  missing <- lapply(data, count_missing)
-  #> [1] "Percentage of missing values in data:"
-  #> [1] 0
-  #> [1] "Percentage of missing values in data:"
-  #> [1] 0
-  pca_withna <- plot_pca_single(
-    data, classes, pch=pch, ncomp=10,
-    title=paste("With NA")
-  )
-  #> [1] "Removing 0 variance columns from data..."
-  #> [1] "Plotting PCA component contribution..."
-```
-
-![](figs_1/compare_na-1.png)<!-- -->![](figs_1/compare_na-2.png)<!-- -->
-
-      #> [1] "Plotting PCA by groups..."
-
-![](figs_1/compare_na-3.png)<!-- -->![](figs_1/compare_na-4.png)<!-- -->![](figs_1/compare_na-5.png)<!-- -->![](figs_1/compare_na-6.png)<!-- -->![](figs_1/compare_na-7.png)<!-- -->![](figs_1/compare_na-8.png)<!-- -->
-
-``` r
-  pca_impute <- plot_pca_single(
-    data_imp, classes, pch=pch, ncomp=10,
-    title=paste("Imputed")
-  )
-  #> [1] "Removing 0 variance columns from data..."
-  #> [1] "Plotting PCA component contribution..."
-```
-
-![](figs_1/compare_na-9.png)<!-- -->![](figs_1/compare_na-10.png)<!-- -->
-
-      #> [1] "Plotting PCA by groups..."
-
-![](figs_1/compare_na-11.png)<!-- -->![](figs_1/compare_na-12.png)<!-- -->![](figs_1/compare_na-13.png)<!-- -->![](figs_1/compare_na-14.png)<!-- -->![](figs_1/compare_na-15.png)<!-- -->![](figs_1/compare_na-16.png)<!-- -->
-
-``` r
-  heatmaps <- cor_imputed_unimputed(pca_withna, pca_impute, data_names)
+  pca_unimputed_prot <- mixOmics::pca(unimputed_prot, ncomp=10)
+  pca_unimputed_tran <- mixOmics::pca(unimputed_tran, ncomp=10)
+  pca_imputed_prot <- mixOmics::pca(data$proteome, ncomp=10)
+  pca_imputed_tran <- mixOmics::pca(data$translatome, ncomp=10)
+  cor_imputed_unimputed_(pca_imputed_prot, pca_unimputed_prot, "Proteome")
   #> [1] "Plotting correlation between unimputed and imputed components"
 ```
 
-![](figs_1/compare_na-17.png)<!-- -->![](figs_1/compare_na-18.png)<!-- -->
+![](figs_1/compare_na-1.png)<!-- -->
+
+``` r
+  cor_imputed_unimputed_(pca_imputed_tran, pca_unimputed_tran, "Translatome")
+  #> [1] "Plotting correlation between unimputed and imputed components"
+```
+
+![](figs_1/compare_na-2.png)<!-- --> &gt; **NOTE**: Imputation may take
+some time, go eat lunch
+
 </details>
 
 In both cases, there is a strong correlation between the variates on at
@@ -536,6 +509,15 @@ Using the pipeline:
 ```
 
 Using the R data object:
+
+``` r
+  names(tuned_splsda)
+  
+  # keep optimal number of features to keep
+  splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
+  splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
+  names(splsda_keepx) <- data_names
+```
 
 </details>
 

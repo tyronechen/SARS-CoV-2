@@ -99,6 +99,21 @@ This may take up to a few days to run.
 
 ## 3.1 Biological context
 
+This dataset contains four omics data: lipidome, metabolome, proteome
+and transcriptome. There are 49-51 biological replicates for 2 sample
+types: less severe COVID-19 and more severe COVID-19. The original
+publication with the source data is here:
+
+-   Overmyer KA, Shishkova E, Miller IJ, Balnis J, Bernstein MN,
+    Peters-Clarke TM, Meyer JG, Quan Q, Muehlbauer LK, Trujillo EA, He
+    Y, Chopra A, Chieng HC, Tiwari A, Judson MA, Paulson B, Brademan DR,
+    Zhu Y, Serrano LR, Linke V, Drake LA, Adam AP, Schwartz BS, Singer
+    HA, Swanson S, Mosher DF, Stewart R, Coon JJ, Jaitovich A.
+    Large-Scale Multi-omic Analysis of COVID-19 Severity. *Cell Syst*.
+    2021 Jan 20;12(1):23-40.e7. doi:
+    [10.1016/j.cels.2020.10.003](10.1016/j.cels.2020.10.003). Epub 2020
+    Oct 8. PMID: 33096026; PMCID: PMC7543711.
+
 ## 3.2 Summary
 
 The data used as input to this pipeline available in gitlab:
@@ -824,7 +839,7 @@ Click to expand code block
 ### 7.3.3 Correlation plot
 
 A correlation score is provided per block of omics data. In this case
-there is just one score as there are two blocks of omics data.
+are 6 scores as there are 4 blocks of omics data.
 
 <details>
 <summary>
