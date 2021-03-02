@@ -1,7 +1,5 @@
 [![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
 
-> **NOTE**: This is being rewritten and will be updated shortly.
-
 # SARS-CoV-2
 
 Copyright (c) 2020 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-0181-6258">Sonika Tyagi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
