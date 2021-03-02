@@ -1021,7 +1021,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   # plot the diablo data with a series of diagnostic plots
 
   # need to make a function to squeeze sample names automatically and remap
-  trim_names_ <- function(data, trim=16) {
+  trim_names_ <- function(data, trim=6) {
     all_names <- data
     long_names <- which(sapply(data, nchar, USE.NAMES=FALSE) > trim)
     if (length(long_names) == 0) {return()}
@@ -1035,7 +1035,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   block_to_trim <- names(trimmed_names[lapply(trimmed_names, length) > 0])
 
   # replace names in all associated columns for visualisation only
-  replace_names_ <- function(data, trim=16) {
+  replace_names_ <- function(data, trim=6) {
     all_names <- head(data$names$colnames, n=-1)
     split_ <- function(block, all_names) {
       all_names <- gsub("__FEATUREID", "", all_names[[block]])
@@ -1065,7 +1065,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
     }
     return(list(data_vis=data_vis, truncated=truncated))
   }
-  data_vis_names <- replace_names_(data, trim=16)
+  data_vis_names <- replace_names_(data, trim=6)
   data_vis <- data_vis_names$data_vis
   truncated <- data_vis_names$truncated
   print("Plotting correlation between components...")
@@ -1111,7 +1111,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting overall heatmap...")
 
   # hide column (sample) names by default (will run off page otherwise)
-  if (max(unlist(lapply(data$names$colnames$X, nchar))) > 8) {
+  if (max(unlist(lapply(data$names$colnames$X, nchar))) > 6) {
     show_cols = FALSE
   } else {
     show_cols = TRUE
@@ -1125,10 +1125,10 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
       data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
     }
     mixOmics::cimDiablo(data, comp=comp, size.legend=0.5, col.names=show_cols)
-    mixOmics::plotLoadings(data, contrib="max", comp=comp, max.name.length=8,
+    mixOmics::plotLoadings(data, contrib="max", comp=comp, max.name.length=6,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
-    mixOmics::plotLoadings(data, contrib="min", comp=comp, max.name.length=8,
+    mixOmics::plotLoadings(data, contrib="min", comp=comp, max.name.length=6,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
     for (i in block_to_trim) {
@@ -1140,12 +1140,12 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
         data$names$colnames[[i]] <- trimmed_names[[i]][["data"]]
       }
       mixOmics::plotLoadings(data, contrib="max", comp=comp, block=j,
-        max.name.length=8, method='median', ndisplay=20,
+        max.name.length=6, method='median', ndisplay=20,
         name.var=colnames(data), plot=TRUE,
         title=paste(comp, j, "DIABLO max loadings"), size.name=0.6
       )
       mixOmics::plotLoadings(data, contrib="min", comp=comp, block=j,
-        max.name.length=8, method='median', ndisplay=20,
+        max.name.length=6, method='median', ndisplay=20,
         name.var=colnames(data), plot=TRUE,
         title=paste(comp, j, "DIABLO min loadings"), size.name=0.6
       )
