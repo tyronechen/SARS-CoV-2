@@ -1,15 +1,15 @@
 ---
 title: "Case study 2"
 output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+    number_sections: true
   github_document:
     toc: true
     toc_depth: 2
     number_sections: true
   html_notebook:
-    toc: true
-    toc_depth: 2
-    number_sections: true
-  rmarkdown::html_vignette:
     toc: true
     toc_depth: 2
     number_sections: true
@@ -90,6 +90,10 @@ Rscript ../run_pipeline.R \
 
 ## Biological context
 
+This dataset contains four omics data: lipidome, metabolome, proteome and transcriptome. There are 49-51 biological replicates for 2 sample types: less severe COVID-19 and more severe COVID-19. The original publication with the source data is here:
+
+- Overmyer KA, Shishkova E, Miller IJ, Balnis J, Bernstein MN, Peters-Clarke TM, Meyer JG, Quan Q, Muehlbauer LK, Trujillo EA, He Y, Chopra A, Chieng HC, Tiwari A, Judson MA, Paulson B, Brademan DR, Zhu Y, Serrano LR, Linke V, Drake LA, Adam AP, Schwartz BS, Singer HA, Swanson S, Mosher DF, Stewart R, Coon JJ, Jaitovich A. Large-Scale Multi-omic Analysis of COVID-19 Severity. *Cell Syst*. 2021 Jan 20;12(1):23-40.e7. doi: [10.1016/j.cels.2020.10.003](10.1016/j.cels.2020.10.003). Epub 2020 Oct 8. PMID: 33096026; PMCID: PMC7543711.
+
 ## Summary
 
 The data used as input to this pipeline available in gitlab:
@@ -140,12 +144,14 @@ For reference, you can also access all these loaded data below and results in th
 
 <details>
   <summary>Click to expand code block</summary>
-  ```{r load_rdata_obj, eval=FALSE}
+  ```{r load_rdata_obj, eval=TRUE}
   url_rdata <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/results/case_study_2/RData.RData"
   download.file(url_rdata, "RData.RData")
   load("RData.RData")
   ls()
   ```
+  > **NOTE**: There are some differences in the R data object for case studies 1 and 2. Case study 1 was originally performed using an early version of the code. It has since been streamlined for case study 2, which contains more information. However, both analyses are reproducible and the user can if needed further investigate the internal data structures after loading them.
+
 </details>
 
 For case study 2, it is not recommended to run the pipeline directly because of resource usage. This may take more than a day on 16 cpus. Instead, we use the `RData` object created as a result and load data from there directly to skip long-running steps. In those cases, we provide the code for reference only.
@@ -156,10 +162,10 @@ Obtain the input data from the git repository.
   <summary>Click to expand code block</summary>
   ```{r get_data, eval=FALSE}
   url_class <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/classes_diablo.tsv"
-  url_lipi <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/proteome_mapfile.txt"
-  url_meta <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/translatome_mapfile.txt"
-  url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/diablo_proteome.txt"
-  url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/diablo_translatome.txt"
+  url_lipi <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_lipidome.tsv"
+  url_meta <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_metabolome.tsv"
+  url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_proteome.tsv"
+  url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptome.tsv"
 
   urls <- c(url_class, url_lipi, url_meta, url_prot, url_tran)
   file_names <- sapply(strsplit(urls, "/"), tail, 1)
@@ -194,7 +200,6 @@ Load the data and metadata with the following functions. All files must be in th
   data_names <- argv$data_names
   design <- create_design(data, 0.1)
   ```
-  > **NOTE**: There are some differences in the R data object for case studies 1 and 2. Case study 1 was originally performed using an early version of the code. It has since been streamlined for case study 2, which contains more information. However, both analyses are reproducible and the user can if needed further investigate the internal data structures after loading them.
 
 </details>
 
@@ -206,15 +211,44 @@ Before analysing data further we perform standard checks for common quality issu
 
 We discovered a small proportion of missing values within the transcriptome data. Missing values in data can bias analyses. There are multiple ways to address this. In our case we use imputation.
 
+```{r cor_impute, echo=FALSE, message=FALSE}
+cor_imputed_unimputed_ <- function(pca_withna, pca_impute, names) {
+  # plots a heatmap of correlations: -> df, df, name
+  x <- pca_withna
+  y <- pca_impute
+  z <- names
+  print("Plotting correlation between unimputed and imputed components")
+  print(ggplot2::ggplot(reshape2::melt(cor(x$variates$X, y$variates$X)),
+    ggplot2::aes(Var1, Var2, fill=value)) +
+    ggplot2::ggtitle(paste(z, "correlation between imputed and unimputed data")) +
+    ggplot2::geom_tile() +
+    ggplot2::scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
+      limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
+    ggplot2::theme_minimal()
+  )
+}
+```
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r check_na, eval=TRUE}
+  # the data object has already been cleaned, we load the raw data for reference
+  url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptomics.tsv"
+  download.file(url_tran, "data_transcriptomics.tsv")
+
+  unimputed_tran_path <- "data_transcriptomics.tsv"
+  unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
+  unimputed_tran[unimputed_tran == 0] <- NA
+
+  na_prop_tran <- show_na_prop(unimputed_tran, "Transcriptome")
+  ```
+</details>
+
 <details>
   <summary>Click to expand code block</summary>
   Using the pipeline:
-  ```{r check_na, eval=TRUE}
-  # you may need this line if NA is represented as 0 in your data
-  # in this specific case study the data has already been cleaned
-  data <- mapply(function(x) zero_to_na(x), data, SIMPLIFY=FALSE)
-  missing <- lapply(data, count_missing)
-  mapply(function(x, y) show_na_prop(x, y), data, data_names, SIMPLIFY=FALSE)
+  ```{r remove_na, eval=FALSE}
+  data <- lapply(data, remove_na_class, classes)
   ```
 </details>
 
@@ -230,7 +264,7 @@ We corrected for the missing values in the transcruptome data (~0.5% of original
   ```
 
   Using the R data object:
-  ```{r impute_na_obj, eval=FALSE}
+  ```{r impute_na_obj, eval=TRUE}
   # this data was pre-imputed and then loaded back in internally
   dim(data$transcriptome)
   ```
@@ -245,17 +279,10 @@ To test that imputation has not introduced significant technical variation into 
 <details>
   <summary>Click to expand code block</summary>
   Using the pipeline (if data is imputed internally):
-  ```{r compare_na, eval=FALSE}
-  missing <- lapply(data, count_missing)
-  pca_withna <- plot_pca_single(
-    data, classes, ncomp=10,
-    title=paste("With NA")
-  )
-  pca_impute <- plot_pca_single(
-    data_imp, classes, ncomp=10,
-    title=paste("Imputed")
-  )
-  heatmaps <- cor_imputed_unimputed(pca_withna, pca_impute, data_names)
+  ```{r compare_na, eval=TRUE}
+  pca_imputed <- mixOmics::pca(data$transcriptome, ncomp=10)
+  pca_unimputed <- mixOmics::pca(unimputed_tran, ncomp=10)
+  cor_imputed_unimputed_(pca_imputed, pca_unimputed, "Transcriptome")
   ```
 
   Using the R Data object:
@@ -263,7 +290,7 @@ To test that imputation has not introduced significant technical variation into 
   To improve efficiency during code run, a imputed data file was generated as output in the first run of the pipeline. This was then used in subsequent runs of the pipeline as direct input. You can reproduce this manually with the code in the `make_manuscript_figures.R` [script in our gitlab repository](https://gitlab.com/tyagilab/sars-cov-2/).
 </details>
 
-In both cases, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
+In this case, there is a strong correlation between the variates on at least the first 5 principal components corresponding to at least 50% of the variation in the data.
 
 ## Accounting for unwanted variation
 
@@ -285,7 +312,7 @@ To investigate the parameters best suited for the methods, leave-one-out cross v
   tuned_splsda <- tune_splsda(
     data, classes, data_names, data.frame(pch), ncomp=4, nrepeat=10,
     logratio="none", test_keepX=c(10, 25, 50, 100), validation="loo", folds=10,
-    dist="centroids.dist", cpus=6, progressBar=FALSE
+    dist="centroids.dist", cpus=1, progressBar=FALSE
   )
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
@@ -307,10 +334,6 @@ To investigate the parameters best suited for the methods, leave-one-out cross v
   ```{r tune_splsda_obj, eval=TRUE}
   names(tuned_splsda)
 
-  # keep number of components or use user specified
-  splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-  splsda_ncomp <- unlist(splsda_ncomp, recursive=FALSE)
-
   # keep optimal number of features to keep
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -328,8 +351,8 @@ With the tuned parameters, we run sPLSDA (subset of features).
   ```{r splsda_result, eval=FALSE}
   # this step can take some time
   data_splsda <- classify_splsda(
-    data=data_imp, classes=classes, pch=pch, title=data_names,
-    ncomp=splsda_ncomp, keepX=splsda_keepx, contrib="max", outdir="./",
+    data=data, classes=classes, pch=pch, title=data_names,
+    ncomp=2, keepX=splsda_keepx, contrib="max", outdir="./",
     mappings=NULL, dist="centroids.dist", bg=TRUE
   )
   ```
@@ -348,8 +371,8 @@ We also run PLSDA (all features) for comparison.
   ```{r plsda_result, eval=FALSE}
   # this step can take some time
   data_plsda <- classify_plsda(
-    data=data_imp, classes=classes, pch=pch, title=data_names,
-    ncomp=4, contrib="max", outdir="./",
+    data=data, classes=classes, pch=pch, title=data_names,
+    ncomp=2, contrib="max", outdir="./",
     mappings=NULL, dist="centroids.dist", bg=TRUE
   )
   ```
@@ -362,17 +385,266 @@ We also run PLSDA (all features) for comparison.
 
 These automatically generate a large series of plots. Figures are ordered sequentially by each block of omics data in `data_name`, in this case `lipidome`, `metabolome`, `proteome`, followed by `translatome`. Some `txt` files containing feature loadings are also written to the output directory.
 
-## Diagnostic plots
+## Explanation of output
 
-## Results
+Detailed technical information on the individual figures types and underlying methods are available at the [mixOmics website](http://mixomics.org/). This walkthrough will explain the plots in context of the biological system under study only. The plots are explained in the order that they appear in this document.
+
+### Scatter plots
+
+Plotting the first few components of the sPLSDA reveals a spectrum of phenotypes from less severe to more severe, with a degree of overlap.
+
+### Classification error
+
+> **NOTE**: Balanced error rate can be used in cases where classes are imbalanced.
+
+To show accuracy of the method, the classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. The centroids distance metric appeared to perform the best in this case, with the lowest error rate after 3 components for proteome and 4 for translatome.
+
+### Feature stability
+
+To assess how stable the feature is across cross-validation, each of the horizontal bars represent a feature. The height of the bar corresponds to stability. We observe three subsets of highly stable features, moderately stable features and less stable features.
+
+### ROC curves
+
+As a supplementary layer of validation, ROC curves showing classification accuracy are available, but we note that these have limited applicability given the specific context of the method. The underlying method already internally specifies the prediction cutoff to achieve maximal sensitivity and specificity.
+
+### Arrow plots
+
+To review agreement between matching data sets, we use an arrow plot. Short arrows suggest a strong similarity, while long arrows indicate dissimilarity. Two sample groups in the proteome data (Virus 6h, Virus 24h) appear to be dissimilar.
+
+### Clustered image maps
+
+To investigate the relationship between samples, these plots can be interpreted like heatmaps. They are coloured by biological class as well as batch information. Individual components can be extracted for custom visualisation if needed.
+
+### Variable loadings
+
+To understand how much a feature contributes to the biological classification, loading weights are shown. Direction of the bar indicates the abundance of that feature in the data (left for less, right for more). Bars are colour coded to biological class. Individual components can be extracted for custom visualisation if needed.
+
+Note that only a subset of these features are visualised. The full list is exported into a tab-separated `txt` file, similar to that from a `limma` differential expression analysis.
+
+### PLSDA
+
+To supplement the sPLSDA, we also compared the performance of PLSDA (a non sparse variant of sPLSDA keeping all features). This showed similarities in patterns across the datasets. The plots are conceptually identical, but several plots are excluded as they are not applicable (feature selection, variable stability).
 
 # Multi omics analyses
 
+Having assessed the major sources of variation and features of interest contributing to biological conditions within the individual blocks of omics data, we can use this information to guide our multi-omics integration.
+
+We applied a latent variable approach to identify a highly correlated multi-omics signature. This analysis is carried out in a conceptually similar way to the previous sPLSDA with similar parameter requirements, except with multiple omics data blocks corrected for longitudinal study effects specified as input. We illustrate the correlation between features across these omics blocks with a circos plot.
+
 ## Parameter tuning
 
-## Diagnostic plots
+To investigate the parameters best suited for the methods, leave-one-out cross validation was performed. Similar to sPLSDA, the number of components and features selected were tuned internally with a function in the mixOmics package.
 
-## Results
+<details>
+  <summary>Click to expand code block</summary>
+  Using the pipeline:
+  ```{r tune_diablo, eval=FALSE}
+  # tune number of components
+  tuned_diablo <- tune_diablo_ncomp(data, classes, design, ncomp=2, cpus=1)
+  print("Parameters with lowest error rate:")
+  tuned_diablo <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
+  diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
+  print("Number of components:")
+  print(diablo_ncomp)
+
+  # tune keepx
+  diablo_keepx <- c(5,10,12,14,16,18,20,30)
+  diablo_keepx <- tune_diablo_keepx(
+    data, classes, diablo_ncomp, design, diablo_keepx, cpus=1,
+    dist="mahalanobis.dist", progressBar=FALSE
+  )
+  print("Diablo keepx:")
+  print(diablo_keepx)
+  ```
+
+  Using the R object:
+  ```{r tune_diablo_obj, eval=TRUE}
+  tuned_diablo
+  diablo$keepX
+  ```
+</details>
+
+## Running the analysis
+
+With the tuned parameters, we run multi-block sPLSDA (DIABLO).
+
+<details>
+  <summary>Click to expand code block</summary>
+  Using the pipeline:
+  ```{r run_diablo, eval=FALSE}
+  diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
+  # these values were precomputed, newer versions of code save these values for use
+  diablo_keepx <- list(lipidome=c(7, 7)
+                       metabolome=c(6, 10)
+                       proteome=c(8, 5),
+                       translatome=c(7, 30))
+
+  # run the algorithm
+  diablo <- run_diablo(data, classes, diablo_ncomp, design, diablo_keepx)
+  ```
+
+  Using the R data object:
+  ```{r run_diablo_obj, eval=TRUE}
+  diablo
+  ```
+</details>
+
+## Explanation of output
+
+Many of these plots can be interpreted in conceptually similar ways to that of the single-omic sPLSDA above. However, some extra plots are created to better illustrate correlation between datasets.
+
+> **NOTE**: As usual, the full list of plots and results are available in the git repository.
+
+### Classification error
+
+> **NOTE**: Balanced error rate can be used in cases where classes are imbalanced.
+
+To show accuracy of the method, the classification error rate across multiple components for maximum, centroids and mahalanobis distance are plotted. The centroids distance metric appeared to perform the best in this case, with the lowest error rate after 3 components for proteome and 4 for translatome.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r perf_diablo}
+  # assess performance
+  perf_diablo <- mixOmics::perf(
+    diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=1, progressBar=TRUE
+  )
+  plot(perf_diablo)
+  ```
+</details>
+
+### Feature stability
+
+To assess how stable the feature is across cross-validation, each of the horizontal bars represent a feature. The height of the bar corresponds to stability. We observe three subsets of highly stable features, moderately stable features and less stable features.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r perf_diablo_stability}
+
+  mapply(
+    function(x, y) plot(
+      x$comp1, type="h", main="Comp 1", las=2,
+      ylab="Stability", xlab="Features", xaxt="n"),
+    perf_diablo$features$stable$nrep1,
+    c("Lipidome", "Metabolome", "Proteome", "Transcriptome")
+  )
+  ```
+</details>
+
+### Correlation plot
+
+A correlation score is provided per block of omics data. In this case are 6 scores as there are 4 blocks of omics data.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r diablo}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::plotDiablo(diablo, ncomp=1)
+  ```
+</details>
+
+### Scatter plots
+
+Plotting the first few components of the multi-block sPLSDA (DIABLO) reveals a spectrum of phenotypes from less severe to more severe, with a degree of overlap.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r perf_scatter}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::plotIndiv(
+    diablo, ind.names=FALSE, legend=TRUE, title='DIABLO', ellipse=TRUE
+  )
+  ```
+</details>
+
+### ROC curves
+
+As a supplementary layer of validation, ROC curves showing classification accuracy are available, but we note that these have limited applicability given the specific context of the method. The underlying method already internally specifies the prediction cutoff to achieve maximal sensitivity and specificity.
+
+> **NOTE**: No ROC curves were generated for this particular case study.
+
+### Arrow plots
+
+To review agreement between matching data sets, we use an arrow plot. Short arrows suggest a strong similarity, while long arrows indicate dissimilarity. There appears to be a spectrum of phenotypes from less severe to more severe, with a degree of overlap.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r perf_arrow}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::plotArrow(diablo, ind.names=FALSE, legend=TRUE, title='DIABLO')
+  ```
+</details>
+
+### Correlation circle plots
+
+The correlation circle plots highlight the contribution of each variable to each component. A strong correlation between variables is indicated by clusters of points.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r perf_correlation}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::plotVar(diablo, style='graphics', legend=TRUE, comp=c(1,2),
+    title="DIABLO 1/2", var.names=FALSE
+  )
+  ```
+</details>
+
+### Clustered image maps
+
+To investigate the relationship between samples, these plots can be interpreted like heatmaps. They are coloured by biological class as well as batch information. Individual components can be extracted for custom visualisation if needed.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r cim}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::cimDiablo(diablo, size.legend=0.5, col.names=FALSE)
+  ```
+</details>
+
+### Variable loadings
+
+To understand how much a feature contributes to the biological classification, loading weights are shown. Direction of the bar indicates the abundance of that feature in the data (left for less, right for more). Bars are colour coded to biological class. Individual components can be extracted for custom visualisation if needed.
+
+Note that only a subset of these features are visualised. The full list is exported into a tab-separated `txt` file, similar to that from a `limma` differential expression analysis.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r loadings}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::plotLoadings(diablo, contrib="max", comp=1, max.name.length=6,
+    method='median', ndisplay=20, size.name=0.6,
+    size.legend=0.6, title=paste("DIABLO max loadings")
+  )
+  ```
+</details>
+
+### Circos plot
+
+To visualise correlations between different blocks of omics data, a circos plot is generated. The blue block represents lipidome data, the green block represents metabolome data, the red block represents proteome data and the orange block represents transcriptome data. Each point on the circle is a single feature. Lines linking features show correlations between features that pass the user-specified correlation threshold, in this case 0.8. Red lines indicate positive correlation and blue lines negative correlation.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r circos}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::circosPlot(
+    diablo, cutoff=0.8, line=FALSE, size.legend=0.5, size.variables=0.001
+  )
+  ```
+</details>
+
+### Network plot
+
+Similar to the circos plot, a network plot can be generated. It is compatible with cytoscape and can be exported as a `gml` file.
+
+<details>
+  <summary>Click to expand code block</summary>
+  ```{r network}
+  # to keep the case study concise we use a custom function to output main plots
+  mixOmics::network(
+    diablo, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4,
+    col.names=FALSE, row.names=FALSE
+  )
+  ```
+</details>
 
 # Output data
 
