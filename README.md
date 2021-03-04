@@ -1,3 +1,5 @@
+
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.4562010-brightgreen?style=for-the-badge&logo=appveyor)](https://doi.org/10.5281/zenodo.4562010)
 [![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
 
 # SARS-CoV-2
