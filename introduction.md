@@ -38,9 +38,9 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.html)
--   [Case study 1](case_study_1.html)
--   [Case study 2](case_study_2.html)
+-   [Introduction](introduction.md)
+-   [Case study 1](case_study_1.md)
+-   [Case study 2](case_study_2.md)
 
 # 2 Installation
 
