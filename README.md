@@ -15,6 +15,26 @@ This work was presented at the [ABACBS (Australian Bioinformatics and Computatio
 
 Future work will involve the application of deep learning to better identify latent patterns in high dimensional data. [An example of some of our preliminary work on this topic is available here.](https://gitlab.com/tyagilab/integrativeepigenomics)
 
+You can cite this pipeline as:
+
+- Chen, Tyrone, Philip, Melcy, Lê Cao, Kim-Anh, & Tyagi, Sonika. (2021, March 4). Multi-omics data harmonisation for the discovery of COVID-19 drug targets. Zenodo. http://doi.org/10.5281/zenodo.4562010
+
+```
+@software{chen_tyrone_2021_4562010,
+  author       = {Chen, Tyrone and
+                  Philip, Melcy and
+                  Lê Cao, Kim-Anh and
+                  Tyagi, Sonika},
+  title        = {{Multi-omics data harmonisation for the discovery 
+                   of COVID-19 drug targets}},
+  month        = mar,
+  year         = 2021,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.4562010},
+  url          = {https://doi.org/10.5281/zenodo.4562010}
+}
+```
+
 ## Overview of the pipeline
 
 This pipeline ingests data in the format of at least two matrices, each corresponding to individual omics data. In the matrices, samples correspond to rows and features to columns.
