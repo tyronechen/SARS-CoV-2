@@ -1,8 +1,9 @@
-
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.4562010-brightgreen?style=for-the-badge&logo=appveyor)](https://doi.org/10.5281/zenodo.4562010)
 [![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
 
 # SARS-CoV-2
+
+> **NOTE**: The [main repository is on gitlab](https://gitlab.com/tyagilab/sars-cov-2). It is [also mirrored on github](https://github.com/tyronechen/SARS-CoV-2) but please submit any issues to the main gitlab repository only.
 
 Copyright (c) 2020 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-0181-6258">Sonika Tyagi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
 
