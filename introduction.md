@@ -72,9 +72,9 @@ Alternatively, clone the git repository with:
     conda config --add channels conda-forge
 
     install_me="r-argparser r-brio r-colorspace r-diffobj r-dplyr r-ellipsis \
-     r-farver r-ggplot2 r-ggrepel r-igraph r-isoband r-matrixStats r-mixOmics \
-     r-parallel r-plyr r-rARPACK r-Rcpp r-RcppEigen r-reshape2 r-RSpectra \
-     r-stringi r-testthat r-tibble r-tidyr r-utf8 r-vctrs r-zeallot"
+     r-farver r-ggplot2 r-ggrepel r-igraph r-isoband r-rjson r-matrixStats \
+     r-mixOmics r-parallel r-plyr r-rARPACK r-Rcpp r-RcppEigen r-reshape2 \
+     r-RSpectra r-stringi r-testthat r-tibble r-tidyr r-utf8 r-vctrs r-zeallot"
 
     conda create -n my_environment install ${install_me}
 
@@ -83,8 +83,8 @@ You can also install dependencies in `R` directly:
     install_me <- c(
       "argparser", "brio", "colorspace", "diffobj", "dplyr", "ellipsis", "farver",
       "ggplot2", "ggrepel", "igraph", "isoband", "matrixStats", "mixOmics",
-      "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "RSpectra",
-      "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot"
+      "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "rjson",
+      "RSpectra", "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot"
       )
     sapply(install_me, install.packages)
 
@@ -172,10 +172,10 @@ arbitrary number of features.
 sapply(two_omics, dim)
 #> $classes
 #> NULL
-#> 
+#>
 #> $lipidome
 #> [1]  100 3357
-#> 
+#>
 #> $metabolome
 #> [1] 100 150
 ```

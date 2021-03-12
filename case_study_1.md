@@ -89,7 +89,7 @@ This may take up to a few hours to run.
        --plot Rplots.pdf \
        --args Rscript.sh
 
-Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.**
+Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.** [An example file is available here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/args.json).
 
     Rscript ../run_pipeline.R --json args.json
 
