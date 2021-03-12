@@ -65,7 +65,7 @@ here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/examp
 This may take up to a few days to run.
 
     Rscript ../run_pipeline.R \
-       ../../data/case_study_2/classes_diablo.tsv \
+       --classes ../../data/case_study_2/classes_diablo.tsv \
        --classes_secondary NA \
        --dropna_classes FALSE \
        --dropna_prop 0 \
@@ -94,6 +94,12 @@ This may take up to a few days to run.
        --rdata RData.RData \
        --plot Rplots.pdf \
        --args Rscript.sh
+
+
+Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.**
+
+    Rscript ../run_pipeline.R --json args.json
+
 
 # 3 Input data
 
@@ -214,7 +220,7 @@ Click to expand code block
   url_meta <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_metabolome.tsv"
   url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_proteome.tsv"
   url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptome.tsv"
-  
+
   urls <- c(url_class, url_lipi, url_meta, url_prot, url_tran)
   file_names <- sapply(strsplit(urls, "/"), tail, 1)
   mapply(function(x, y) download.file(x, y), urls, file_names, SIMPLIFY=FALSE)
@@ -274,13 +280,13 @@ Using the R data object:
   lapply(data, dim)
   #> $lipidome
   #> [1]  100 3357
-  #> 
+  #>
   #> $metabolome
   #> [1] 100 150
-  #> 
+  #>
   #> $proteome
   #> [1] 100 517
-  #> 
+  #>
   #> $transcriptome
   #> [1]   100 13263
   data_names <- argv$data_names
@@ -309,11 +315,11 @@ Click to expand code block
   # the data object has already been cleaned, we load the raw data for reference
   url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptomics.tsv"
   download.file(url_tran, "data_transcriptomics.tsv")
-  
+
   unimputed_tran_path <- "data_transcriptomics.tsv"
   unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
   unimputed_tran[unimputed_tran == 0] <- NA
-  
+
   na_prop_tran <- show_na_prop(unimputed_tran, "Transcriptome")
 ```
 
@@ -437,13 +443,13 @@ Using the pipeline:
   )
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-  
+
   print("Tuned splsda to use number of components:")
   splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
   splsda_ncomp <- unlist(splsda_ncomp, recursive=FALSE)
   names(splsda_ncomp) <- data_names
   print(splsda_ncomp)
-  
+
   print("Tuned the number of variables selected on each component to:")
   print(splsda_keepx)
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -456,7 +462,7 @@ Using the R data object:
 ``` r
   names(tuned_splsda)
   #> [1] "lipidome"      "metabolome"    "proteome"      "transcriptome"
-  
+
   # keep optimal number of features to keep
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -491,13 +497,13 @@ Using the R data object:
   lapply(data_splsda, names)
   #> $lipidome
   #> [1] "data_splsda" "perf_splsda"
-  #> 
+  #>
   #> $metabolome
   #> [1] "data_splsda" "perf_splsda"
-  #> 
+  #>
   #> $proteome
   #> [1] "data_splsda" "perf_splsda"
-  #> 
+  #>
   #> $transcriptome
   #> [1] "data_splsda" "perf_splsda"
 ```
@@ -528,13 +534,13 @@ Using the R data object:
   lapply(data_plsda, names)
   #> $lipidome
   #> [1] "data_plsda" "perf_plsda"
-  #> 
+  #>
   #> $metabolome
   #> [1] "data_plsda" "perf_plsda"
-  #> 
+  #>
   #> $proteome
   #> [1] "data_plsda" "perf_plsda"
-  #> 
+  #>
   #> $transcriptome
   #> [1] "data_plsda" "perf_plsda"
 ```
@@ -656,7 +662,7 @@ Using the pipeline:
   diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
   print("Number of components:")
   print(diablo_ncomp)
-  
+
   # tune keepx
   diablo_keepx <- c(5,10,12,14,16,18,20,30)
   diablo_keepx <- tune_diablo_keepx(
@@ -671,18 +677,18 @@ Using the R object:
 
 ``` r
   tuned_diablo
-  #>         max.dist   centroids.dist mahalanobis.dist 
+  #>         max.dist   centroids.dist mahalanobis.dist
   #>                2                2                2
   diablo$keepX
   #> $lipidome
   #> [1] 7 7
-  #> 
+  #>
   #> $metabolome
   #> [1]  6 10
-  #> 
+  #>
   #> $proteome
   #> [1] 8 5
-  #> 
+  #>
   #> $transcriptome
   #> [1]  7 30
 ```
@@ -707,7 +713,7 @@ Using the pipeline:
                        metabolome=c(6, 10)
                        proteome=c(8, 5),
                        translatome=c(7, 30))
-  
+
   # run the algorithm
   diablo <- run_diablo(data, classes, diablo_ncomp, design, diablo_keepx)
 ```
@@ -716,43 +722,43 @@ Using the R data object:
 
 ``` r
   diablo
-  #> 
+  #>
   #> Call:
-  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design) 
-  #> 
-  #>  sGCCA with 2 components on block 1 named lipidome 
-  #>  sGCCA with 2 components on block 2 named metabolome 
-  #>  sGCCA with 2 components on block 3 named proteome 
-  #>  sGCCA with 2 components on block 4 named transcriptome 
+  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design)
+  #>
+  #>  sGCCA with 2 components on block 1 named lipidome
+  #>  sGCCA with 2 components on block 2 named metabolome
+  #>  sGCCA with 2 components on block 3 named proteome
+  #>  sGCCA with 2 components on block 4 named transcriptome
   #>  sGCCA with 2 components on the outcome Y
-  #> 
-  #>  Dimension of block 1 is  100 3357 
-  #>  Dimension of block 2 is  100 150 
-  #>  Dimension of block 3 is  100 517 
-  #>  Dimension of block 4 is  100 13263 
-  #>  Outcome Y has 2 levels 
-  #> 
-  #>  Selection of 7 7 variables on each of the sGCCA components on the block 1 
-  #>  Selection of 6 10 variables on each of the sGCCA components on the block 2 
-  #>  Selection of 8 5 variables on each of the sGCCA components on the block 3 
-  #>  Selection of 7 30 variables on each of the sGCCA components on the block 4 
-  #> 
-  #>  Main numerical outputs: 
-  #>  -------------------- 
-  #>  loading vectors: see object$loadings 
-  #>  variates: see object$variates 
-  #>  variable names: see object$names 
-  #> 
-  #>  Functions to visualise samples: 
-  #>  -------------------- 
-  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo 
-  #> 
-  #>  Functions to visualise variables: 
-  #>  -------------------- 
-  #>  plotVar, plotLoadings, network, circosPlot 
-  #> 
-  #>  Other functions: 
-  #>  -------------------- 
+  #>
+  #>  Dimension of block 1 is  100 3357
+  #>  Dimension of block 2 is  100 150
+  #>  Dimension of block 3 is  100 517
+  #>  Dimension of block 4 is  100 13263
+  #>  Outcome Y has 2 levels
+  #>
+  #>  Selection of 7 7 variables on each of the sGCCA components on the block 1
+  #>  Selection of 6 10 variables on each of the sGCCA components on the block 2
+  #>  Selection of 8 5 variables on each of the sGCCA components on the block 3
+  #>  Selection of 7 30 variables on each of the sGCCA components on the block 4
+  #>
+  #>  Main numerical outputs:
+  #>  --------------------
+  #>  loading vectors: see object$loadings
+  #>  variates: see object$variates
+  #>  variable names: see object$names
+  #>
+  #>  Functions to visualise samples:
+  #>  --------------------
+  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo
+  #>
+  #>  Functions to visualise variables:
+  #>  --------------------
+  #>  plotVar, plotLoadings, network, circosPlot
+  #>
+  #>  Other functions:
+  #>  --------------------
   #>  selectVar, perf, auc
 ```
 
@@ -788,7 +794,7 @@ Click to expand code block
   perf_diablo <- mixOmics::perf(
     diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=6, progressBar=TRUE
   )
-  #> 
+  #>
   #> Performing repeated cross-validation...
   #>   |                                                                              |                                                                      |   0%
   plot(perf_diablo)
@@ -810,7 +816,7 @@ Click to expand code block
 </summary>
 
 ``` r
-  
+
   mapply(
     function(x, y) plot(
       x$comp1, type="h", main="Comp 1", las=2,
@@ -824,13 +830,13 @@ Click to expand code block
 
       #> $lipidome
       #> NULL
-      #> 
+      #>
       #> $metabolome
       #> NULL
-      #> 
+      #>
       #> $proteome
       #> NULL
-      #> 
+      #>
       #> $transcriptome
       #> NULL
 

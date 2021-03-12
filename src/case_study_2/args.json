@@ -1,0 +1,63 @@
+{
+  "classes" : "../../data/case_study_1/classes_diablo.tsv",
+  "dropna_classes" : "FALSE",
+  "dropna_prop" : 0,
+  "data" : [
+    "../../data/case_study_2/data_lipidomics.tsv",
+    "../../data/case_study_2/data_metabolomics.tsv",
+    "../../data/case_study_2/data_proteomics.tsv",
+    "../../data/case_study_2/data_transcriptomics_imputed_all.tsv"
+  ],
+  "data_names" : [
+    "lipidome",
+    "metabolome",
+    "proteome",
+    "translatome"
+  ],
+  "force_unique" : "FALSE",
+  "ncpus" : 6,
+  "linkage" : 0.1,
+  "diablocomp" : 0,
+  "diablo_keepx" : "5,6,7,8,9,10,30",
+  "icomp" : 10,
+  "pcomp" : 10,
+  "zero_as_na" : "TRUE",
+  "replace_missing" : "TRUE",
+  "plsdacomp" : 2,
+  "splsdacomp" : 2,
+  "splsda_keepx" : "5,6,7,8,9,10,30",
+  "dist_plsda" : "centroids.dist",
+  "dist_splsda" : "centroids.dist",
+  "dist_diablo" : "centroids.dist",
+  "contrib" : "max",
+  "outfile_dir" : "../../results/case_study_2/EXAMPLE",
+  "rdata" : "RData.RData",
+  "plot" : "Rplots.pdf",
+  "args" : "Rscript.sh"
+}
+
+../../data/case_study_2/classes_diablo.tsv \
+--classes_secondary NA \
+--dropna_classes FALSE \
+--dropna_prop 0 \
+--data \
+--data_names lipidome metabolome proteome transcriptome \
+--force_unique FALSE \
+--mappings NA \
+--ncpus 16 \
+--diablocomp 0 \
+--linkage 0.1 \
+--diablo_keepx 5 6 7 8 9 10 30 \
+--icomp 0 \
+--pcomp 10 \
+--plsdacomp 2 \
+--splsdacomp 2 \
+--splsda_keepx 5 6 7 8 9 10 30 \
+--dist_plsda centroids.dist \
+--dist_splsda centroids.dist \
+--dist_diablo centroids.dist \
+--contrib max \
+--outfile_dir ../../results/case_study_2/EXAMPLE/ \
+--rdata RData.RData \
+--plot Rplots.pdf \
+--args Rscript.sh

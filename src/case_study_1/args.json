@@ -1,0 +1,38 @@
+{
+  "classes" : "../../data/case_study_1/classes_diablo.txt",
+  "classes_secondary" : "../../data/case_study_1/pch.txt",
+  "dropna_classes" : "TRUE",
+  "dropna_prop" : 0,
+  "data" : [
+    "../../data/case_study_1/diablo_proteome.txt",
+    "../../data/case_study_1/diablo_translatome.txt"
+  ],
+  "data_names" : [
+    "proteome",
+    "translatome"
+  ],
+  "force_unique" : "TRUE",
+  "mappings" : [
+    "../../data/case_study_1/proteome_mapfile.txt",
+    "../../data/case_study_1/translatome_mapfile.txt"
+  ],
+  "ncpus" : 6,
+  "linkage" : 0.1,
+  "diablocomp" : 0,
+  "diablo_keepx" : "5,10,12,14,16,18,20,30",
+  "icomp" : 24,
+  "pcomp" : 10,
+  "zero_as_na" : "TRUE",
+  "replace_missing" : "TRUE",
+  "plsdacomp" : 4,
+  "splsdacomp" : 4,
+  "splsda_keepx" : "10,25,50,100",
+  "dist_plsda" : "centroids.dist",
+  "dist_splsda" : "centroids.dist",
+  "dist_diablo" : "mahalanobis.dist",
+  "contrib" : "max",
+  "outfile_dir" : "../../results/case_study_1/EXAMPLE",
+  "rdata" : "RData.RData",
+  "plot" : "Rplots.pdf",
+  "args" : "Rscript.sh"
+}

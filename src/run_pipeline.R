@@ -2,6 +2,7 @@
 # combine multi-omics data
 library(argparser, quietly=TRUE)
 library(ggplot2)
+library(multiomics)
 library(parallel)
 library(reshape2)
 
@@ -27,7 +28,11 @@ parse_argv <- function() {
   )
   # Add command line arguments
   p <- argparser::add_argument(
-    p, "classes", help="sample information", type="character"
+    p, "--json", type="character", default=NA,
+    help="pass args as json file instead of command line args (overrides args!)"
+  )
+  p <- argparser::add_argument(
+    p, "--classes", help="sample information", type="character"
   )
   p <- argparser::add_argument(
     p, "--classes_secondary", type="character", default=NA,
@@ -161,6 +166,12 @@ write_args <- function(args, argpath) {
 
 main <- function() {
   argv <- parse_argv()
+
+  if (!is.na(argv$json)) {
+    print("Json file passed to pipeline, override all other command input!")
+    argv <- rjson::fromJSON(file=argv$json)
+  }
+
   print("Creating output files directory (will overwrite existing data!)")
   outdir <- argv$outfile_dir
   dir.create(file.path(outdir))
@@ -447,7 +458,7 @@ main <- function() {
 
   # block-wise splsda doesnt do internal multilevel decomposition
   if (!is.na(pch)) {
-    diablo_input <- lapply(input_data, withinVariation, design=data.frame(pch))
+    diablo_input <- lapply(input_data, mixOmics::withinVariation, design=data.frame(pch))
   } else {
     diablo_input <- input_data
   }
