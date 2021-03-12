@@ -55,12 +55,12 @@ A script to reproduce our analysis for case study 2 is shown. [You can also down
 
 ```
 Rscript ../run_pipeline.R \
-   ../../data/case_study_2/classes_diablo.tsv \
+   --classes ../../data/case_study_2/classes_diablo.tsv \
    --classes_secondary NA \
    --dropna_classes FALSE \
    --dropna_prop 0 \
    --data \
-    ../../../data/case_study_2/data_lipidomics.tsv \
+    ../../data/case_study_2/data_lipidomics.tsv \
     ../../data/case_study_2/data_metabolomics.tsv \
     ../../data/case_study_2/data_proteomics.tsv \
     ../../data/case_study_2/data_transcriptomics_imputed_all.tsv \
@@ -84,6 +84,12 @@ Rscript ../run_pipeline.R \
    --rdata RData.RData \
    --plot Rplots.pdf \
    --args Rscript.sh
+```
+
+Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.** [An example file is available here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/args.json).
+
+```
+    Rscript ../run_pipeline.R --json args.json
 ```
 
 # Input data
