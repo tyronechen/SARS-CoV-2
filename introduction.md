@@ -83,7 +83,7 @@ Pull an image from docker:
     docker run --rm -it --entrypoint bash multiomics:1.0.0
 
     # copy the script from install location or repository as shown above and run
-    run_pipeline.R -h
+    Rscript run_pipeline.R -h
 
 > **NOTE**: You may require root access.
 
