@@ -49,21 +49,60 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 You can install this directly as an R package from gitlab:
 
     install.packages(devtools)
+    install_gitlab("tyagilab/sars-cov-2", subdir="multiomics")
+
+Add the `build_vignettes` argument if you want the detailed package documentation as well:
+
     install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE)
 
+If you encounter any errors, you may need to install `mixOmics` from source:
+
+    install.packages("devtools")
+    # then load
+    library(devtools)
+    install_github("mixOmicsTeam/mixOmics")
+
 The actual script used to run the pipeline is not directly callable but
-provided as a separate script.
+provided as a separate script:
 
     # this will show you the path to the script
     system.file("scripts", "run_pipeline.R", package="multiomics")
 
-## 2.2 Manual
+## 2.2 Docker and singularity containers
+
+This installs the environment needed to use the pipeline. Note that you will still need the controller script. This comes with the package automatically as a separate script, but you [can also download it from gitlab](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/run_pipeline.R).
+
+Pull an image from docker:
+
+    docker pull tyronechen/multiomics:1.0.0
+
+    # check that it works correctly
+    docker run --rm -it multiomics:1.0.0 Rscript -e 'packageVersion("multiomics")'
+
+    # this opens a bash shell where you can use run_pipeline.R
+    docker run --rm -it --entrypoint bash multiomics:1.0.0
+
+    # copy the script from install location or repository as shown above and run
+    run_pipeline.R -h
+
+> **NOTE**: You may require root access.
+
+Pull an image from singularity:
+
+    singularity pull multiomics.sif docker://tyronechen/multiomics:1.0.0
+
+    # copy the script from install location or repository as shown above and run
+    singularity exec multiomics.sif Rscript run_pipeline.R -h
+
+> **NOTE**: This can be large, you may need to set $SINGULARITY_TMPDIR to a custom location.
+
+## 2.3 Manual
 
 Alternatively, clone the git repository with:
 
     git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
 
-### 2.2.1 Install dependencies
+### 2.3.1 Install dependencies
 
 [With `conda`](https://bioconda.github.io/user/install.html):
 
