@@ -1,5 +1,8 @@
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.4562010-brightgreen?style=for-the-badge&logo=appveyor)](https://doi.org/10.5281/zenodo.4562010)
-[![license](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=appveyor)](https://opensource.org/licenses/MIT)
+[![](https://flat.badgen.net/badge/DOI/10.5281%2Fzenodo.4562010/green?scale=1.5)](https://doi.org/10.5281/zenodo.4562010)
+[![](https://flat.badgen.net/badge/license/MIT/cyan?scale=1.5)](https://opensource.org/licenses/MIT)
+[![](https://flat.badgen.net/docker/size/tyronechen/multiomics/1.0.0/amd64?scale=1.5&color=black)](https://hub.docker.com/repository/docker/tyronechen/multiomics)
+[![](https://flat.badgen.net/badge/icon/gitlab?icon=gitlab&label&color=orange&scale=1.5)](https://gitlab.com/tyagilab/sars-cov-2)
+[![](https://flat.badgen.net/badge/icon/@tyagilab?icon=twitter&label&scale=1.5)](@tyagilab)
 
 # SARS-CoV-2
 
