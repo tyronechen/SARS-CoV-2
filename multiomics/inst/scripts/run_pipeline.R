@@ -120,6 +120,10 @@ parse_argv <- function() {
     help="correlation cutoff for displaying lines on circos plot"
   )
   p <- argparser::add_argument(
+    p, "--tune_off", flag=TRUE,
+    help="turn off tuning (if you already know the values or for debugging)"
+  )
+  p <- argparser::add_argument(
     p, "--outfile_dir", type="character", default="./",
     help="write args, R plots and RData here (will overwrite existing!)"
   )
@@ -191,6 +195,9 @@ main <- function() {
   dist_splsda <- argv$dist_splsda
   dist_diablo <- argv$dist_diablo
   corr_cutoff <- argv$corr_cutoff
+  print("Perform tuning of sPLSDA and DIABLO:")
+  tune_off <- argv$tune_off
+  print(tune_off)
   print("Distance measure (PLSDA):")
   print(dist_plsda)
   print("Distance measure (sPLSDA):")
@@ -285,7 +292,7 @@ main <- function() {
   # check classes
   print(summary(classes))
   print("Y (classes):")
-  print(classes)
+  print(table(classes))
   print("Design:")
   print(design)
 
@@ -370,10 +377,8 @@ main <- function() {
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
-      print("Tuning splsda components and selected variables")
       if (is.na(argv$splsda_keepx)) {
-        splsda_keepx <- c(5,50,100)
-        splsda_ncomp <- length(splsda_keepx)
+        splsda_keepx <- NA
       } else {
         splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
         # splsda_ncomp = length(splsda_keepx)
@@ -385,30 +390,35 @@ main <- function() {
       print("sPLSDA ncomp:")
       print(splsda_ncomp)
 
-      if (!is.na(pch)) {
-        tuned_splsda <- tune_splsda(input_data,classes,data_names,data.frame(pch),
-          ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-          test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
-          cpus=argv$ncpus, progressBar=TRUE)
+      if (!tune_off) {
+        print("Tuning splsda components and selected variables")
+        if (!is.na(pch)) {
+          tuned_splsda <- tune_splsda(input_data,classes,data_names,data.frame(pch),
+            ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+            test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
+            cpus=argv$ncpus, progressBar=TRUE)
+        } else {
+          tuned_splsda <- tune_splsda(input_data, classes, data_names, NULL,
+            ncomp=splsda_ncomp, nrepeat=10, logratio="none",
+            test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
+            cpus=argv$ncpus, progressBar=TRUE)
+        }
+        splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
+        splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
+
+        print("Tuned splsda to use number of components:")
+        splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
+        splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
+        names(splsda_ncomp) <- data_names
+        print(splsda_ncomp)
+
+        print("Tuned the number of variables selected on each component to:")
+        print(splsda_keepx)
+        splsda_keepx <- unlist(splsda_keepx, recursive = FALSE)
+        names(splsda_keepx) <- data_names
       } else {
-        tuned_splsda <- tune_splsda(input_data, classes, data_names, NULL,
-          ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-          test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
-          cpus=argv$ncpus, progressBar=TRUE)
+        print("No sPLSDA tuning performed!")
       }
-      splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
-      splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-
-      print("Tuned splsda to use number of components:")
-      splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
-      splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
-      names(splsda_ncomp) <- data_names
-      print(splsda_ncomp)
-
-      print("Tuned the number of variables selected on each component to:")
-      print(splsda_keepx)
-      splsda_keepx <- unlist(splsda_keepx, recursive = FALSE)
-      names(splsda_keepx) <- data_names
 
       if (!is.na(pch)) {
         data_splsda <- classify_splsda(
@@ -432,14 +442,19 @@ main <- function() {
   )
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
-  if (argv$diablocomp == 0) {
-    tuned_diablo <- tune_diablo_ncomp(data, classes, design, argv$diablocomp, cpus=argv$ncpus)
+  if (!tune_off) {
+    tuned_diablo <- tune_diablo_ncomp(
+      data, classes, design, argv$diablocomp, cpus=argv$ncpus
+    )
     perf_diablo <- tuned_diablo
     print("Parameters with lowest error rate:")
     tuned_diablo <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
     diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
   } else {
+    print("No DIABLO tuning (number of components) performed!")
     diablo_ncomp <- argv$diablocomp
+    tuned_diablo <- NA
+    perf_diablo <- NA
   }
   print("Number of components:")
   print(diablo_ncomp)
@@ -472,12 +487,25 @@ main <- function() {
 
   # tune diablo parameters and run diablo
   diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
-  diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp, design,
-    diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE)
 
-  print("Diablo keepx:")
-  print(diablo_keepx)
-  diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+  if (!tune_off) {
+    diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
+      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE)
+    print("Diablo keepx:")
+    print(diablo_keepx)
+    diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+  } else {
+    print("No DIABLO tuning (keepX) performed!")
+    diablo_keepx <- rep(diablo_keepx, length(data_names))
+    diablo_keepx <- split(
+      diablo_keepx, sort(rep_len(1:length(data_names), length(diablo_keepx)))
+    )
+    names(diablo_keepx) <- data_names
+    print("Diablo keepx:")
+    print(diablo_keepx)
+    diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+  }
+
   print("Diablo design:")
   print(diablo$design)
   plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx", corr_cutoff)

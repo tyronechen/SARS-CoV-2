@@ -1,6 +1,6 @@
 Package: multiomics
 Title: Takes quantitative multi-omics data as matrices and identifies correlating features of interest
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: c(
     person(given = "Tyrone",
            family = "Chen",

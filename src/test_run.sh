@@ -1,12 +1,12 @@
 Rscript run_pipeline.R \
-   -c ../data/case_study_2/classes_diablo.tsv  \
+   --classes ../data/case_study_2/classes_diablo.tsv  \
    --dropna_classes FALSE \
    --dropna_prop 0 \
    --data ../data/case_study_2/data_lipidomics.tsv ../data/case_study_2/data_metabolomics.tsv \
    --data_names lipidome metabolome \
    --force_unique FALSE \
    --ncpus 6 \
-   --diablocomp 0 \
+   --diablocomp 2 \
    --linkage 0.1 \
    --diablo_keepx 5 10 \
    --icomp 0 \
@@ -22,4 +22,5 @@ Rscript run_pipeline.R \
    --outfile_dir ../results/test_run/ \
    --rdata RData.RData \
    --plot Rplots.pdf \
-   --args Rscript.sh
+   --args Rscript.sh \
+   --tune_off
