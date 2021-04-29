@@ -1014,10 +1014,12 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL) {
 #' @param outdir string to outfile directory. Defaults to "./"
 #' @param data_names names of individual omics data blocks. Defaults to NA.
 #' @param keepvar name of kept variable. Defaults to "".
+#' @param cutoff display correlations that exceed this threshold
 #' @export
 # @examples
 # plot_diablo(data, ncomp=0, outdir="./", data_names=NA, keepvar="")
-plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
+plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
+  cutoff=0.95) {
   # plot the diablo data with a series of diagnostic plots
 
   # need to make a function to squeeze sample names automatically and remap
@@ -1097,14 +1099,14 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="") {
   print("Plotting circos from similarity matrix...")
   # cant remove feature labels, need to make label size 0.001 or lower
   corr_diablo <- mixOmics::circosPlot(
-    data, cutoff=0.95, line=TRUE, size.legend=0.5, size.variables=0.001,
+    data, cutoff=cutoff, line=TRUE, size.legend=0.5, size.variables=0.001,
     var.names=truncated
   )
   corr_out <- paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
   cyto <- mixOmics::network(
-    data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=0.4
+    data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=cutoff
   )
   cyto_out <- paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
   igraph::write.graph(cyto$gR, cyto_out, format="graphml")

@@ -116,6 +116,10 @@ parse_argv <- function() {
     help="contribution type for plotting loadings of s/PLSDA/DIABLO [max|min]"
   )
   p <- argparser::add_argument(
+    p, "--corr_cutoff", type="double", default=0.95,
+    help="correlation cutoff for displaying lines on circos plot"
+  )
+  p <- argparser::add_argument(
     p, "--outfile_dir", type="character", default="./",
     help="write args, R plots and RData here (will overwrite existing!)"
   )
@@ -186,13 +190,15 @@ main <- function() {
   dist_plsda <- argv$dist_plsda
   dist_splsda <- argv$dist_splsda
   dist_diablo <- argv$dist_diablo
+  corr_cutoff <- argv$corr_cutoff
   print("Distance measure (PLSDA):")
   print(dist_plsda)
   print("Distance measure (sPLSDA):")
   print(dist_splsda)
   print("Distance measure (DIABLO):")
   print(dist_diablo)
-
+  print("Display correlation cutoff:")
+  print(corr_cutoff)
   options(warn=1)
 
   paths <- argv$data
@@ -474,7 +480,7 @@ main <- function() {
   diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
   print("Diablo design:")
   print(diablo$design)
-  plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx")
+  plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx", corr_cutoff)
   # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
 
   # save RData object for future reference
