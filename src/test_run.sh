@@ -1,5 +1,5 @@
 Rscript run_pipeline.R \
-   ../data/case_study_2/classes_diablo.tsv  \
+   -c ../data/case_study_2/classes_diablo.tsv  \
    --dropna_classes FALSE \
    --dropna_prop 0 \
    --data ../data/case_study_2/data_lipidomics.tsv ../data/case_study_2/data_metabolomics.tsv \
@@ -18,6 +18,7 @@ Rscript run_pipeline.R \
    --dist_splsda centroids.dist \
    --dist_diablo centroids.dist \
    --contrib max \
+   --corr_cutoff 0.7 \
    --outfile_dir ../results/test_run/ \
    --rdata RData.RData \
    --plot Rplots.pdf \
