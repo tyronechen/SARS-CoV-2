@@ -112,6 +112,18 @@ parse_argv <- function() {
     help="diablo distance metric [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p <- argparser::add_argument(
+    p, "--cross_val", type="character", default="loo",
+    help="cross-validation method ['Mfold', 'loo'], defaults to loo"
+  )
+  p <- argparser::add_argument(
+    p, "--cross_val_nrepeat", type="integer", default=10,
+    help="cross-validation, repeat this many times"
+  )
+  p <- argparser::add_argument(
+    p, "--cross_val_folds", type="integer", default=10,
+    help="folds in cross-validation, applicable to Mfold only"
+  )
+  p <- argparser::add_argument(
     p, "--contrib", type="character", default="max",
     help="contribution type for plotting loadings of s/PLSDA/DIABLO [max|min]"
   )
@@ -197,7 +209,13 @@ main <- function() {
   corr_cutoff <- argv$corr_cutoff
   print("Perform tuning of sPLSDA and DIABLO:")
   tune_off <- argv$tune_off
-  print(tune_off)
+  print(!tune_off)
+  print("Cross-validation method:")
+  print(argv$cross_val)
+  print("Cross-validation nrepeat:")
+  print(argv$cross_val_nrepeat)
+  print("Cross-validation folds:")
+  print(argv$cross_val_folds)
   print("Distance measure (PLSDA):")
   print(dist_plsda)
   print("Distance measure (sPLSDA):")
@@ -393,15 +411,19 @@ main <- function() {
       if (!tune_off) {
         print("Tuning splsda components and selected variables")
         if (!is.na(pch)) {
-          tuned_splsda <- tune_splsda(input_data,classes,data_names,data.frame(pch),
-            ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-            test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
-            cpus=argv$ncpus, progressBar=TRUE)
+          tuned_splsda <- tune_splsda(input_data, classes, data_names,
+            data.frame(pch),
+            ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
+            test_keepX=splsda_keepx, validation=argv$cross_val,
+            folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
+            progressBar=TRUE)
         } else {
-          tuned_splsda <- tune_splsda(input_data, classes, data_names, NULL,
-            ncomp=splsda_ncomp, nrepeat=10, logratio="none",
-            test_keepX=splsda_keepx, validation="loo", folds=10, dist=dist_splsda,
-            cpus=argv$ncpus, progressBar=TRUE)
+          tuned_splsda <- tune_splsda(input_data, classes, data_names,
+            NULL,
+            ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
+            test_keepX=splsda_keepx, validation=argv$cross_val,
+            folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
+            progressBar=TRUE)
         }
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
@@ -490,7 +512,10 @@ main <- function() {
 
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
-      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE)
+      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
+      cross_val=argv$cross_val, folds=argv$cross_val_folds,
+      nrepeat=argv$cross_val_nrepeat
+    )
     print("Diablo keepx:")
     print(diablo_keepx)
     diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)

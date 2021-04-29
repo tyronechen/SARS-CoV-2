@@ -9,6 +9,7 @@ Rscript run_pipeline.R \
    --diablocomp 2 \
    --linkage 0.1 \
    --diablo_keepx 5 10 \
+   --cross_val Mfold \
    --icomp 0 \
    --pcomp 10 \
    --plsdacomp 2 \

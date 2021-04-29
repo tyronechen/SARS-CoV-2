@@ -940,12 +940,14 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1) {
 #' @param dist string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"
 #' @param cpus integer number of cpus for parallel processing. Defaults to 2.
 #' @param progressBar boolean showing progress bar. Defaults to TRUE.
+#' @param cross_val character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
 #' @seealso [multiomics::create_design()], [multiomics::tune_diablo_ncomp()], [multiomics::tune_diablo_keepx()], [multiomics::run_diablo()]
 #' @export
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
-  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE) {
+  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE,
+  cross_val="loo", folds=10, nrepeat=10) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
   # We choose the optimal number of variables to select in each data set using
@@ -960,7 +962,7 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
 
   tune_data <- mixOmics::tune.block.splsda(
       X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
-      validation='loo', folds=10, nrepeat=1, cpus=cpus, dist=dist,
+      validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
       progressBar=progressBar)
   list_keepX <- tune_data$choice.keepX
   return(list_keepX)
