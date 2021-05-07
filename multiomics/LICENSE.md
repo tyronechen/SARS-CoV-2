@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2021 Tyrone Chen,Abolfazl Jalal Abadi,Kim-Anh Lê Cao,Sonika Tyagi
+Copyright (c) 2021 Tyrone Chen,Al J Abadi,Kim-Anh Lê Cao,Sonika Tyagi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
