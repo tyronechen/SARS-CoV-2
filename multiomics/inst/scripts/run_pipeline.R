@@ -29,7 +29,7 @@ parse_argv <- function() {
     help="secondary sample information eg individual (same format as classes)"
   )
   p <- argparser::add_argument(
-    p, "--dropna_classes", type="bool", default=TRUE,
+    p, "--dropna_classes", type="bool", default=FALSE,
     help="where all replicates for >= 1 class are NA, drop that feature. \
     If both --dropna_classes and --dropna_prop are enabled, perform \
     --dropna_classes and then --dropna_prop."
