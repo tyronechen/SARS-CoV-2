@@ -72,7 +72,7 @@ parse_argv <- function() {
     help="variables to keep for diablo"
   )
   p <- argparser::add_argument(
-    p, "--icomp", type="integer", default=10,
+    p, "--icomp", type="integer", default=0,
     help="component number for imputing (set 0 for no imputation)"
   )
   p <- argparser::add_argument(
