@@ -264,13 +264,14 @@ impute_missing_ <- function(data, ncomp=10, block_name="", outdir="./") {
   print(ncomp)
   # data <- data[!is.na(apply(data, 1, function(x) var(x, na.rm = TRUE))),
   #              !is.na(apply(data, 2, function(x) var(x, na.rm = TRUE)))]
-  nipals_tune <- mixOmics::nipals(data, reconst=TRUE, ncomp=ncomp)
+  nipals_tune <- mixOmics::nipals(data, ncomp=ncomp)
   barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
     xlab="Number of components", ylab="Explained variance"
   )
+  nipals_impute <- mixOmics::impute.nipals(data, ncomp = ncomp)
   outfile_path <- paste(outdir, "/", "data_", block_name, "_imputed.tsv", sep="")
   write.table(
-    as.data.frame(nipals_tune$rec), file=outfile_path, quote=FALSE, sep="\t"
+    as.data.frame(nipals_impute), file=outfile_path, quote=FALSE, sep="\t"
   )
   return(nipals_tune$rec)
 }
