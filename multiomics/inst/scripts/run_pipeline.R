@@ -35,7 +35,7 @@ parse_argv <- function() {
     --dropna_classes and then --dropna_prop."
   )
   p <- argparser::add_argument(
-    p, "--dropna_prop", type="integer", default=0,
+    p, "--dropna_prop", type="integer", default=0.5,
     help="drop feature that does not meet NA proportion threshold, eg if 0.3, \
     drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
     --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
