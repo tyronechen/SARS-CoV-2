@@ -184,7 +184,7 @@ main <- function() {
 
   print("Creating output files directory (will overwrite existing data!)")
   outdir <- argv$outfile_dir
-  dir.create(file.path(outdir))
+  dir.create(file.path(outdir), recursive = TRUE, showWarnings = FALSE)
 
   print("Writing command line arguments to:")
   argpath <- paste(outdir, argv$args, sep="/")
@@ -358,7 +358,7 @@ main <- function() {
     input_data <- data
   }
 
-  if (!is.na(pch)) {
+  if (!is.na(argv$classes_secondary)) {
     data_pca_multilevel <- plot_pca_multilevel(
       input_data, classes, pch=pch, ncomp=argv$pcomp,
       title=paste("With NA. PC:", argv$pcomp)
