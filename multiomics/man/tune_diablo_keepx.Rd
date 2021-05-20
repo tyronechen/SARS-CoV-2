@@ -12,7 +12,10 @@ tune_diablo_keepx(
   test_keepX = c(5, 50, 100),
   cpus = 2,
   dist = "centroids.dist",
-  progressBar = TRUE
+  progressBar = TRUE,
+  cross_val = "loo",
+  folds = 10,
+  nrepeat = 10
 )
 }
 \arguments{
@@ -31,6 +34,8 @@ tune_diablo_keepx(
 \item{dist}{string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"}
 
 \item{progressBar}{boolean showing progress bar. Defaults to TRUE.}
+
+\item{cross_val}{character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".}
 }
 \description{
 Tune sPLSDA multi-block features to keep

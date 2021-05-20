@@ -101,7 +101,14 @@ show_na_prop <- function(data, name="") {
 # @examples
 # remove_na_prop(dataframe_with_data_na, na_prop=0.3, zero_as_na=TRUE)
 remove_na_prop <- function(data, na_prop=0.3, zero_as_na=TRUE) {
-  mapply(function(x) remove_na_prop_(x, na_prop), data)
+  # mapply(function(x) remove_na_prop_(x, na_prop), data)
+  data_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- remove_na_prop_(data[[i]], na_prop)
+    data_new <- append(data_new, list(data_tmp))
+  }
+  names(data_new) <- names(data)
+  return(data_new)
 }
 
 remove_na_prop_ <- function(data, na_prop=0.3, zero_as_na=TRUE) {
@@ -279,9 +286,16 @@ impute_missing_ <- function(data, ncomp=10, block_name="", outdir="./") {
 # @examples
 # impute_missing(data, 10, "./")
 impute_missing <- function(data, ncomps, outdir) {
-  mapply(function(x, y, z)
-    impute_missing_(x, y, z, outdir), data, ncomps, names(data), SIMPLIFY=FALSE
-  )
+  # mapply(function(x, y, z)
+  #   impute_missing_(x, y, z, outdir), data, ncomps, names(data), SIMPLIFY=FALSE
+  # )
+  data_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]])
+    data_new <- append(data_new, data_tmp)
+  }
+  names(data_new) <- names(data)
+  return(data_new)
 }
 
 replace_missing_ <- function(data, imputed) {
@@ -301,7 +315,14 @@ replace_missing_ <- function(data, imputed) {
 # @examples
 # replace_missing(data, imputed)
 replace_missing <- function(data, imputed) {
-  mapply(function(x, y) replace_missing_(x, y), data, imputed)
+  # mapply(function(x, y) replace_missing_(x, y), data, imputed)
+  data_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- replace_missing_(data[[i]], imputed[[i]])
+    data_new <- append(data_new, data_tmp)
+  }
+  names(data_new) <- names(data)
+  return(data_new)
 }
 
 #' Plots PCA without performing multilevel decomposition
@@ -329,29 +350,62 @@ plot_pca_single <- function(data, classes, pch=NA, title="", ncomp=0, show=FALSE
     print(data_pca)
   }
   print("Plotting PCA component contribution...")
-  mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
+  # mapply(function(x, y) plot(x, main=paste(y, "Screeplot")), data_pca, names)
+  for(i in 1:length(data_pca)) {
+    plot(data_pca[[i]], main=paste(names[[i]], "Screeplot"))
+  }
+
   if (!is.na(pch)) {
     print("Plotting PCA by groups...")
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=FALSE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/2"), pch=pch), data_pca, names)
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=FALSE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=FALSE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=FALSE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 1/2"), pch=pch), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=FALSE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=FALSE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    for(i in 1:length(data_pca)){
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 1/2"), pch=pch
+      )
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 1/3"), pch=pch
+      )
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 2/3"), pch=pch
+      )
+    }
+
   } else {
     print("Plotting PCA by groups...")
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=TRUE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/2")), data_pca, names)
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=TRUE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
-    mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=TRUE,
-      group=classes, legend=TRUE, ncomp=ncomp,
-      title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 1/2")), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 1/3"), pch=pch), data_pca, names)
+    # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+    #   group=classes, legend=TRUE, ncomp=ncomp,
+    #   title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
+    for(i in 1:length(data_pca)) {
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 1/2")
+      )
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 1/3")
+      )
+      mixOmics::plotIndiv(
+        data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
+        ncomp=ncomp, title=paste(title, names[[i]], "PCA 2/3")
+      )
+    }
   }
   return(data_pca)
 }
@@ -370,12 +424,24 @@ plot_pca_single <- function(data, classes, pch=NA, title="", ncomp=0, show=FALSE
 plot_additional <- function(data, data_pca, classes, names) {
   # correlation circle and biplots: dataframe, list, vector -> outfile_path.pdf
   print("Plotting correlation circle plots...")
-  mapply(function(x, y) mixOmics::plotVar(x, comp=c(1, 2),
-    title=paste(y, "PCA 1/2"), var.names=FALSE), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotVar(x, comp=c(1, 2),
+  #   title=paste(y, "PCA 1/2"), var.names=FALSE), data_pca, names)
+  for(i in 1:length(data_pca)){
+    mixOmics::plotVar(
+      data_pca[[i]], comp=c(1, 2), title=paste(names[[i]], "PCA 1/2"),
+      var.names=FALSE
+    )
+  }
 
   print("Plotting biplots...")
-  mapply(function(x, y, z) biplot(y, cex=0.7, xlabs=paste(classes, 1:nrow(x)),
-    main=paste(z, "Biplot")), data, data_pca, names)
+  # mapply(function(x, y, z) biplot(y, cex=0.7, xlabs=paste(classes, 1:nrow(x)),
+  #   main=paste(z, "Biplot")), data, data_pca, names)
+  for(i in 1:length(data)){
+    biplot(
+      data_pca[[i]], cex=0.7, xlabs=paste(classes, 1:nrow(data[[i]])),
+      main=paste(names[[i]], "PCA 1/2")
+    )
+  }
 }
 
 #' Plots PCA with multilevel decomposition
@@ -407,19 +473,37 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
   }
 
   print("Plotting PCA multilevel component contribution...")
-  mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
-    data_pca, names)
+  # mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
+  #   data_pca, names)
+  for(i in 1:length(data_pca)){
+    plot(data_pca[[i]], main=paste(names[[i]], "Screeplot multilevel"))
+  }
 
   print("Plotting PCA multilevel...")
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=FALSE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=FALSE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=FALSE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=FALSE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PCA M 1/2"), pch=pch), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=FALSE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PCA M 1/3"), pch=pch), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=FALSE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
+  for(i in 1:length(data_pca)){
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PCA M 1/2"), pch=pch
+    )
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PCA M 1/3"), pch=pch
+    )
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PCA M 2/3"), pch=pch
+    )
+  }
+
   return(data_pca)
 }
 
@@ -442,9 +526,19 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
 # classify_plsda(data, classes, pch=NA, title="", ncomp=0, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE)
 classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
-  mapply(function(x, y) classify_plsda_(
-    x, classes, pch, y, ncomp, contrib, outdir, mappings, dist, bg), data, title,
-    SIMPLIFY=FALSE)
+  # mapply(function(x, y) classify_plsda_(
+  #   x, classes, pch, y, ncomp, contrib, outdir, mappings, dist, bg), data, title,
+  #   SIMPLIFY=FALSE)
+  data_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- classify_plsda_(
+      data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
+      dist, bg
+    )
+    data_new <- append(data_new, data_tmp)
+  }
+  names(data_new) <- names(data)
+  return(data_new)
 }
 
 classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
@@ -523,7 +617,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 
   # supporess roc printing automatically to stdout
   sink("/dev/null")
-  roc <- mapply(function(x) mixOmics::auroc(data_plsda, roc.comp=x), seq(ncomp))
+  # roc <- mapply(function(x) mixOmics::auroc(data_plsda, roc.comp=x), seq(ncomp))
+  roc <- list()
+  for(i in 1:ncomp){
+    data_tmp <- mixOmics::auroc(data_plsda, roc.comp=i)
+    roc <- append(roc, data_tmp)
+  }
   sink()
 
   # consider using plotvar for some datasets
@@ -606,9 +705,19 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=TRUE) {
-    mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
-      nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
-      data, names, SIMPLIFY=FALSE)
+    # mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
+    #   nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
+    #   data, names, SIMPLIFY=FALSE)
+    data_new <- list()
+    for(i in 1:length(names)){
+      data_tmp <- tune_splsda_(
+        data[[i]], classes, names[[i]], multilevel, ncomp, nrepeat, logratio,
+        test_keepX, validation, folds, dist, cpus, progressBar
+      )
+      data_new <- append(data_new, data_tmp)
+    }
+    names(data_new) <- names(data)
+    return(data_new)
   }
 
 tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
@@ -616,7 +725,7 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
   dist="centroids.dist", cpus=2, progressBar=TRUE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
   # tune splsda components
-  tuned = mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
+  tuned <- mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
     progressBar=progressBar
@@ -646,9 +755,18 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
 classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
   bg=TRUE) {
-  mapply(function(x, y, c, k) classify_splsda_(
-    x, classes, pch, y, c, k, contrib, outdir
-  ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
+  # mapply(function(x, y, c, k) classify_splsda_(
+  #   x, classes, pch, y, c, k, contrib, outdir
+  # ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
+  data_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- classify_splsda_(
+      data[[i]], classes, pch, title[[i]], ncomp, keepX[[i]]
+    )
+    data_new <- append(data_new, data_tmp)
+  }
+  names(data_new) <- names(data)
+  return(data_new)
 }
 
 classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
@@ -729,7 +847,12 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
     )
   }
   sink("/dev/null")
-  roc <- mapply(function(x) mixOmics::auroc(data_splsda, roc.comp=x), seq(ncomp))
+  # roc <- mapply(function(x) mixOmics::auroc(data_splsda, roc.comp=x), seq(ncomp))
+  roc <- list()
+  for(i in 1:ncomp){
+    data_tmp <- mixOmics::auroc(data_splsda, roc.comp=i)
+    roc <- append(roc, data_tmp)
+  }
   sink()
 
   if (ncomp > 1) {
@@ -802,19 +925,36 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
 plot_plsda <- function(data, classes, pch, title="", ncomp=0) {
   names <- names(data)
   print("Plotting PLSDA component contribution...")
-  mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
-    data, names)
+  # mapply(function(x, y) plot(x, main=paste(y, "Screeplot multilevel")),
+  #   data, names)
+  for(i in 1:length(names)){
+    plot(data[[i]], main=paste(names[[i]], "Screeplot multilevel"))
+  }
 
   print("Plotting plsda...")
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=TRUE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PLSDA 1/2"), pch=pch), data_pca, names)
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=TRUE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PLSDA 1/3"), pch=pch), data_pca, names)
-  mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=TRUE,
-    group=classes, legend=TRUE, ncomp=ncomp,
-    title=paste(title, y, "PLSDA 2/3"), pch=pch), data_pca, names)
+  for(i in 1:length(names)){
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(1,2), ind.names=TRUE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 1/2"), pch=pch
+    )
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(1,3), ind.names=TRUE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 1/3"), pch=pch
+    )
+    mixOmics::plotIndiv(
+      data_pca[[i]], comp=c(2,3), ind.names=TRUE, group=classes, legend=TRUE,
+      ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 2/3"), pch=pch
+    )
+  }
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,2), ind.names=TRUE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PLSDA 1/2"), pch=pch), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(1,3), ind.names=TRUE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PLSDA 1/3"), pch=pch), data_pca, names)
+  # mapply(function(x, y) mixOmics::plotIndiv(x, comp=c(2,3), ind.names=TRUE,
+  #   group=classes, legend=TRUE, ncomp=ncomp,
+  #   title=paste(title, y, "PLSDA 2/3"), pch=pch), data_pca, names)
   return(data_pca)
 }
 
@@ -832,8 +972,11 @@ plot_plsda <- function(data, classes, pch, title="", ncomp=0) {
 # plot_loadings(data, contrib="max", ncomp=2, method="median", ndisplay=50, title="Loadings")
 plot_loadings <- function(data, contrib="max", ncomp=2, method="median",
   ndisplay=50, title="Loadings") {
-  mapply(function(x, y) plot_loadings_(x, contrib, ncomp, method, ndisplay,
-    y), data, title)
+  # mapply(function(x, y) plot_loadings_(x, contrib, ncomp, method, ndisplay,
+  #   y), data, title)
+  for (i in length(data)) {
+    plot_loadings_(data[[i]], contrib, ncomp, method, ndisplay, title[[i]])
+  }
 }
 
 plot_loadings_ <- function(data, contrib="max", ncomp=2, method="median",
@@ -862,15 +1005,31 @@ plot_loadings_ <- function(data, contrib="max", ncomp=2, method="median",
 cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
   # plots a heatmap of correlations: -> list of df, list of df, vector of names
   print("Plotting correlation between unimputed and imputed components")
-  mapply(function(x, y, z) print(
-    ggplot2::ggplot(reshape2::melt(cor(x$variates$X, y$variates$X)),
-    ggplot2::aes(Var1, Var2, fill=value)) +
-    ggplot2::ggtitle(paste(z, "Correlation between imputed and unimputed data")) +
-    ggplot2::geom_tile() +
-    ggplot2::scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
-      limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
-    ggplot2::theme_minimal()),
-  pca_withna, pca_impute, names)
+  # mapply(function(x, y, z) print(
+  #   ggplot2::ggplot(reshape2::melt(cor(x$variates$X, y$variates$X)),
+  #   ggplot2::aes(Var1, Var2, fill=value)) +
+  #   ggplot2::ggtitle(paste(z, "Correlation between imputed and unimputed data")) +
+  #   ggplot2::geom_tile() +
+  #   ggplot2::scale_fill_gradient2(low="blue", high="red", mid="white", midpoint=0,
+  #     limit=c(-1,1), space="Lab", name="Pearson\nCorrelation") +
+  #   ggplot2::theme_minimal()),
+  # pca_withna, pca_impute, names)
+  for (i in 1:length(names)) {
+    print(
+      ggplot2::ggplot(reshape2::melt(
+        cor(pca_withna[[i]]$variates$X, pca_impute[[i]]$variates$X)
+      ), ggplot2::aes(Var1, Var2, fill=value)) +
+      ggplot2::ggtitle(
+        paste(names[[i]], "Correlation between imputed and unimputed data")
+      ) +
+      ggplot2::geom_tile() +
+      ggplot2::scale_fill_gradient2(
+        low="blue", high="red", mid="white", midpoint=0, limit=c(-1,1),
+        space="Lab", name="Pearson\nCorrelation"
+      ) +
+      ggplot2::theme_minimal()
+    )
+  }
 }
 
 #' Tune sPLSDA multi-block (DIABLO) number of components
@@ -959,11 +1118,16 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   test_keepX <- mapply(function(name, dims) list(name=dims), names(data),
     rep(list(test_keepX))
   )
+  # test_keepX <- list()
+  # for(i in 1:length(rep(list(test_keepX)))){
+  #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
+  #   test_keepX <- append(test_keepX, data_tmp)
+  # }
 
   tune_data <- mixOmics::tune.block.splsda(
-      X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
-      validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
-      progressBar=progressBar)
+    X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
+    validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
+    progressBar=progressBar)
   list_keepX <- tune_data$choice.keepX
   return(list_keepX)
 }
@@ -979,16 +1143,26 @@ force_unique_blocks <- function(data) {
   # in diablo, features across blocks must be unique: list of df -> list of df
   print("Appending suffix to individual block names (diablo requires unique!):")
   names <- names(data)
-  colnames_new <- mapply(
-    function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
-  )
+  # colnames_new <- mapply(
+  #   function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
+  # )
+  colnames_new <- list()
+  for(i in 1:length(data)){
+    data_tmp <- paste(lapply(data, colnames)[[i]], names(data)[[i]], sep="_")
+    colnames_new <- append(colnames_new, data_tmp)
+  }
   reassign_colnames_ <- function(data, colnames_new) {
     colnames(data) <- colnames_new
     return(data)
   }
-  data <- mapply(reassign_colnames_, data, colnames_new)
-  names(data) <- names
-  return(data)
+  # data <- mapply(reassign_colnames_, data, colnames_new)
+  new_data <- list()
+  for(i in 1:length(data)){
+    data_tmp <- reassign_colnames_(data[[i]], colnames_new[[i]])
+    new_data <- append(new_data, data_tmp)
+  }
+  names(new_data) <- names
+  return(new_data)
 }
 
 #' Run the multi-omic pipeline
@@ -1049,6 +1223,11 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
     splitted <- mapply(
       function(x) split_(x, all_names), names(all_names), SIMPLIFY=FALSE
     )
+    # splitted <- list()
+    # for(i in 1:length(names(all_names))) {
+    #   data_tmp <- split_(names(all_names)[[i]], all_names)
+    #   splitted <- append(splitted, data_tmp)
+    # }
     truncate_ <- function(names, trim) {
       ifelse(nchar(names) > trim, paste0(strtrim(names, trim), ''), names)
     }
@@ -1074,10 +1253,20 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   truncated <- data_vis_names$truncated
   print("Plotting correlation between components...")
   sink("/dev/null")
-  roc <- mapply(function(x) mixOmics::auroc(data, roc.comp=x), seq(ncomp))
+  # roc <- mapply(function(x) mixOmics::auroc(data, roc.comp=x), seq(ncomp))
+  roc <- list()
+  for(i in 1:ncomp){
+    data_tmp <- mixOmics::auroc(data, roc.comp=i)
+    roc <- append(roc, data_tmp)
+  }
   sink()
-  mapply(function(x) mixOmics::plotDiablo(data, ncomp=x), seq(ncomp))
+  # mapply(function(x) mixOmics::plotDiablo(data, ncomp=x), seq(ncomp))
+  # col.per.group <- mixOmics::color.mixo(1:length(data_names))
+  # names(col.per.group) <- levels(data$Y)
 
+  for(i in 1:ncomp) {
+    mixOmics::plotDiablo(object=data, ncomp=i, col.per.group=NULL)
+  }
   if (ncomp > 1) {
     print("Plotting individual samples into space spanned by block components...")
     mixOmics::plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO',
@@ -1099,10 +1288,14 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
     )
   }
   print("Plotting circos from similarity matrix...")
+  corr_diablo <- mixOmics::circosPlot(
+    data, cutoff=cutoff
+  )
+  print("HEE HEE")
   # cant remove feature labels, need to make label size 0.001 or lower
   corr_diablo <- mixOmics::circosPlot(
     data, cutoff=cutoff, line=TRUE, size.legend=0.5, size.variables=0.001,
-    var.names=truncated
+    var.names=truncated, showIntraLinks=TRUE, linkWidth=c(1,2)
   )
   corr_out <- paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
@@ -1202,7 +1395,8 @@ assess_performance <- function(data, dist, ncomp) {
   # ROC and AUC criteria are not particularly insightful in relation to the
   # performance evaluation of our methods, but can complement the analysis.
   print("Plotting ROC...")
-  mapply(function(x) mixOmics::auroc(data, x), seq(ncomp))
+  # mapply(function(x) mixOmics::auroc(data, x), seq(ncomp))
+  for(i in 1:ncomp) {mixOmics::auroc(data, roc.comp=i)}
   return(perf_diablo)
 }
 

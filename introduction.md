@@ -20,7 +20,7 @@ Introduction
 Copyright (c) 2020
 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
-<a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip
+<a href="https://orcid.org/0000-0002-4146-2848">Al J Abadi
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
 <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
@@ -38,9 +38,9 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.md)
--   [Case study 1](case_study_1.md)
--   [Case study 2](case_study_2.md)
+-   [Introduction](introduction.html)
+-   [Case study 1](case_study_1.html)
+-   [Case study 2](case_study_2.html)
 
 # 2 Installation
 
@@ -49,60 +49,21 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 You can install this directly as an R package from gitlab:
 
     install.packages(devtools)
-    install_gitlab("tyagilab/sars-cov-2", subdir="multiomics")
-
-Add the `build_vignettes` argument if you want the detailed package documentation as well:
-
     install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE)
 
-If you encounter any errors, you may need to install `mixOmics` from source:
-
-    install.packages("devtools")
-    # then load
-    library(devtools)
-    install_github("mixOmicsTeam/mixOmics")
-
 The actual script used to run the pipeline is not directly callable but
-provided as a separate script:
+provided as a separate script.
 
     # this will show you the path to the script
     system.file("scripts", "run_pipeline.R", package="multiomics")
 
-## 2.2 Docker and singularity containers
-
-This installs the environment needed to use the pipeline. Note that you will still need the controller script. This comes with the package automatically as a separate script, but you [can also download it from gitlab](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/run_pipeline.R).
-
-Pull an image from docker:
-
-    docker pull tyronechen/multiomics:1.0.0
-
-    # check that it works correctly
-    docker run --rm -it multiomics:1.0.0 Rscript -e 'packageVersion("multiomics")'
-
-    # this opens a bash shell where you can use run_pipeline.R
-    docker run --rm -it --entrypoint bash multiomics:1.0.0
-
-    # copy the script from install location or repository as shown above and run
-    Rscript run_pipeline.R -h
-
-> **NOTE**: You may require root access.
-
-Pull an image from singularity:
-
-    singularity pull multiomics.sif docker://tyronechen/multiomics:1.0.0
-
-    # copy the script from install location or repository as shown above and run
-    singularity exec multiomics.sif Rscript run_pipeline.R -h
-
-> **NOTE**: This can be large, you may need to set $SINGULARITY_TMPDIR to a custom location.
-
-## 2.3 Manual
+## 2.2 Manual
 
 Alternatively, clone the git repository with:
 
     git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
 
-### 2.3.1 Install dependencies
+### 2.2.1 Install dependencies
 
 [With `conda`](https://bioconda.github.io/user/install.html):
 
@@ -111,9 +72,10 @@ Alternatively, clone the git repository with:
     conda config --add channels conda-forge
 
     install_me="r-argparser r-brio r-colorspace r-diffobj r-dplyr r-ellipsis \
-     r-farver r-ggplot2 r-ggrepel r-igraph r-isoband r-rjson r-matrixStats \
-     r-mixOmics r-parallel r-plyr r-rARPACK r-Rcpp r-RcppEigen r-reshape2 \
-     r-RSpectra r-stringi r-testthat r-tibble r-tidyr r-utf8 r-vctrs r-zeallot"
+     r-farver r-ggplot2 r-ggrepel r-igraph r-isoband r-matrixStats r-mixOmics \
+     r-parallel r-plyr r-rARPACK r-Rcpp r-RcppEigen r-reshape2 r-RSpectra \
+     r-stringi r-testthat r-tibble r-tidyr r-utf8 r-vctrs r-zeallot \
+     bioconductor-biocparallel"
 
     conda create -n my_environment install ${install_me}
 
@@ -122,9 +84,9 @@ You can also install dependencies in `R` directly:
     install_me <- c(
       "argparser", "brio", "colorspace", "diffobj", "dplyr", "ellipsis", "farver",
       "ggplot2", "ggrepel", "igraph", "isoband", "matrixStats", "mixOmics",
-      "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "rjson",
-      "RSpectra", "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot"
-      )
+      "parallel", "plyr", "rARPACK", "Rcpp", "RcppEigen", "reshape2", "RSpectra",
+      "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot",
+      "BiocParallel")
     sapply(install_me, install.packages)
 
 # 3 Usage
@@ -211,10 +173,10 @@ arbitrary number of features.
 sapply(two_omics, dim)
 #> $classes
 #> NULL
-#>
+#> 
 #> $lipidome
 #> [1]  100 3357
-#>
+#> 
 #> $metabolome
 #> [1] 100 150
 ```

@@ -4,7 +4,14 @@
 \alias{plot_diablo}
 \title{Make plots for diablo}
 \usage{
-plot_diablo(data, ncomp = 0, outdir = "./", data_names = NA, keepvar = "")
+plot_diablo(
+  data,
+  ncomp = 0,
+  outdir = "./",
+  data_names = NA,
+  keepvar = "",
+  cutoff = 0.95
+)
 }
 \arguments{
 \item{data}{list of dataframes with quantitative multi-omics data.}
@@ -16,6 +23,8 @@ plot_diablo(data, ncomp = 0, outdir = "./", data_names = NA, keepvar = "")
 \item{data_names}{names of individual omics data blocks. Defaults to NA.}
 
 \item{keepvar}{name of kept variable. Defaults to "".}
+
+\item{cutoff}{display correlations that exceed this threshold}
 }
 \description{
 Run the multi-block splsda on the multi omics data

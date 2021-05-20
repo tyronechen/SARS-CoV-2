@@ -29,7 +29,7 @@ Case study 2
 Copyright (c) 2020
 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
-<a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip
+<a href="https://orcid.org/0000-0002-4146-2848">Al J Abadi
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
 <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
@@ -47,9 +47,9 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.md)
--   [Case study 1](case_study_1.md)
--   [Case study 2](case_study_2.md)
+-   [Introduction](introduction.html)
+-   [Case study 1](case_study_1.html)
+-   [Case study 2](case_study_2.html)
 
 # 2 Running the script
 
@@ -65,12 +65,12 @@ here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/examp
 This may take up to a few days to run.
 
     Rscript ../run_pipeline.R \
-       --classes ../../data/case_study_2/classes_diablo.tsv \
+       ../../data/case_study_2/classes_diablo.tsv \
        --classes_secondary NA \
        --dropna_classes FALSE \
        --dropna_prop 0 \
        --data \
-        ../../../data/case_study_2/data_lipidomics.tsv \
+        ../../data/case_study_2/data_lipidomics.tsv \
         ../../data/case_study_2/data_metabolomics.tsv \
         ../../data/case_study_2/data_proteomics.tsv \
         ../../data/case_study_2/data_transcriptomics_imputed_all.tsv \
@@ -94,12 +94,6 @@ This may take up to a few days to run.
        --rdata RData.RData \
        --plot Rplots.pdf \
        --args Rscript.sh
-
-
-Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.** [An example file is available here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/args.json).
-
-    Rscript ../run_pipeline.R --json args.json
-
 
 # 3 Input data
 
@@ -183,13 +177,16 @@ Click to expand code block
   download.file(url_rdata, "RData.RData")
   load("RData.RData")
   ls()
-  #>  [1] "argv"                "classes"             "data"               
-  #>  [4] "data_imp"            "data_pca_multilevel" "data_plsda"         
-  #>  [7] "data_splsda"         "diablo"              "dist_diablo"        
-  #> [10] "dist_plsda"          "dist_splsda"         "linkage"            
-  #> [13] "mappings"            "pca_impute"          "pca_withna"         
-  #> [16] "pch"                 "perf_diablo"         "tuned_diablo"       
-  #> [19] "tuned_splsda"        "url_rdata"
+  #>  [1] "argv"                   "classes"                "cor_imputed_unimputed_"
+  #>  [4] "data"                   "data_imp"               "data_names"            
+  #>  [7] "data_pca_multilevel"    "data_plsda"             "data_splsda"           
+  #> [10] "design"                 "diablo"                 "dist_diablo"           
+  #> [13] "dist_plsda"             "dist_splsda"            "linkage"               
+  #> [16] "mappings"               "na_prop_tran"           "pca_impute"            
+  #> [19] "pca_imputed"            "pca_unimputed"          "pca_withna"            
+  #> [22] "pch"                    "perf_diablo"            "splsda_keepx"          
+  #> [25] "tuned_diablo"           "tuned_splsda"           "unimputed_tran"        
+  #> [28] "unimputed_tran_path"    "url_rdata"              "url_tran"
 ```
 
 > **NOTE**: There are some differences in the R data object for case
@@ -220,7 +217,7 @@ Click to expand code block
   url_meta <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_metabolome.tsv"
   url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_proteome.tsv"
   url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptome.tsv"
-
+  
   urls <- c(url_class, url_lipi, url_meta, url_prot, url_tran)
   file_names <- sapply(strsplit(urls, "/"), tail, 1)
   mapply(function(x, y) download.file(x, y), urls, file_names, SIMPLIFY=FALSE)
@@ -280,13 +277,13 @@ Using the R data object:
   lapply(data, dim)
   #> $lipidome
   #> [1]  100 3357
-  #>
+  #> 
   #> $metabolome
   #> [1] 100 150
-  #>
+  #> 
   #> $proteome
   #> [1] 100 517
-  #>
+  #> 
   #> $transcriptome
   #> [1]   100 13263
   data_names <- argv$data_names
@@ -315,11 +312,11 @@ Click to expand code block
   # the data object has already been cleaned, we load the raw data for reference
   url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_transcriptomics.tsv"
   download.file(url_tran, "data_transcriptomics.tsv")
-
+  
   unimputed_tran_path <- "data_transcriptomics.tsv"
   unimputed_tran <- read.table(unimputed_tran_path, sep="\t", header=TRUE, row.names=1)
   unimputed_tran[unimputed_tran == 0] <- NA
-
+  
   na_prop_tran <- show_na_prop(unimputed_tran, "Transcriptome")
 ```
 
@@ -439,17 +436,17 @@ Using the pipeline:
   tuned_splsda <- tune_splsda(
     data, classes, data_names, data.frame(pch), ncomp=4, nrepeat=10,
     logratio="none", test_keepX=c(10, 25, 50, 100), validation="loo", folds=10,
-    dist="centroids.dist", cpus=6, progressBar=FALSE
+    dist="centroids.dist", cpus=1, progressBar=FALSE
   )
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-
+  
   print("Tuned splsda to use number of components:")
   splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
   splsda_ncomp <- unlist(splsda_ncomp, recursive=FALSE)
   names(splsda_ncomp) <- data_names
   print(splsda_ncomp)
-
+  
   print("Tuned the number of variables selected on each component to:")
   print(splsda_keepx)
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -462,7 +459,7 @@ Using the R data object:
 ``` r
   names(tuned_splsda)
   #> [1] "lipidome"      "metabolome"    "proteome"      "transcriptome"
-
+  
   # keep optimal number of features to keep
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -497,13 +494,13 @@ Using the R data object:
   lapply(data_splsda, names)
   #> $lipidome
   #> [1] "data_splsda" "perf_splsda"
-  #>
+  #> 
   #> $metabolome
   #> [1] "data_splsda" "perf_splsda"
-  #>
+  #> 
   #> $proteome
   #> [1] "data_splsda" "perf_splsda"
-  #>
+  #> 
   #> $transcriptome
   #> [1] "data_splsda" "perf_splsda"
 ```
@@ -534,13 +531,13 @@ Using the R data object:
   lapply(data_plsda, names)
   #> $lipidome
   #> [1] "data_plsda" "perf_plsda"
-  #>
+  #> 
   #> $metabolome
   #> [1] "data_plsda" "perf_plsda"
-  #>
+  #> 
   #> $proteome
   #> [1] "data_plsda" "perf_plsda"
-  #>
+  #> 
   #> $transcriptome
   #> [1] "data_plsda" "perf_plsda"
 ```
@@ -656,17 +653,17 @@ Using the pipeline:
 
 ``` r
   # tune number of components
-  tuned_diablo <- tune_diablo_ncomp(data, classes, design, ncomp=2, cpus=6)
+  tuned_diablo <- tune_diablo_ncomp(data, classes, design, ncomp=2, cpus=1)
   print("Parameters with lowest error rate:")
   tuned_diablo <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
   diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
   print("Number of components:")
   print(diablo_ncomp)
-
+  
   # tune keepx
   diablo_keepx <- c(5,10,12,14,16,18,20,30)
   diablo_keepx <- tune_diablo_keepx(
-    data, classes, diablo_ncomp, design, diablo_keepx, cpus=6,
+    data, classes, diablo_ncomp, design, diablo_keepx, cpus=1,
     dist="mahalanobis.dist", progressBar=FALSE
   )
   print("Diablo keepx:")
@@ -677,18 +674,18 @@ Using the R object:
 
 ``` r
   tuned_diablo
-  #>         max.dist   centroids.dist mahalanobis.dist
+  #>         max.dist   centroids.dist mahalanobis.dist 
   #>                2                2                2
   diablo$keepX
   #> $lipidome
   #> [1] 7 7
-  #>
+  #> 
   #> $metabolome
   #> [1]  6 10
-  #>
+  #> 
   #> $proteome
   #> [1] 8 5
-  #>
+  #> 
   #> $transcriptome
   #> [1]  7 30
 ```
@@ -713,7 +710,7 @@ Using the pipeline:
                        metabolome=c(6, 10)
                        proteome=c(8, 5),
                        translatome=c(7, 30))
-
+  
   # run the algorithm
   diablo <- run_diablo(data, classes, diablo_ncomp, design, diablo_keepx)
 ```
@@ -722,43 +719,43 @@ Using the R data object:
 
 ``` r
   diablo
-  #>
+  #> 
   #> Call:
-  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design)
-  #>
-  #>  sGCCA with 2 components on block 1 named lipidome
-  #>  sGCCA with 2 components on block 2 named metabolome
-  #>  sGCCA with 2 components on block 3 named proteome
-  #>  sGCCA with 2 components on block 4 named transcriptome
+  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design) 
+  #> 
+  #>  sGCCA with 2 components on block 1 named lipidome 
+  #>  sGCCA with 2 components on block 2 named metabolome 
+  #>  sGCCA with 2 components on block 3 named proteome 
+  #>  sGCCA with 2 components on block 4 named transcriptome 
   #>  sGCCA with 2 components on the outcome Y
-  #>
-  #>  Dimension of block 1 is  100 3357
-  #>  Dimension of block 2 is  100 150
-  #>  Dimension of block 3 is  100 517
-  #>  Dimension of block 4 is  100 13263
-  #>  Outcome Y has 2 levels
-  #>
-  #>  Selection of 7 7 variables on each of the sGCCA components on the block 1
-  #>  Selection of 6 10 variables on each of the sGCCA components on the block 2
-  #>  Selection of 8 5 variables on each of the sGCCA components on the block 3
-  #>  Selection of 7 30 variables on each of the sGCCA components on the block 4
-  #>
-  #>  Main numerical outputs:
-  #>  --------------------
-  #>  loading vectors: see object$loadings
-  #>  variates: see object$variates
-  #>  variable names: see object$names
-  #>
-  #>  Functions to visualise samples:
-  #>  --------------------
-  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo
-  #>
-  #>  Functions to visualise variables:
-  #>  --------------------
-  #>  plotVar, plotLoadings, network, circosPlot
-  #>
-  #>  Other functions:
-  #>  --------------------
+  #> 
+  #>  Dimension of block 1 is  100 3357 
+  #>  Dimension of block 2 is  100 150 
+  #>  Dimension of block 3 is  100 517 
+  #>  Dimension of block 4 is  100 13263 
+  #>  Outcome Y has 2 levels 
+  #> 
+  #>  Selection of 7 7 variables on each of the sGCCA components on the block 1 
+  #>  Selection of 6 10 variables on each of the sGCCA components on the block 2 
+  #>  Selection of 8 5 variables on each of the sGCCA components on the block 3 
+  #>  Selection of 7 30 variables on each of the sGCCA components on the block 4 
+  #> 
+  #>  Main numerical outputs: 
+  #>  -------------------- 
+  #>  loading vectors: see object$loadings 
+  #>  variates: see object$variates 
+  #>  variable names: see object$names 
+  #> 
+  #>  Functions to visualise samples: 
+  #>  -------------------- 
+  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo 
+  #> 
+  #>  Functions to visualise variables: 
+  #>  -------------------- 
+  #>  plotVar, plotLoadings, network, circosPlot 
+  #> 
+  #>  Other functions: 
+  #>  -------------------- 
   #>  selectVar, perf, auc
 ```
 
@@ -792,11 +789,11 @@ Click to expand code block
 ``` r
   # assess performance
   perf_diablo <- mixOmics::perf(
-    diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=6, progressBar=TRUE
+    diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=1, progressBar=TRUE
   )
-  #>
+  #> 
   #> Performing repeated cross-validation...
-  #>   |                                                                              |                                                                      |   0%
+  #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
   plot(perf_diablo)
 ```
 
@@ -816,7 +813,7 @@ Click to expand code block
 </summary>
 
 ``` r
-
+  
   mapply(
     function(x, y) plot(
       x$comp1, type="h", main="Comp 1", las=2,
@@ -830,13 +827,13 @@ Click to expand code block
 
       #> $lipidome
       #> NULL
-      #>
+      #> 
       #> $metabolome
       #> NULL
-      #>
+      #> 
       #> $proteome
       #> NULL
-      #>
+      #> 
       #> $transcriptome
       #> NULL
 

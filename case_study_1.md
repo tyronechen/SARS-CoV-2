@@ -29,7 +29,7 @@ Case study 1
 Copyright (c) 2020
 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
-<a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip
+<a href="https://orcid.org/0000-0002-4146-2848">Al J Abadi
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
 <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>,
@@ -47,9 +47,9 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.md)
--   [Case study 1](case_study_1.md)
--   [Case study 2](case_study_2.md)
+-   [Introduction](introduction.html)
+-   [Case study 1](case_study_1.html)
+-   [Case study 2](case_study_2.html)
 
 # 2 Running the script
 
@@ -65,7 +65,7 @@ here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_1/examp
 This may take up to a few hours to run.
 
     Rscript ../run_pipeline.R \
-       --classes ../../data/case_study_1/classes_diablo.txt  \
+       ../../data/case_study_1/classes_diablo.txt  \
        --classes_secondary ../../data/case_study_1/pch.txt \
        --dropna_classes TRUE \
        --dropna_prop 0 \
@@ -88,11 +88,6 @@ This may take up to a few hours to run.
        --rdata RData.RData \
        --plot Rplots.pdf \
        --args Rscript.sh
-
-Alternatively, pass the command line arguments as a json file. **This will override any arguments specified on the command line.** [An example file is available here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_2/args.json).
-
-    Rscript ../run_pipeline.R --json args.json
-
 
 # 3 Input data
 
@@ -164,12 +159,20 @@ Click to expand code block
   download.file(url_rdata, "RData.RData")
   load("RData.RData")
   ls()
-  #>  [1] "argv"                "classes"             "data"               
-  #>  [4] "data_imp"            "data_pca_multilevel" "data_plsda"         
-  #>  [7] "data_splsda"         "diablo"              "diablo_all"         
-  #> [10] "dist_diablo"         "dist_splsda"         "mappings"           
-  #> [13] "pca_impute"          "pca_withna"          "pch"                
-  #> [16] "tuned_diablo"        "tuned_splsda"        "url_rdata"
+  #>  [1] "argv"                   "classes"                "cor_imputed_unimputed_"
+  #>  [4] "data"                   "data_imp"               "data_names"            
+  #>  [7] "data_pca_multilevel"    "data_plsda"             "data_splsda"           
+  #> [10] "design"                 "diablo"                 "diablo_all"            
+  #> [13] "dist_diablo"            "dist_splsda"            "file_names"            
+  #> [16] "mapped"                 "mappings"               "na_prop_prot"          
+  #> [19] "na_prop_tran"           "paths"                  "pca_impute"            
+  #> [22] "pca_unimputed_prot"     "pca_unimputed_tran"     "pca_withna"            
+  #> [25] "pch"                    "perf_diablo"            "splsda_keepx"          
+  #> [28] "splsda_ncomp"           "tuned_diablo"           "tuned_splsda"          
+  #> [31] "unimputed_prot"         "unimputed_prot_path"    "unimputed_tran"        
+  #> [34] "unimputed_tran_path"    "url_class"              "url_pch"               
+  #> [37] "url_prot"               "url_prot_map"           "url_rdata"             
+  #> [40] "url_tran"               "url_tran_map"           "urls"
 ```
 
 > **NOTE**: There are some differences in the R data object for case
@@ -200,10 +203,27 @@ Click to expand code block
   url_tran_map <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/translatome_mapfile.txt"
   url_prot <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_proteome.txt"
   url_tran <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_translatome.txt"
-
+  
   urls <- c(url_class, url_pch, url_prot_map, url_tran_map, url_prot, url_tran)
   file_names <- sapply(strsplit(urls, "/"), tail, 1)
   mapply(function(x, y) download.file(x, y), urls, file_names, SIMPLIFY=FALSE)
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/classes_diablo.txt`
+  #> [1] 0
+  #> 
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/pch.txt`
+  #> [1] 0
+  #> 
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/proteome_mapfile.txt`
+  #> [1] 0
+  #> 
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/translatome_mapfile.txt`
+  #> [1] 0
+  #> 
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_proteome.txt`
+  #> [1] 0
+  #> 
+  #> $`https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_1/diablo_translatome.txt`
+  #> [1] 0
   if (any(file.exists(file_names)) != TRUE) {stop("Files incorrectly downloaded!")}
 ```
 
@@ -225,7 +245,17 @@ Using the pipeline:
   classes <- parse_classes("classes_diablo.txt")
   pch <- parse_classes("pch.txt")
   data <- lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
+  #> [1] "Parsing file:"
+  #> [1] "diablo_proteome.txt"
+  #> [1] "Dropping features where all values are NA"
+  #> [1] "Parsing file:"
+  #> [1] "diablo_translatome.txt"
+  #> [1] "Dropping features where all values are NA"
   mapped <- lapply(mappings, parse_mappings)
+  #> [1] "Parsing mappings..."
+  #> [1] "proteome_mapfile.txt"
+  #> [1] "Parsing mappings..."
+  #> [1] "translatome_mapfile.txt"
   # these must be unique
   data_names <- c("proteome", "translatome")
   # design matrix specifying linkage across blocks (for multiomics)
@@ -235,9 +265,12 @@ Using the pipeline:
 Using the R data object:
 
 ``` r
+  url_rdata <- "https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/results/case_study_1/RData.RData"
+  download.file(url_rdata, "RData.RData")
+  
   load("RData.RData")
   classes
-  #>  [1] "Control_2h"  "Control_2h"  "Control_2h"  "Control_6h"  "Control_6h"
+  #>  [1] "Control_2h"  "Control_2h"  "Control_2h"  "Control_6h"  "Control_6h" 
   #>  [6] "Control_6h"  "Control_10h" "Control_10h" "Control_10h" "Control_24h"
   #> [11] "Control_24h" "Control_24h" "Virus_2h"    "Virus_2h"    "Virus_2h"   
   #> [16] "Virus_6h"    "Virus_6h"    "Virus_6h"    "Virus_10h"   "Virus_10h"  
@@ -245,7 +278,7 @@ Using the R data object:
   lapply(data, dim)
   #> $proteome
   #> [1]   24 6380
-  #>
+  #> 
   #> $translatome
   #> [1]   24 1595
   data_names <- c("proteome", "translatome")
@@ -293,7 +326,7 @@ Click to expand code block
 ![](figs_1/check_na-2.png)<!-- -->
 
 ``` r
-
+  
   # need to drop col where all missing
   unimputed_prot <- remove_na_class(unimputed_prot, classes, missing_as=NA)
   #> [1]   24 6381
@@ -342,7 +375,10 @@ Using the pipeline:
   # this step is important, some functions use the names internally
   names(data) <- data_names
   data_imp <- impute_missing(data, rep(24, length(data)), outdir="./")
-
+  #> [1] "Number of components for imputation:"
+  #> [1] 24
+  #> Error in mixOmics::nipals(data, reconst = TRUE, ncomp = ncomp): unused argument (reconst = TRUE)
+  
   # only replace the missing values and preserve the original values
   data <- replace_missing(data, data_imp)
 ```
@@ -351,6 +387,11 @@ Using the R data object:
 
 ``` r
   lapply(data_imp, dim)
+  #> $proteome
+  #> [1]   24 6380
+  #> 
+  #> $translatome
+  #> [1]   24 1595
 ```
 
 </details>
@@ -375,20 +416,16 @@ Click to expand code block
   pca_unimputed_prot <- mixOmics::pca(unimputed_prot, ncomp=10)
   pca_unimputed_tran <- mixOmics::pca(unimputed_tran, ncomp=10)
   pca_imputed_prot <- mixOmics::pca(data$proteome, ncomp=10)
+  #> Error: use smaller 'ncomp'
   pca_imputed_tran <- mixOmics::pca(data$translatome, ncomp=10)
+  #> Error: use smaller 'ncomp'
   cor_imputed_unimputed_(pca_imputed_prot, pca_unimputed_prot, "Proteome")
-  #> [1] "Plotting correlation between unimputed and imputed components"
-```
-
-![](figs_1/compare_na-1.png)<!-- -->
-
-``` r
+  #> Error in cor_imputed_unimputed_(pca_imputed_prot, pca_unimputed_prot, : object 'pca_imputed_prot' not found
   cor_imputed_unimputed_(pca_imputed_tran, pca_unimputed_tran, "Translatome")
-  #> [1] "Plotting correlation between unimputed and imputed components"
+  #> Error in cor_imputed_unimputed_(pca_imputed_tran, pca_unimputed_tran, : object 'pca_imputed_tran' not found
 ```
 
-![](figs_1/compare_na-2.png)<!-- --> &gt; **NOTE**: Imputation may take
-some time, go eat lunch
+> **NOTE**: Imputation may take some time, go eat lunch
 
 </details>
 
@@ -412,32 +449,14 @@ Click to expand code block
     data, classes, pch=pch, ncomp=10,
     title=paste("With NA.")
   )
-  #> [1] "Removing 0 variance columns from data..."
-  #> [1] "Plotting PCA multilevel component contribution..."
-```
-
-![](figs_1/sample_effect-1.png)<!-- -->![](figs_1/sample_effect-2.png)<!-- -->
-
-      #> [1] "Plotting PCA multilevel..."
-
-![](figs_1/sample_effect-3.png)<!-- -->![](figs_1/sample_effect-4.png)<!-- -->![](figs_1/sample_effect-5.png)<!-- -->![](figs_1/sample_effect-6.png)<!-- -->![](figs_1/sample_effect-7.png)<!-- -->![](figs_1/sample_effect-8.png)<!-- -->
-
-``` r
   data_imp <- replace_missing(data, data_imp)
   names(data_imp) <- data_names
   data_pca_multilevel <- plot_pca_multilevel(
     data_imp, classes, pch=pch, ncomp=10,
     title=paste("Imputed.")
   )
-  #> [1] "Removing 0 variance columns from data..."
-  #> [1] "Plotting PCA multilevel component contribution..."
 ```
 
-![](figs_1/sample_effect-9.png)<!-- -->![](figs_1/sample_effect-10.png)<!-- -->
-
-      #> [1] "Plotting PCA multilevel..."
-
-![](figs_1/sample_effect-11.png)<!-- -->![](figs_1/sample_effect-12.png)<!-- -->![](figs_1/sample_effect-13.png)<!-- -->![](figs_1/sample_effect-14.png)<!-- -->![](figs_1/sample_effect-15.png)<!-- -->![](figs_1/sample_effect-16.png)<!-- -->
 </details>
 
 # 6 Single omics analyses
@@ -466,7 +485,7 @@ Using the pipeline:
   tuned_splsda <- tune_splsda(
     data_imp, classes, data_names, data.frame(pch), ncomp=4, nrepeat=10,
     logratio="none", test_keepX=c(5,6,7,8,9,10,30), validation="loo", folds=10,
-    dist="centroids.dist", cpus=6, progressBar=FALSE
+    dist="centroids.dist", cpus=1, progressBar=FALSE
   )
 ```
 
@@ -475,7 +494,7 @@ Using the pipeline:
 ``` r
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-
+  
   print("Tuned splsda to use number of components:")
   #> [1] "Tuned splsda to use number of components:"
   splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
@@ -483,41 +502,184 @@ Using the pipeline:
   names(splsda_ncomp) <- data_names
   print(splsda_ncomp)
   #> $proteome
-  #> NULL
-  #>
+  #> [1] NA
+  #> 
   #> $translatome
   #> NULL
-
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
+  
   print("Tuned the number of variables selected on each component to:")
   #> [1] "Tuned the number of variables selected on each component to:"
   print(splsda_keepx)
   #> $proteome
-  #> $proteome$choice.keepX
-  #> comp1 comp2 comp3 comp4
-  #>    30    30    30    30
-  #>
-  #>
+  #> [1] NA
+  #> 
   #> $translatome
-  #> $translatome$choice.keepX
-  #> comp1 comp2 comp3 comp4
-  #>     5     5    30     6
+  #> NULL
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> <NA> 
+  #>   NA 
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> <NA> 
+  #>   NA 
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> $<NA>$<NA>
+  #> NULL
+  #> 
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
   names(splsda_keepx) <- data_names
   print(splsda_keepx)
   #> $proteome
-  #> comp1 comp2 comp3 comp4
-  #>    30    30    30    30
-  #>
+  #> [1] NA
+  #> 
   #> $translatome
-  #> comp1 comp2 comp3 comp4
-  #>     5     5    30     6
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL
+  #> 
+  #> $<NA>
+  #> [1] NA
+  #> 
+  #> $<NA>
+  #> NULL()
 ```
 
 Using the R data object:
 
 ``` r
   names(tuned_splsda)
-
+  #>  [1] "proteome"    "translatome" NA            NA            NA           
+  #>  [6] NA            NA            NA            NA            NA           
+  #> [11] NA            NA            NA            NA            NA           
+  #> [16] NA            NA            NA
+  
   # keep optimal number of features to keep
   splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
   splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
@@ -545,140 +707,9 @@ Click to expand code block
   #> [1] "splsda components:"
   #> [1] 4
   #> [1] "number of variables on each component:"
-  #> comp1 comp2 comp3 comp4
-  #>    30    30    30    30
+  #> [1] NA
+  #> Error in if (any(keepX < 0)) stop("each component of 'keepX' must be non negative "): missing value where TRUE/FALSE needed
 ```
-
-![](figs_1/splsda_result-1.png)<!-- -->![](figs_1/splsda_result-2.png)<!-- -->![](figs_1/splsda_result-3.png)<!-- -->![](figs_1/splsda_result-4.png)<!-- -->
-
-      #> [1] "Getting performance metrics"
-      #> [1] "Plotting error rates..."
-      #>
-      #> comp 1
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 2
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 3
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 4
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> $overall
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000     0.58333333        0.5833333
-      #> comp2 0.6250000     0.25000000        0.5000000
-      #> comp3 0.4166667     0.12500000        0.2083333
-      #> comp4 0.3333333     0.08333333        0.2500000
-      #>
-      #> $BER
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000     0.58333333        0.5833333
-      #> comp2 0.6250000     0.25000000        0.5000000
-      #> comp3 0.4166667     0.12500000        0.2083333
-      #> comp4 0.3333333     0.08333333        0.2500000
-
-![](figs_1/splsda_result-5.png)<!-- -->
-
-      #> [1] "Plotting stability of sPLSDA..."
-
-![](figs_1/splsda_result-6.png)<!-- -->![](figs_1/splsda_result-7.png)<!-- -->![](figs_1/splsda_result-8.png)<!-- -->![](figs_1/splsda_result-9.png)<!-- -->![](figs_1/splsda_result-10.png)<!-- -->![](figs_1/splsda_result-11.png)<!-- -->![](figs_1/splsda_result-12.png)<!-- -->
-
-      #> [1] "Plotting arrow plot..."
-
-![](figs_1/splsda_result-13.png)<!-- -->
-
-      #> [1] "Getting loadings and plotting clustered image maps"
-
-![](figs_1/splsda_result-14.png)<!-- -->![](figs_1/splsda_result-15.png)<!-- -->![](figs_1/splsda_result-16.png)<!-- -->![](figs_1/splsda_result-17.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//proteome_1_sPLSDA_max.txt"
-      #> [1] ".//proteome_1_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-18.png)<!-- -->![](figs_1/splsda_result-19.png)<!-- -->![](figs_1/splsda_result-20.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//proteome_2_sPLSDA_max.txt"
-      #> [1] ".//proteome_2_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-21.png)<!-- -->![](figs_1/splsda_result-22.png)<!-- -->![](figs_1/splsda_result-23.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//proteome_3_sPLSDA_max.txt"
-      #> [1] ".//proteome_3_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-24.png)<!-- -->![](figs_1/splsda_result-25.png)<!-- -->![](figs_1/splsda_result-26.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//proteome_4_sPLSDA_max.txt"
-      #> [1] ".//proteome_4_sPLSDA_min.txt"
-      #> [1] "splsda components:"
-      #> [1] 4
-      #> [1] "number of variables on each component:"
-      #> comp1 comp2 comp3 comp4
-      #>     5     5    30     6
-
-![](figs_1/splsda_result-27.png)<!-- -->![](figs_1/splsda_result-28.png)<!-- -->![](figs_1/splsda_result-29.png)<!-- -->![](figs_1/splsda_result-30.png)<!-- -->
-
-      #> [1] "Getting performance metrics"
-      #> [1] "Plotting error rates..."
-      #>
-      #> comp 1
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 2
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 3
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 4
-      #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> $overall
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000     0.50000000       0.50000000
-      #> comp2 0.5833333     0.41666667       0.45833333
-      #> comp3 0.4583333     0.20833333       0.33333333
-      #> comp4 0.2916667     0.08333333       0.08333333
-      #>
-      #> $BER
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000     0.50000000       0.50000000
-      #> comp2 0.5833333     0.41666667       0.45833333
-      #> comp3 0.4583333     0.20833333       0.33333333
-      #> comp4 0.2916667     0.08333333       0.08333333
-
-![](figs_1/splsda_result-31.png)<!-- -->
-
-      #> [1] "Plotting stability of sPLSDA..."
-
-![](figs_1/splsda_result-32.png)<!-- -->![](figs_1/splsda_result-33.png)<!-- -->![](figs_1/splsda_result-34.png)<!-- -->![](figs_1/splsda_result-35.png)<!-- -->![](figs_1/splsda_result-36.png)<!-- -->![](figs_1/splsda_result-37.png)<!-- -->![](figs_1/splsda_result-38.png)<!-- -->
-
-      #> [1] "Plotting arrow plot..."
-
-![](figs_1/splsda_result-39.png)<!-- -->
-
-      #> [1] "Getting loadings and plotting clustered image maps"
-
-![](figs_1/splsda_result-40.png)<!-- -->![](figs_1/splsda_result-41.png)<!-- -->![](figs_1/splsda_result-42.png)<!-- -->![](figs_1/splsda_result-43.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//translatome_1_sPLSDA_max.txt"
-      #> [1] ".//translatome_1_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-44.png)<!-- -->![](figs_1/splsda_result-45.png)<!-- -->![](figs_1/splsda_result-46.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//translatome_2_sPLSDA_max.txt"
-      #> [1] ".//translatome_2_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-47.png)<!-- -->![](figs_1/splsda_result-48.png)<!-- -->![](figs_1/splsda_result-49.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//translatome_3_sPLSDA_max.txt"
-      #> [1] ".//translatome_3_sPLSDA_min.txt"
-
-![](figs_1/splsda_result-50.png)<!-- -->![](figs_1/splsda_result-51.png)<!-- -->![](figs_1/splsda_result-52.png)<!-- -->
-
-      #> [1] "Writing sPLSDA loadings to:"
-      #> [1] ".//translatome_4_sPLSDA_max.txt"
-      #> [1] ".//translatome_4_sPLSDA_min.txt"
 
 </details>
 
@@ -703,14 +734,14 @@ Click to expand code block
 
       #> [1] "Getting performance metrics"
       #> [1] "Plotting error rates..."
-      #>
-      #> comp 1
+      #> 
+      #> comp 1 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 2
+      #> comp 2 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 3
+      #> comp 3 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 4
+      #> comp 4 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
       #> $overall
       #>        max.dist centroids.dist mahalanobis.dist
@@ -718,7 +749,7 @@ Click to expand code block
       #> comp2 0.6250000      0.4583333        0.3750000
       #> comp3 0.4166667      0.2500000        0.2500000
       #> comp4 0.2083333      0.1666667        0.1666667
-      #>
+      #> 
       #> $BER
       #>        max.dist centroids.dist mahalanobis.dist
       #> comp1 0.7500000      0.6250000        0.6250000
@@ -729,90 +760,84 @@ Click to expand code block
 ![](figs_1/plsda_result-5.png)<!-- -->![](figs_1/plsda_result-6.png)<!-- -->![](figs_1/plsda_result-7.png)<!-- -->![](figs_1/plsda_result-8.png)<!-- -->![](figs_1/plsda_result-9.png)<!-- -->
 
       #> [1] "Plotting arrow plot..."
-
-![](figs_1/plsda_result-10.png)<!-- -->
-
       #> [1] "Getting loadings and plotting clustered image maps"
 
-![](figs_1/plsda_result-11.png)<!-- -->![](figs_1/plsda_result-12.png)<!-- -->![](figs_1/plsda_result-13.png)<!-- -->![](figs_1/plsda_result-14.png)<!-- -->
+![](figs_1/plsda_result-10.png)<!-- -->![](figs_1/plsda_result-11.png)<!-- -->![](figs_1/plsda_result-12.png)<!-- -->![](figs_1/plsda_result-13.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//proteome_1_PLSDA_max.txt"
       #> [1] ".//proteome_1_PLSDA_min.txt"
 
-![](figs_1/plsda_result-15.png)<!-- -->![](figs_1/plsda_result-16.png)<!-- -->![](figs_1/plsda_result-17.png)<!-- -->
+![](figs_1/plsda_result-14.png)<!-- -->![](figs_1/plsda_result-15.png)<!-- -->![](figs_1/plsda_result-16.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//proteome_2_PLSDA_max.txt"
       #> [1] ".//proteome_2_PLSDA_min.txt"
 
-![](figs_1/plsda_result-18.png)<!-- -->![](figs_1/plsda_result-19.png)<!-- -->![](figs_1/plsda_result-20.png)<!-- -->
+![](figs_1/plsda_result-17.png)<!-- -->![](figs_1/plsda_result-18.png)<!-- -->![](figs_1/plsda_result-19.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//proteome_3_PLSDA_max.txt"
       #> [1] ".//proteome_3_PLSDA_min.txt"
 
-![](figs_1/plsda_result-21.png)<!-- -->![](figs_1/plsda_result-22.png)<!-- -->![](figs_1/plsda_result-23.png)<!-- -->
+![](figs_1/plsda_result-20.png)<!-- -->![](figs_1/plsda_result-21.png)<!-- -->![](figs_1/plsda_result-22.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//proteome_4_PLSDA_max.txt"
       #> [1] ".//proteome_4_PLSDA_min.txt"
       #> [1] "Plotting multi level partial least squares discriminant analysis"
 
-![](figs_1/plsda_result-24.png)<!-- -->![](figs_1/plsda_result-25.png)<!-- -->![](figs_1/plsda_result-26.png)<!-- -->![](figs_1/plsda_result-27.png)<!-- -->
+![](figs_1/plsda_result-23.png)<!-- -->![](figs_1/plsda_result-24.png)<!-- -->![](figs_1/plsda_result-25.png)<!-- -->![](figs_1/plsda_result-26.png)<!-- -->
 
       #> [1] "Getting performance metrics"
       #> [1] "Plotting error rates..."
-      #>
-      #> comp 1
+      #> 
+      #> comp 1 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 2
+      #> comp 2 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 3
+      #> comp 3 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
-      #> comp 4
+      #> comp 4 
       #>   |                                                                              |                                                                      |   0%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%
       #> $overall
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000      0.6250000        0.6250000
-      #> comp2 0.6250000      0.3333333        0.5833333
-      #> comp3 0.3333333      0.2083333        0.4583333
-      #> comp4 0.1250000      0.1250000        0.4166667
-      #>
+      #>         max.dist centroids.dist mahalanobis.dist
+      #> comp1 0.75000000      0.5833333        0.5833333
+      #> comp2 0.62500000      0.3750000        0.5416667
+      #> comp3 0.29166667      0.2500000        0.5000000
+      #> comp4 0.08333333      0.1250000        0.2916667
+      #> 
       #> $BER
-      #>        max.dist centroids.dist mahalanobis.dist
-      #> comp1 0.7500000      0.6250000        0.6250000
-      #> comp2 0.6250000      0.3333333        0.5833333
-      #> comp3 0.3333333      0.2083333        0.4583333
-      #> comp4 0.1250000      0.1250000        0.4166667
+      #>         max.dist centroids.dist mahalanobis.dist
+      #> comp1 0.75000000      0.5833333        0.5833333
+      #> comp2 0.62500000      0.3750000        0.5416667
+      #> comp3 0.29166667      0.2500000        0.5000000
+      #> comp4 0.08333333      0.1250000        0.2916667
 
-![](figs_1/plsda_result-28.png)<!-- -->![](figs_1/plsda_result-29.png)<!-- -->![](figs_1/plsda_result-30.png)<!-- -->![](figs_1/plsda_result-31.png)<!-- -->![](figs_1/plsda_result-32.png)<!-- -->
+![](figs_1/plsda_result-27.png)<!-- -->![](figs_1/plsda_result-28.png)<!-- -->![](figs_1/plsda_result-29.png)<!-- -->![](figs_1/plsda_result-30.png)<!-- -->![](figs_1/plsda_result-31.png)<!-- -->
 
       #> [1] "Plotting arrow plot..."
-
-![](figs_1/plsda_result-33.png)<!-- -->
-
       #> [1] "Getting loadings and plotting clustered image maps"
 
-![](figs_1/plsda_result-34.png)<!-- -->![](figs_1/plsda_result-35.png)<!-- -->![](figs_1/plsda_result-36.png)<!-- -->![](figs_1/plsda_result-37.png)<!-- -->
+![](figs_1/plsda_result-32.png)<!-- -->![](figs_1/plsda_result-33.png)<!-- -->![](figs_1/plsda_result-34.png)<!-- -->![](figs_1/plsda_result-35.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//translatome_1_PLSDA_max.txt"
       #> [1] ".//translatome_1_PLSDA_min.txt"
 
-![](figs_1/plsda_result-38.png)<!-- -->![](figs_1/plsda_result-39.png)<!-- -->![](figs_1/plsda_result-40.png)<!-- -->
+![](figs_1/plsda_result-36.png)<!-- -->![](figs_1/plsda_result-37.png)<!-- -->![](figs_1/plsda_result-38.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//translatome_2_PLSDA_max.txt"
       #> [1] ".//translatome_2_PLSDA_min.txt"
 
-![](figs_1/plsda_result-41.png)<!-- -->![](figs_1/plsda_result-42.png)<!-- -->![](figs_1/plsda_result-43.png)<!-- -->
+![](figs_1/plsda_result-39.png)<!-- -->![](figs_1/plsda_result-40.png)<!-- -->![](figs_1/plsda_result-41.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//translatome_3_PLSDA_max.txt"
       #> [1] ".//translatome_3_PLSDA_min.txt"
 
-![](figs_1/plsda_result-44.png)<!-- -->![](figs_1/plsda_result-45.png)<!-- -->![](figs_1/plsda_result-46.png)<!-- -->
+![](figs_1/plsda_result-42.png)<!-- -->![](figs_1/plsda_result-43.png)<!-- -->![](figs_1/plsda_result-44.png)<!-- -->
 
       #> [1] "Writing PLSDA loadings to:"
       #> [1] ".//translatome_4_PLSDA_max.txt"
@@ -934,17 +959,17 @@ Using the pipeline:
 
 ``` r
   # tune number of components
-  tuned_diablo <- tune_diablo_ncomp(data_imp, classes, design, ncomp=8, cpus=6)
+  tuned_diablo <- tune_diablo_ncomp(data_imp, classes, design, ncomp=8, cpus=1)
   print("Parameters with lowest error rate:")
   tuned_diablo <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
   diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
   print("Number of components:")
   print(diablo_ncomp)
-
+  
   # tune keepx
   diablo_keepx <- c(5,10,12,14,16,18,20,30)
   diablo_keepx <- tune_diablo_keepx(
-    data_imp, classes, diablo_ncomp, design, diablo_keepx, cpus=6,
+    data_imp, classes, diablo_ncomp, design, diablo_keepx, cpus=1,
     dist="mahalanobis.dist", progressBar=FALSE
   )
   print("Diablo keepx:")
@@ -955,12 +980,12 @@ Using the R object:
 
 ``` r
   tuned_diablo
-  #>         max.dist   centroids.dist mahalanobis.dist
+  #>         max.dist   centroids.dist mahalanobis.dist 
   #>                8                1                8
   diablo$keepX
   #> $proteome
   #> [1] 14 14 30  5 10 10 10  5
-  #>
+  #> 
   #> $translatome
   #> [1] 10  5 20  5  5  5 10  5
 ```
@@ -983,9 +1008,9 @@ Using the pipeline:
   # these values were precomputed, newer versions of code save these values for use
   diablo_keepx <- list(proteome=c(14, 14, 30, 5, 10, 10, 10, 5),
                        translatome=c(10, 5, 20, 5, 5, 5, 10, 5))
-
+  
   data_imp <- force_unique_blocks(data_imp)
-
+  
   # run the algorithm
   diablo <- run_diablo(data_imp, classes, diablo_ncomp, design, diablo_keepx)
 ```
@@ -994,37 +1019,37 @@ Using the R data object:
 
 ``` r
   diablo
-  #>
+  #> 
   #> Call:
-  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design)
-  #>
-  #>  sGCCA with 8 components on block 1 named proteome
-  #>  sGCCA with 8 components on block 2 named translatome
+  #>  block.splsda(X = data, Y = classes, ncomp = ncomp, keepX = keepx, design = design) 
+  #> 
+  #>  sGCCA with 8 components on block 1 named proteome 
+  #>  sGCCA with 8 components on block 2 named translatome 
   #>  sGCCA with 8 components on the outcome Y
-  #>
-  #>  Dimension of block 1 is  24 6380
-  #>  Dimension of block 2 is  24 1595
-  #>  Outcome Y has 8 levels
-  #>
-  #>  Selection of 14 14 30 5 10 10 10 5 variables on each of the sGCCA components on the block 1
-  #>  Selection of 10 5 20 5 5 5 10 5 variables on each of the sGCCA components on the block 2
-  #>
-  #>  Main numerical outputs:
-  #>  --------------------
-  #>  loading vectors: see object$loadings
-  #>  variates: see object$variates
-  #>  variable names: see object$names
-  #>
-  #>  Functions to visualise samples:
-  #>  --------------------
-  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo
-  #>
-  #>  Functions to visualise variables:
-  #>  --------------------
-  #>  plotVar, plotLoadings, network, circosPlot
-  #>
-  #>  Other functions:
-  #>  --------------------
+  #> 
+  #>  Dimension of block 1 is  24 6380 
+  #>  Dimension of block 2 is  24 1595 
+  #>  Outcome Y has 8 levels 
+  #> 
+  #>  Selection of 14 14 30 5 10 10 10 5 variables on each of the sGCCA components on the block 1 
+  #>  Selection of 10 5 20 5 5 5 10 5 variables on each of the sGCCA components on the block 2 
+  #> 
+  #>  Main numerical outputs: 
+  #>  -------------------- 
+  #>  loading vectors: see object$loadings 
+  #>  variates: see object$variates 
+  #>  variable names: see object$names 
+  #> 
+  #>  Functions to visualise samples: 
+  #>  -------------------- 
+  #>  plotIndiv, plotArrow, cimDiablo, plotDiablo 
+  #> 
+  #>  Functions to visualise variables: 
+  #>  -------------------- 
+  #>  plotVar, plotLoadings, network, circosPlot 
+  #> 
+  #>  Other functions: 
+  #>  -------------------- 
   #>  selectVar, perf, auc
 ```
 
@@ -1058,11 +1083,11 @@ Click to expand code block
 ``` r
   # assess performance
   perf_diablo <- mixOmics::perf(
-    diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=6, progressBar=TRUE
+    diablo, validation="loo", nrepeats=10, auc=TRUE, cpus=1, progressBar=TRUE
   )
-  #>
+  #> 
   #> Performing repeated cross-validation...
-  #>   |                                                                              |                                                                      |   0%
+  #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
   plot(perf_diablo)
 ```
 
@@ -1179,7 +1204,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.4762 0.895800
       #> Virus_6h vs Other(s)    0.7460 0.176100
-      #>
+      #> 
       #> $proteome$comp2
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.8571 0.049530
@@ -1190,7 +1215,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9524 0.012860
       #> Virus_6h vs Other(s)    0.6667 0.359400
-      #>
+      #> 
       #> $proteome$comp3
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 1.0000 0.005968
@@ -1201,7 +1226,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9206 0.020720
       #> Virus_6h vs Other(s)    0.7460 0.176100
-      #>
+      #> 
       #> $proteome$comp4
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.9524 0.012860
@@ -1212,7 +1237,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9206 0.020720
       #> Virus_6h vs Other(s)    0.8413 0.060560
-      #>
+      #> 
       #> $proteome$comp5
       #>                           AUC  p-value
       #> Control_10h vs Other(s) 1.000 0.005968
@@ -1223,7 +1248,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.000 0.005968
       #> Virus_2h vs Other(s)    1.000 0.005968
       #> Virus_6h vs Other(s)    0.873 0.040240
-      #>
+      #> 
       #> $proteome$comp6
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 1.0000 0.005968
@@ -1234,7 +1259,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    1.0000 0.005968
       #> Virus_6h vs Other(s)    0.8889 0.032470
-      #>
+      #> 
       #> $proteome$comp7
       #>                         AUC  p-value
       #> Control_10h vs Other(s)   1 0.005968
@@ -1245,7 +1270,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)     1 0.005968
       #> Virus_2h vs Other(s)      1 0.005968
       #> Virus_6h vs Other(s)      1 0.005968
-      #>
+      #> 
       #> $proteome$comp8
       #>                         AUC  p-value
       #> Control_10h vs Other(s)   1 0.005968
@@ -1256,8 +1281,8 @@ Click to expand code block
       #> Virus_24h vs Other(s)     1 0.005968
       #> Virus_2h vs Other(s)      1 0.005968
       #> Virus_6h vs Other(s)      1 0.005968
-      #>
-      #>
+      #> 
+      #> 
       #> $translatome
       #> $translatome$comp1
       #>                            AUC  p-value
@@ -1269,7 +1294,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.5079 0.965200
       #> Virus_6h vs Other(s)    0.9206 0.020720
-      #>
+      #> 
       #> $translatome$comp2
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.8571 0.049530
@@ -1280,7 +1305,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9048 0.026030
       #> Virus_6h vs Other(s)    0.7302 0.205600
-      #>
+      #> 
       #> $translatome$comp3
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 1.0000 0.005968
@@ -1291,7 +1316,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9524 0.012860
       #> Virus_6h vs Other(s)    0.7302 0.205600
-      #>
+      #> 
       #> $translatome$comp4
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.7937 0.106400
@@ -1302,7 +1327,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.9206 0.020720
       #> Virus_6h vs Other(s)    0.5556 0.760000
-      #>
+      #> 
       #> $translatome$comp5
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.8730 0.040240
@@ -1313,7 +1338,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    0.8571 0.049530
       #> Virus_6h vs Other(s)    0.7143 0.238600
-      #>
+      #> 
       #> $translatome$comp6
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.9683 0.010020
@@ -1324,7 +1349,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    1.0000 0.005968
       #> Virus_6h vs Other(s)    0.7143 0.238600
-      #>
+      #> 
       #> $translatome$comp7
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.9683 0.010020
@@ -1335,7 +1360,7 @@ Click to expand code block
       #> Virus_24h vs Other(s)   1.0000 0.005968
       #> Virus_2h vs Other(s)    1.0000 0.005968
       #> Virus_6h vs Other(s)    1.0000 0.005968
-      #>
+      #> 
       #> $translatome$comp8
       #>                            AUC  p-value
       #> Control_10h vs Other(s) 0.9841 0.007762
