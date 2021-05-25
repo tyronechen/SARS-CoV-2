@@ -1146,29 +1146,10 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
 # @examples
 # force_unique_blocks(data)
 force_unique_blocks <- function(data) {
-  # in diablo, features across blocks must be unique: list of df -> list of df
-  print("Appending suffix to individual block names (diablo requires unique!):")
-  names <- names(data)
-  # colnames_new <- mapply(
-  #   function(x, y) paste(x, y, sep="_"), lapply(data, colnames), names(data)
-  # )
-  colnames_new <- list()
-  for(i in 1:length(data)){
-    data_tmp <- paste(lapply(data, colnames)[[i]], names(data)[[i]], sep="_")
-    colnames_new <- append(colnames_new, data_tmp)
-  }
-  reassign_colnames_ <- function(data, colnames_new) {
-    colnames(data) <- colnames_new
-    return(data)
-  }
-  # data <- mapply(reassign_colnames_, data, colnames_new)
-  new_data <- list()
-  for(i in 1:length(data)){
-    data_tmp <- reassign_colnames_(data[[i]], colnames_new[[i]])
-    new_data <- append(new_data, data_tmp)
-  }
-  names(new_data) <- names
-  return(new_data)
+  mapply(data, names(data), FUN = function(blockmat, blockname){
+    colnames(blockmat) <- paste0(blockname, '_', colnames(blockmat) )
+    blockmat
+  }, SIMPLIFY = FALSE)
 }
 
 #' Run the multi-omic pipeline
