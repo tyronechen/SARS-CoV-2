@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 # combine multi-omics data
+library(mixOmics)
 library(argparser, quietly=TRUE)
 library(ggplot2)
 library(multiomics)
