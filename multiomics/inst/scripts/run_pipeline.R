@@ -263,8 +263,12 @@ main <- function() {
   names(data) <- data_names
 
   # show proportion of NA values in unfiltered data
-  mapply(function(x, y) show_na_prop(x, y), data, data_names)
-
+  for (i in length(data))
+  {
+    x <- data[[i]]
+    y <- data_names[[i]]
+    show_na_prop(x, y)
+  }
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data <- lapply(data, remove_na_class, classes)
