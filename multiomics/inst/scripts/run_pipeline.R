@@ -283,13 +283,14 @@ main <- function() {
     save(list = ls(all.names = TRUE), file=rdata)
   }
 
-  if (!is.na(argv$mappings)) {
+  if (length(argv$mappings) > 1) {
     print("Using mappings from files (order must be identical to data!):")
     print(argv$mappings)
     mappings <- argv$mappings
     mapped <- lapply(mappings, parse_mappings)
     names(mapped) <- data_names
     data <- mapply(function(x, y) remap_data(x, y), data, mapped)
+    data <- lapply(data, function(x) x[,1:100])
     names(data) <- data_names
   } else {
     print("Not remapping new feature names to existing, will use original.")
@@ -318,8 +319,7 @@ main <- function() {
   missing <- lapply(data, count_missing)
   pca_withna <- plot_pca_single(
     data, classes, pch=pch, ncomp=argv$pcomp,
-    title=paste("With NA. PC:", argv$pcomp)
-  )
+    title=paste("No Impute n_PCs =", argv$pcomp, "\n")
   )
   save(list = ls(all.names = TRUE), file=rdata)
 
@@ -336,7 +336,7 @@ main <- function() {
 
     pca_impute <- plot_pca_single(
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
-      title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+      title=paste("Imputed n_PCs =", argv$pcomp, "IC:", argv$icomp, "\n")
     )
     heatmaps <- cor_imputed_unimputed(pca_withna, pca_impute, data_names)
   } else {
@@ -358,12 +358,12 @@ main <- function() {
   if (!is.na(argv$classes_secondary)) {
     data_pca_multilevel <- plot_pca_multilevel(
       input_data, classes, pch=pch, ncomp=argv$pcomp,
-      title=paste("With NA. PC:", argv$pcomp)
+      title=paste("No Impute. n_PCs =", argv$pcomp, "\n")
     )
     if (exists("data_imp")) {
       data_pca_multilevel <- plot_pca_multilevel(
         input_data, classes, pch=pch, ncomp=argv$pcomp,
-        title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+        title=paste("Imputed. n_PCs =", argv$pcomp, "IC:", argv$icomp, "\n")
       )
     }
   } else { data_pca_multilevel <- NA }
@@ -371,7 +371,7 @@ main <- function() {
 
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
-    if (!is.na(pch)) {
+    if (length(pch) > 1) {
       data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
       )
@@ -386,9 +386,7 @@ main <- function() {
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
-      if (is.na(argv$splsda_keepx)) {
-        splsda_keepx <- NA
-      } else {
+      if (!is.na(argv$splsda_keepx)) {
         splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
         # splsda_ncomp = length(splsda_keepx)
       }
@@ -401,7 +399,7 @@ main <- function() {
 
       if (!tune_off) {
         print("Tuning splsda components and selected variables")
-        if (!is.na(pch)) {
+        if (length(pch) > 1) {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
             data.frame(pch),
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
@@ -433,7 +431,7 @@ main <- function() {
         print("No sPLSDA tuning performed!")
       }
 
-      if (!is.na(pch)) {
+      if (length(pch) > 1) {
         data_splsda <- classify_splsda(
           input_data, classes, pch, title=data_names, splsda_ncomp,
           splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
@@ -474,8 +472,8 @@ main <- function() {
   save(list = ls(all.names = TRUE), file=rdata)
 
   # block-wise splsda doesnt do internal multilevel decomposition
-  if (!is.na(pch)) {
-    diablo_input <- lapply(input_data, mixOmics::withinVariation, design=data.frame(pch))
+  if (length(pch) > 1) {
+    diablo_input <- lapply(input_data, withinVariation, design=data.frame(pch))
   } else {
     diablo_input <- input_data
   }
