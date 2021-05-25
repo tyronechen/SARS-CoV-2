@@ -1299,9 +1299,6 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   } else {
     show_cols = TRUE
   }
-  save(list = ls(all.names = TRUE), file="cimdiabloinput.RData")
-  load("cimdiabloinput.RData")
-  suppressMessages(devtools::load_all('~/Projects/dev/R/_work/mixOmics/mixOmics_ajabadi/mixOmics_ajabadi'))
   cimDiablo(data, size.legend=0.5, col.names=show_cols)
   block_to_trim <- names(trimmed_names[lapply(trimmed_names, length) > 0])
   print("Plotting loading weight of selected variables on each component...")
