@@ -272,9 +272,7 @@ main <- function() {
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data <- lapply(data, remove_na_class, classes)
-    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
-      file=rdata
-    )
+    save(list = ls(all.names = TRUE), file=rdata)
   }
 
   # drop features / columns >= a threshold of NA values
@@ -282,9 +280,7 @@ main <- function() {
     data <- remove_na_prop(
       data, na_prop=argv$dropna_prop, argv$zero_as_na
     )
-    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
-      file=rdata
-    )
+    save(list = ls(all.names = TRUE), file=rdata)
   }
 
   if (!is.na(argv$mappings)) {
@@ -324,9 +320,8 @@ main <- function() {
     data, classes, pch=pch, ncomp=argv$pcomp,
     title=paste("With NA. PC:", argv$pcomp)
   )
-  save(classes, pch, data, linkage, pca_withna, dist_plsda, dist_splsda,
-    dist_diablo, argv, mappings, file=rdata
   )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -349,9 +344,7 @@ main <- function() {
     data_imp <- NA
     pca_impute <- NA
   }
-  save(classes, pch, data, linkage, data_imp, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, argv, mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -374,10 +367,7 @@ main <- function() {
       )
     }
   } else { data_pca_multilevel <- NA }
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
-    mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
@@ -392,10 +382,7 @@ main <- function() {
     }
   } else { data_plsda <- NA }
 
-  save(classes, pch, data, linkage, input_data, data_pca_multilevel, data_plsda,
-    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
-    mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
@@ -462,10 +449,7 @@ main <- function() {
     tuned_splsda <- NA
   }
 
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, pca_withna, pca_impute, dist_plsda, dist_splsda,
-    dist_diablo, argv, mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (!tune_off) {
@@ -487,11 +471,7 @@ main <- function() {
 
   # remove invariant columns
   # data = lapply(data, remove_novar)
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # block-wise splsda doesnt do internal multilevel decomposition
   if (!is.na(pch)) {
@@ -504,12 +484,7 @@ main <- function() {
   if (argv$force_unique == TRUE) {
     diablo_input <- force_unique_blocks(data)
   }
-
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # tune diablo parameters and run diablo
   diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
@@ -541,11 +516,7 @@ main <- function() {
   # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
 
   # save RData object for future reference
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
   dev.off()
 }
 
