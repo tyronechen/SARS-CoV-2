@@ -35,7 +35,7 @@ parse_argv <- function() {
     --dropna_classes and then --dropna_prop."
   )
   p <- argparser::add_argument(
-    p, "--dropna_prop", type="integer", default=0.5,
+    p, "--dropna_prop", type="integer", default=0.6,
     help="drop feature that does not meet NA proportion threshold, eg if 0.3, \
     drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
     --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
@@ -57,11 +57,11 @@ parse_argv <- function() {
     help="path to map file of feature id to name (must be same order as data!)"
   )
   p <- argparser::add_argument(
-    p, "--ncpus", help="number of cpus", type="integer", default=2
+    p, "--ncpus", help="number of cpus", type="integer", default=parallel::detectCores()-2
   )
   p <- argparser::add_argument(
     p, "--diablocomp", type="integer", default=0,
-    help="number of diablo components (set manually if you get inference error)"
+    help="number of diablo components (set manually if you get inference error). Default to number of classes - 1."
   )
   p <- argparser::add_argument(
     p, "--linkage", type="integer", default=0.1,
@@ -84,8 +84,8 @@ parse_argv <- function() {
     help="replace missing values only in imputation, else replace all values (DEFAULT: TRUE)"
   )
   p <- argparser::add_argument(
-    p, "--pcomp", type="integer", default=0,
-    help="number of principal components (defaults to number of samples)"
+    p, "--pcomp", type="integer", default=5,
+    help="number of principal components (defaults to 5)"
   )
   p <- argparser::add_argument(
     p, "--plsdacomp", type="integer", default=0,
@@ -101,7 +101,7 @@ parse_argv <- function() {
   )
   p <- argparser::add_argument(
     p, "--dist_plsda", type="character", default="centroids.dist",
-    help="plsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
+    help="plsda distance metric. [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p <- argparser::add_argument(
     p, "--dist_splsda", type="character", default="centroids.dist",
