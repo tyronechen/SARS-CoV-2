@@ -83,10 +83,15 @@ remap_data <- function(data, mapping) {
 show_na_prop <- function(data, name="") {
   # first, sum the number of missing values per variable
   sum_na_per_var <- apply(data, 2, function(x) {sum(is.na(x))})
-  # show proportion of NA values across all samples (y) for a variable (x)
-  plot(sum_na_per_var/nrow(data), type='h', xlab='variable index',
-    ylab='NA proportion (across all samples for a variable)',
-    main=paste(name, 'NA rate per variable on unfiltered data'))
+  prop_na_per_var <- sum_na_per_var/nrow(data)
+  na_prop_thresholds <- seq(0,1,0.05)
+  sum_na_all_vars <- sapply(na_prop_thresholds, function(x) sum(prop_na_per_var >= x))
+  prop_na_all_vars <- sum_na_all_vars/ncol(data)
+
+  # show proportion of features with more than x proportion of missing values
+  # for different values of x
+  plot(x = na_prop_thresholds , y = prop_na_all_vars, xlab = "Proportion of missing values",
+       ylab = "Proportion of features", main= paste(name, 'missing value proportions for unfiltered data'))
 }
 
 #' Remove NA values in data by proportion
