@@ -151,6 +151,10 @@ parse_argv <- function() {
     p, "--args", type="character", default="Rscript.sh",
     help="command line options for script are saved here as a shell file"
   )
+  p <- argparser::add_argument(
+    p, "--mini_run", flag=TRUE,
+    help="whether to run on first 100 features (max) from each dataset"
+  )
   # Parse the command line arguments
   argv <- argparser::parse_args(p)
 
@@ -262,6 +266,17 @@ main <- function() {
   data <- lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
   names(data) <- data_names
 
+  ## mini run
+  if (isTRUE(argv$mini_run))
+  {
+    print('Performing a mini run as --mini_run flag is used...')
+    data <- lapply(data, function(x) {
+      minirun_ncol <- min(100, ncol(x))
+      x[,seq_len(minirun_ncol)]
+    })
+  }
+
+
   # show proportion of NA values in unfiltered data
   for (i in length(data))
   {
@@ -290,7 +305,6 @@ main <- function() {
     mapped <- lapply(mappings, parse_mappings)
     names(mapped) <- data_names
     data <- mapply(function(x, y) remap_data(x, y), data, mapped)
-    data <- lapply(data, function(x) x[,1:100])
     names(data) <- data_names
   } else {
     print("Not remapping new feature names to existing, will use original.")
