@@ -137,7 +137,7 @@ jobs:
             --cross_val_nrepeat 1 \
             --cross_val_folds 10 \
             --contrib max \
-            --outfile_dir ../results/ \
+            --outfile_dir ../results/case_study_1 \
             --corr_cutoff 0.6 \
             --rdata casestudy1.RData \
             --plot casestudy1.pdf \
@@ -149,25 +149,12 @@ jobs:
       #   run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "warning", check_dir = "check")
       #   shell: Rscript {0}
 
-      - name: Upload check results ⬆️
-        if: failure()
+      - name: Upload results ⬆️
+        if: success()
         uses: actions/upload-artifact@master
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
-
-      - name: Show testthat output 📖
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      # - name: Test coverage 🔍
-      #   # if: (matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release')
-      #   # the commands between 'set +e' and 'set -e' are run without throwing any error
-      #   run: |
-      #     set +e
-      #     Rscript -e "covr::codecov(type = c('tests', 'examples'))"
-      # #     set -e
+          path: results
 
       # - name: Notify Slack 📣
       #   uses: 8398a7/action-slack@v3
