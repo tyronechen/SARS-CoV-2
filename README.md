@@ -8,7 +8,7 @@
 
 > **NOTE**: The [main repository is on gitlab](https://gitlab.com/tyagilab/sars-cov-2). It is [also mirrored on github](https://github.com/tyronechen/SARS-CoV-2) but please submit any issues to the main gitlab repository only.
 
-Copyright (c) 2020 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-0181-6258">Sonika Tyagi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
+Copyright (c) 2020 <a href="https://orcid.org/0000-0002-9207-0385">Tyrone Chen <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-0827-866X">Melcy Philip <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0002-4146-2848">Al J Abadi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-3923-1116">Kim-Anh Lê Cao <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>, <a href="https://orcid.org/0000-0003-0181-6258">Sonika Tyagi <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
 
 Code in this repository is provided under a [MIT license](https://opensource.org/licenses/MIT). This documentation is provided under a [CC-BY-3.0 AU license](https://creativecommons.org/licenses/by/3.0/au/).
 
@@ -20,15 +20,34 @@ Future work will involve the application of deep learning to better identify lat
 
 You can cite this pipeline as:
 
-- Chen, Tyrone, Philip, Melcy, Lê Cao, Kim-Anh, & Tyagi, Sonika. (2021, March 4). Multi-omics data harmonisation for the discovery of COVID-19 drug targets. Zenodo. http://doi.org/10.5281/zenodo.4562010
+- Chen, Tyrone, Philip, Melcy, Lê Cao, Kim-Anh, & Tyagi, Sonika. A multi-modal data harmonisation approach for discovery of COVID-19 drug targets, Briefings in Bioinformatics, 2021;, bbab185, https://doi.org/10.1093/bib/bbab185
+- Chen, Tyrone, Philip, Melcy, Abadi, Al J, Lê Cao, Kim-Anh, & Tyagi, Sonika. (2021, March 4). Multi-omics data harmonisation for the discovery of COVID-19 drug targets. Zenodo. http://doi.org/10.5281/zenodo.4562010
 
 ```
-@software{chen_tyrone_2021_4562010,
-  author       = {Chen, Tyrone and
+@article{10.1093/bib/bbab185,
+    author     = {Chen, Tyrone and
                   Philip, Melcy and
                   Lê Cao, Kim-Anh and
                   Tyagi, Sonika},
-  title        = {{Multi-omics data harmonisation for the discovery 
+    title      = "{A multi-modal data harmonisation approach
+                   for discovery of COVID-19 drug targets}",
+    journal    = {Briefings in Bioinformatics},
+    year       = {2021},
+    month      = {05},
+    issn       = {1477-4054},
+    doi        = {10.1093/bib/bbab185},
+    url        = {https://doi.org/10.1093/bib/bbab185},
+    note       = {bbab185},
+    eprint     = {https://academic.oup.com/bib/advance-article-pdf/doi/10.1093/bib/bbab185/38130519/bbab185.pdf},
+}
+
+@software{chen_tyrone_2021_4562010,
+  author       = {Chen, Tyrone and
+                  Philip, Melcy and
+                  Abadi, Al J and
+                  Lê Cao, Kim-Anh and
+                  Tyagi, Sonika},
+  title        = {{Multi-omics data harmonisation for the discovery
                    of COVID-19 drug targets}},
   month        = mar,
   year         = 2021,
