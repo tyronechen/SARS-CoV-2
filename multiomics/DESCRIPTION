@@ -1,16 +1,16 @@
 Package: multiomics
 Title: Takes quantitative multi-omics data as matrices and identifies correlating features of interest
-Version: 1.0.6
+Version: 1.0.7
 Authors@R: c(
     person(given = "Tyrone",
            family = "Chen",
            role = c("aut", "cre", "cph"),
            email = "chen.tyrone91@gmail.com",
            comment = c(ORCID = "0000-0002-9207-0385")),
-    person(given = "Abolfazl Jalal",
+    person(given = "Al", middle = "J",
            family = "Abadi",
            role = c("aut", "cph"),
-           email = "al.abadi@unimelb.edu.au",
+           email = "al.jal.abadi@gmail.com",
            comment = c(ORCID = "0000-0002-4146-2848")),
     person(given = "Kim-Anh",
            family = "Lê Cao",
