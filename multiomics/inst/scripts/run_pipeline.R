@@ -272,7 +272,7 @@ main <- function() {
   {
     print('Performing a mini run as --mini_run flag is used...')
     data <- lapply(data, function(x) {
-      minirun_ncol <- min(100, ncol(x))
+      minirun_ncol <- min(300, ncol(x))
       x[,seq_len(minirun_ncol)]
     })
   }
