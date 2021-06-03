@@ -388,11 +388,15 @@ main <- function() {
   if (argv$plsdacomp > 0) {
     if (length(pch) > 1) {
       data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
+        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        validation=argv$cross_val, folds=argv$cross_val_folds,
+        nrepeat=argv$cross_val_nrepeat
       )
     } else {
       data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
+        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        validation=argv$cross_val, folds=argv$cross_val_folds,
+        nrepeat=argv$cross_val_nrepeat
       )
     }
   } else { data_plsda <- NA }
@@ -505,7 +509,7 @@ main <- function() {
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
-      cross_val=argv$cross_val, folds=argv$cross_val_folds,
+      validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat
     )
     print("Diablo keepx:")
