@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 # combine multi-omics data
+library(mixOmics)
 library(argparser, quietly=TRUE)
 library(ggplot2)
 library(multiomics)
@@ -39,13 +40,13 @@ parse_argv <- function() {
     help="secondary sample information eg individual (same format as classes)"
   )
   p <- argparser::add_argument(
-    p, "--dropna_classes", type="bool", default=TRUE,
+    p, "--dropna_classes", type="bool", default=FALSE,
     help="where all replicates for >= 1 class are NA, drop that feature. \
     If both --dropna_classes and --dropna_prop are enabled, perform \
     --dropna_classes and then --dropna_prop."
   )
   p <- argparser::add_argument(
-    p, "--dropna_prop", type="integer", default=0,
+    p, "--dropna_prop", type="integer", default=0.6,
     help="drop feature that does not meet NA proportion threshold, eg if 0.3, \
     drop a feature if >= 0.3 of values are NA. If both --dropna_classes and \
     --dropna_prop are enabled, perform --dropna_classes and then --dropna_prop."
@@ -67,11 +68,11 @@ parse_argv <- function() {
     help="path to map file of feature id to name (must be same order as data!)"
   )
   p <- argparser::add_argument(
-    p, "--ncpus", help="number of cpus", type="integer", default=2
+    p, "--ncpus", help="number of cpus", type="integer", default=parallel::detectCores()-2
   )
   p <- argparser::add_argument(
     p, "--diablocomp", type="integer", default=0,
-    help="number of diablo components (set manually if you get inference error)"
+    help="number of diablo components (set manually if you get inference error). Default to number of classes - 1."
   )
   p <- argparser::add_argument(
     p, "--linkage", type="integer", default=0.1,
@@ -82,7 +83,7 @@ parse_argv <- function() {
     help="variables to keep for diablo"
   )
   p <- argparser::add_argument(
-    p, "--icomp", type="integer", default=10,
+    p, "--icomp", type="integer", default=0,
     help="component number for imputing (set 0 for no imputation)"
   )
   p <- argparser::add_argument(
@@ -94,8 +95,8 @@ parse_argv <- function() {
     help="replace missing values only in imputation, else replace all values (DEFAULT: TRUE)"
   )
   p <- argparser::add_argument(
-    p, "--pcomp", type="integer", default=0,
-    help="number of principal components (defaults to number of samples)"
+    p, "--pcomp", type="integer", default=5,
+    help="number of principal components (defaults to 5)"
   )
   p <- argparser::add_argument(
     p, "--plsdacomp", type="integer", default=0,
@@ -111,7 +112,7 @@ parse_argv <- function() {
   )
   p <- argparser::add_argument(
     p, "--dist_plsda", type="character", default="centroids.dist",
-    help="plsda distance metric [max.dist, centroids.dist, mahalanobis.dist]"
+    help="plsda distance metric. [max.dist, centroids.dist, mahalanobis.dist]"
   )
   p <- argparser::add_argument(
     p, "--dist_splsda", type="character", default="centroids.dist",
@@ -161,6 +162,10 @@ parse_argv <- function() {
     p, "--args", type="character", default="Rscript.sh",
     help="command line options for script are saved here as a shell file"
   )
+  p <- argparser::add_argument(
+    p, "--mini_run", flag=TRUE,
+    help="whether to run on first 100 features (max) from each dataset"
+  )
   # Parse the command line arguments
   argv <- argparser::parse_args(p)
 
@@ -194,7 +199,7 @@ main <- function() {
 
   print("Creating output files directory (will overwrite existing data!)")
   outdir <- argv$outfile_dir
-  dir.create(file.path(outdir))
+  dir.create(file.path(outdir), recursive = TRUE, showWarnings = FALSE)
 
   print("Writing command line arguments to:")
   argpath <- paste(outdir, argv$args, sep="/")
@@ -272,15 +277,28 @@ main <- function() {
   data <- lapply(paths, parse_data, missing_as=NA, rmna=TRUE)
   names(data) <- data_names
 
-  # show proportion of NA values in unfiltered data
-  mapply(function(x, y) show_na_prop(x, y), data, data_names)
+  ## mini run
+  if (isTRUE(argv$mini_run))
+  {
+    print('Performing a mini run as --mini_run flag is used...')
+    data <- lapply(data, function(x) {
+      minirun_ncol <- min(300, ncol(x))
+      x[,seq_len(minirun_ncol)]
+    })
+  }
 
+
+  # show proportion of NA values in unfiltered data
+  for (i in length(data))
+  {
+    x <- data[[i]]
+    y <- data_names[[i]]
+    show_na_prop(x, y)
+  }
   # drop features / columns where >= 1 class is not represented
   if (argv$dropna_classes == TRUE) {
     data <- lapply(data, remove_na_class, classes)
-    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
-      file=rdata
-    )
+    save(list = ls(all.names = TRUE), file=rdata)
   }
 
   # drop features / columns >= a threshold of NA values
@@ -288,12 +306,10 @@ main <- function() {
     data <- remove_na_prop(
       data, na_prop=argv$dropna_prop, argv$zero_as_na
     )
-    save(classes, pch, data, dist_plsda, dist_splsda, dist_diablo, argv,
-      file=rdata
-    )
+    save(list = ls(all.names = TRUE), file=rdata)
   }
 
-  if (!is.na(argv$mappings)) {
+  if (length(argv$mappings) > 1) {
     print("Using mappings from files (order must be identical to data!):")
     print(argv$mappings)
     mappings <- argv$mappings
@@ -328,11 +344,9 @@ main <- function() {
   missing <- lapply(data, count_missing)
   pca_withna <- plot_pca_single(
     data, classes, pch=pch, ncomp=argv$pcomp,
-    title=paste("With NA. PC:", argv$pcomp)
+    title=paste("No Impute n_PCs =", argv$pcomp, "\n")
   )
-  save(classes, pch, data, linkage, pca_withna, dist_plsda, dist_splsda,
-    dist_diablo, argv, mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # impute data if components given
   # refer to http://mixomics.org/methods/missing-values/
@@ -347,7 +361,7 @@ main <- function() {
 
     pca_impute <- plot_pca_single(
       data_imp, classes, pch=pch, ncomp=argv$pcomp,
-      title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+      title=paste("Imputed n_PCs =", argv$pcomp, "IC:", argv$icomp, "\n")
     )
     heatmaps <- cor_imputed_unimputed(pca_withna, pca_impute, data_names)
   } else {
@@ -355,9 +369,7 @@ main <- function() {
     data_imp <- NA
     pca_impute <- NA
   }
-  save(classes, pch, data, linkage, data_imp, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, argv, mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
@@ -368,46 +380,42 @@ main <- function() {
     input_data <- data
   }
 
-  if (!is.na(pch)) {
+  if (!is.na(argv$classes_secondary)) {
     data_pca_multilevel <- plot_pca_multilevel(
       input_data, classes, pch=pch, ncomp=argv$pcomp,
-      title=paste("With NA. PC:", argv$pcomp)
+      title=paste("No Impute. n_PCs =", argv$pcomp, "\n")
     )
     if (exists("data_imp")) {
       data_pca_multilevel <- plot_pca_multilevel(
         input_data, classes, pch=pch, ncomp=argv$pcomp,
-        title=paste("Imputed. PC:", argv$pcomp, "IC:", argv$icomp)
+        title=paste("Imputed. n_PCs =", argv$pcomp, "IC:", argv$icomp, "\n")
       )
     }
   } else { data_pca_multilevel <- NA }
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel,
-    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
-    mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # partial least squares discriminant analysis
   if (argv$plsdacomp > 0) {
-    if (!is.na(pch)) {
+    if (length(pch) > 1) {
       data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
+        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        validation=argv$cross_val, folds=argv$cross_val_folds,
+        nrepeat=argv$cross_val_nrepeat
       )
     } else {
       data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE
+        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        validation=argv$cross_val, folds=argv$cross_val_folds,
+        nrepeat=argv$cross_val_nrepeat
       )
     }
   } else { data_plsda <- NA }
 
-  save(classes, pch, data, linkage, input_data, data_pca_multilevel, data_plsda,
-    pca_withna, pca_impute, dist_plsda, dist_splsda, dist_diablo, argv,
-    mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # sparse partial least squares discriminant analysis
   if (argv$splsdacomp > 0) {
-      if (is.na(argv$splsda_keepx)) {
-        splsda_keepx <- NA
-      } else {
+      if (!is.na(argv$splsda_keepx)) {
         splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
         # splsda_ncomp = length(splsda_keepx)
       }
@@ -420,7 +428,7 @@ main <- function() {
 
       if (!tune_off) {
         print("Tuning splsda components and selected variables")
-        if (!is.na(pch)) {
+        if (length(pch) > 1) {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
             data.frame(pch),
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
@@ -452,7 +460,7 @@ main <- function() {
         print("No sPLSDA tuning performed!")
       }
 
-      if (!is.na(pch)) {
+      if (length(pch) > 1) {
         data_splsda <- classify_splsda(
           input_data, classes, pch, title=data_names, splsda_ncomp,
           splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
@@ -468,10 +476,7 @@ main <- function() {
     tuned_splsda <- NA
   }
 
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, pca_withna, pca_impute, dist_plsda, dist_splsda,
-    dist_diablo, argv, mappings, file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (!tune_off) {
@@ -493,15 +498,11 @@ main <- function() {
 
   # remove invariant columns
   # data = lapply(data, remove_novar)
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # block-wise splsda doesnt do internal multilevel decomposition
-  if (!is.na(pch)) {
-    diablo_input <- lapply(input_data, mixOmics::withinVariation, design=data.frame(pch))
+  if (length(pch) > 1) {
+    diablo_input <- lapply(input_data, withinVariation, design=data.frame(pch))
   } else {
     diablo_input <- input_data
   }
@@ -510,12 +511,7 @@ main <- function() {
   if (argv$force_unique == TRUE) {
     diablo_input <- force_unique_blocks(data)
   }
-
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
 
   # tune diablo parameters and run diablo
   diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
@@ -523,7 +519,7 @@ main <- function() {
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
-      cross_val=argv$cross_val, folds=argv$cross_val_folds,
+      validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat
     )
     print("Diablo keepx:")
@@ -547,11 +543,7 @@ main <- function() {
   # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
 
   # save RData object for future reference
-  save(classes, pch, data, linkage, data_imp, data_pca_multilevel, data_plsda,
-    data_splsda, tuned_splsda, tuned_diablo, pca_withna, pca_impute,
-    dist_plsda, dist_splsda, dist_diablo, perf_diablo, argv, mappings, diablo,
-    file=rdata
-  )
+  save(list = ls(all.names = TRUE), file=rdata)
   dev.off()
 }
 

@@ -530,12 +530,16 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
 #' @param mappings dataframe of mappings for features. Defaults to NULL
 #' @param dist string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"
 #' @param bg boolean describing if background should be plotted. Defaults to TRUE
+#' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
+#' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
+#' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
 #' @seealso [multiomics::classify_plsda()], [multiomics::classify_splsda()]
 #' @export
 # @examples
 # classify_plsda(data, classes, pch=NA, title="", ncomp=0, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE)
 classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
+  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE,
+  validation="loo", nrepeat=10, folds=10) {
   # mapply(function(x, y) classify_plsda_(
   #   x, classes, pch, y, ncomp, contrib, outdir, mappings, dist, bg), data, title,
   #   SIMPLIFY=FALSE)
@@ -543,7 +547,7 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   for(i in 1:length(data)){
     data_tmp <- classify_plsda_(
       data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
-      dist, bg
+      dist, bg, validation=validation, nrepeat=nrepeat, folds=folds
     )
     data_new <- append(data_new, data_tmp)
   }
@@ -552,7 +556,8 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
 }
 
 classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
-  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE) {
+  contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE,
+  validation="loo", nrepeat=10, folds=10) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (length(pch) > 1) {
@@ -621,7 +626,10 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 
   print("Getting performance metrics")
   print("Plotting error rates...")
-  metrics <- perf(data_plsda, validation="loo", progressBar=TRUE, auc=TRUE)
+  metrics <- mixOmics::perf(
+    data_plsda, progressBar=TRUE, auc=TRUE,
+    validation=validation, nrepeat=nrepeat, folds=folds
+  )
   print(metrics$error.rate)
   plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
 
@@ -758,20 +766,24 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
 #' @param mappings dataframe of mappings for features. Defaults to NULL
 #' @param dist string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"
 #' @param bg boolean describing if background should be plotted. Defaults to TRUE
+#' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
+#' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
+#' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
 #' @seealso [multiomics::classify_plsda()], [multiomics::classify_splsda()], [multiomics::tune_splsda()]
 #' @export
 # @examples
 # classify_splsda(data, classes, pch=NA, title="", ncomp=0, keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE)
 classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
-  bg=TRUE) {
+  bg=TRUE, validation="loo", nrepeat=10, folds=10) {
   # mapply(function(x, y, c, k) classify_splsda_(
   #   x, classes, pch, y, c, k, contrib, outdir
   # ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
   data_new <- list()
   for(i in 1:length(data)){
     data_tmp <- classify_splsda_(
-      data[[i]], classes, pch, title[[i]], ncomp, keepX[[i]]
+      data[[i]], classes, pch, title[[i]], ncomp, keepX,
+      validation=validation, nrepeat=nrepeat, folds=10
     )
     data_new <- append(data_new, data_tmp)
   }
@@ -781,7 +793,7 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
 
 classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
-  bg=TRUE) {
+  bg=TRUE, validation="loo", nrepeat=10, folds=10) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
@@ -839,7 +851,10 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
 
   print("Getting performance metrics")
   print("Plotting error rates...")
-  metrics <- perf(data_splsda, validation="loo", progressBar=TRUE, auc=TRUE)
+  metrics <- mixOmics::perf(
+    data_splsda, validation=validation, folds=folds, nrepeat=nrepeat,
+    progressBar=TRUE, auc=TRUE
+  )
   print(metrics$error.rate)
   plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
   print("Plotting stability of sPLSDA...")
@@ -1112,14 +1127,16 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1) {
 #' @param dist string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"
 #' @param cpus integer number of cpus for parallel processing. Defaults to 2.
 #' @param progressBar boolean showing progress bar. Defaults to TRUE.
-#' @param cross_val character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
+#' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
+#' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
+#' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
 #' @seealso [multiomics::create_design()], [multiomics::tune_diablo_ncomp()], [multiomics::tune_diablo_keepx()], [multiomics::run_diablo()]
 #' @export
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
   test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE,
-  cross_val="loo", folds=10, nrepeat=10) {
+  validation="loo", folds=10, nrepeat=10) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
   # We choose the optimal number of variables to select in each data set using
