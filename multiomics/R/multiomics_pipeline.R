@@ -278,7 +278,7 @@ impute_missing_ <- function(data, ncomp=10, block_name="", outdir="./") {
   write.table(
     as.data.frame(nipals_impute), file=outfile_path, quote=FALSE, sep="\t"
   )
-  return(nipals_tune$rec)
+  return(nipals_impute)
 }
 
 #' Impute missing values
@@ -298,7 +298,7 @@ impute_missing <- function(data, ncomps, outdir) {
   data_new <- list()
   for(i in 1:length(data)){
     data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]])
-    data_new <- append(data_new, data_tmp)
+    data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
   return(data_new)
@@ -325,7 +325,7 @@ replace_missing <- function(data, imputed) {
   data_new <- list()
   for(i in 1:length(data)){
     data_tmp <- replace_missing_(data[[i]], imputed[[i]])
-    data_new <- append(data_new, data_tmp)
+    data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
   return(data_new)
@@ -549,7 +549,7 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
       data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
       dist, bg, validation=validation, nrepeat=nrepeat, folds=folds
     )
-    data_new <- append(data_new, data_tmp)
+    data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
   return(data_new)
@@ -639,7 +639,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   roc <- list()
   for(i in 1:ncomp){
     data_tmp <- auroc(data_plsda, roc.comp=i)
-    roc <- append(roc, data_tmp)
+    roc <- append(roc, list(data_tmp))
   }
   sink()
 
@@ -732,7 +732,7 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
         data[[i]], classes, names[[i]], multilevel, ncomp, nrepeat, logratio,
         test_keepX, validation, folds, dist, cpus, progressBar
       )
-      data_new <- append(data_new, data_tmp)
+      data_new <- append(data_new, list(data_tmp))
     }
     names(data_new) <- names(data)
     return(data_new)
@@ -785,7 +785,7 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
       data[[i]], classes, pch, title[[i]], ncomp, keepX,
       validation=validation, nrepeat=nrepeat, folds=10
     )
-    data_new <- append(data_new, data_tmp)
+    data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
   return(data_new)
@@ -876,7 +876,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   roc <- list()
   for(i in 1:ncomp){
     data_tmp <- auroc(data_splsda, roc.comp=i)
-    roc <- append(roc, data_tmp)
+    roc <- append(roc, list(data_tmp))
   }
   sink()
 
@@ -1151,7 +1151,7 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   # test_keepX <- list()
   # for(i in 1:length(rep(list(test_keepX)))){
   #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
-  #   test_keepX <- append(test_keepX, data_tmp)
+  #   test_keepX <- append(test_keepX, list(data_tmp))
   # }
 
   tune_data <- tune.block.splsda(
@@ -1268,7 +1268,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   roc <- list()
   for(i in 1:ncomp){
     data_tmp <- auroc(data, roc.comp=i)
-    roc <- append(roc, data_tmp)
+    roc <- append(roc, list(data_tmp))
   }
   sink()
   # mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
