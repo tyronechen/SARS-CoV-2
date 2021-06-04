@@ -30,4 +30,3 @@ Rscript  inst/scripts/run_pipeline.R --tune_off \
   --rdata casestudy1.RData \
   --plot casestudy1.pdf \
   --args Rscript_cs1.sh
-  
