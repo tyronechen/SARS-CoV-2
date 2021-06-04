@@ -533,13 +533,14 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
 #' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
 #' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
 #' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @seealso [multiomics::classify_plsda()], [multiomics::classify_splsda()]
 #' @export
 # @examples
 # classify_plsda(data, classes, pch=NA, title="", ncomp=0, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE)
 classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE,
-  validation="loo", nrepeat=10, folds=10) {
+  validation="loo", nrepeat=10, folds=10, near_zero_var=FALSE) {
   # mapply(function(x, y) classify_plsda_(
   #   x, classes, pch, y, ncomp, contrib, outdir, mappings, dist, bg), data, title,
   #   SIMPLIFY=FALSE)
@@ -547,7 +548,8 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   for(i in 1:length(data)){
     data_tmp <- classify_plsda_(
       data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
-      dist, bg, validation=validation, nrepeat=nrepeat, folds=folds
+      dist, bg, validation=validation, nrepeat=nrepeat, folds=folds,
+      near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
   }
@@ -557,7 +559,7 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
 
 classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE,
-  validation="loo", nrepeat=10, folds=10) {
+  validation="loo", nrepeat=10, folds=10, near_zero_var=FALSE) {
   # discriminate samples: list, vector, bool, integer -> list
   # single or multilevel PLS-DA
   if (length(pch) > 1) {
@@ -565,7 +567,8 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     pch <- c(as.factor(pch))
     title_plt <- paste(title, "PLSDA multi")
     data_plsda <- plsda(
-      data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp
+      data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp,
+      near.zero.var=near_zero_var
     )
 
     if (ncomp > 1) {
@@ -716,13 +719,14 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 #' @param dist string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"
 #' @param cpus integer number of cpus for parallel processing. Defaults to 2.
 #' @param progressBar boolean showing progress bar. Defaults to TRUE.
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @seealso [multiomics::classify_splsda()]
 #' @export
 # @examples
 # tune_splsda(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10, logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10, dist="centroids.dist", cpus=2, progressBar=TRUE)
 tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE) {
+  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
     # mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
     #   nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
     #   data, names, SIMPLIFY=FALSE)
@@ -730,7 +734,7 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
     for(i in 1:length(names)){
       data_tmp <- tune_splsda_(
         data[[i]], classes, names[[i]], multilevel, ncomp, nrepeat, logratio,
-        test_keepX, validation, folds, dist, cpus, progressBar
+        test_keepX, validation, folds, dist, cpus, progressBar, near_zero_var
       )
       data_new <- append(data_new, list(data_tmp))
     }
@@ -740,13 +744,13 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
 
 tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE) {
+  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
   # tune splsda components
   tuned <- tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
-    progressBar=progressBar
+    progressBar=progressBar, near.zero.var=near_zero_var
   )
   print(plot(tuned, main=names))
   return(tuned)
@@ -769,13 +773,14 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
 #' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
 #' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
 #' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @seealso [multiomics::classify_plsda()], [multiomics::classify_splsda()], [multiomics::tune_splsda()]
 #' @export
 # @examples
 # classify_splsda(data, classes, pch=NA, title="", ncomp=0, keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist", bg=TRUE)
 classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
-  bg=TRUE, validation="loo", nrepeat=10, folds=10) {
+  bg=TRUE, validation="loo", nrepeat=10, folds=10, near_zero_var=FALSE) {
   # mapply(function(x, y, c, k) classify_splsda_(
   #   x, classes, pch, y, c, k, contrib, outdir
   # ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
@@ -783,7 +788,7 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   for(i in 1:length(data)){
     data_tmp <- classify_splsda_(
       data[[i]], classes, pch, title[[i]], ncomp, keepX,
-      validation=validation, nrepeat=nrepeat, folds=10
+      validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
   }
@@ -793,7 +798,7 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
 
 classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   keepX=NULL, contrib="max", outdir="./", mappings=NULL, dist="centroids.dist",
-  bg=TRUE, validation="loo", nrepeat=10, folds=10) {
+  bg=TRUE, validation="loo", nrepeat=10, folds=10, near_zero_var=FALSE) {
   # discriminate samples: list, vector, bool, integer, vector -> list
   # single or multilevel sPLS-DA
   if (is.null(keepX)) {
@@ -813,15 +818,18 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
 
   if (length(pch) > 1) {
     data_splsda <- splsda(
-      data,Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX
+      data,Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX,
+      near.zero.var=near_zero_var
     )
   } else {
-    data_splsda <- splsda(data, Y=classes, ncomp=ncomp, keepX=keepX)
+    data_splsda <- splsda(
+      data, Y=classes, ncomp=ncomp, keepX=keepX, near.zero.var=near_zero_var
+    )
   }
 
   if (ncomp > 1) {
     if (!is.na(bg)) {
-      bg <- background.predict(data_splsda,comp.predicted=2,dist=dist)
+      bg <- background.predict(data_splsda, comp.predicted=2, dist=dist)
       plotIndiv(data_splsda, ind.names=FALSE, group=classes,
         legend=TRUE, pch=pch, title=paste(title, "sPLSDA multi 1/2"),
         comp=c(1,2), ellipse=TRUE, background=bg
@@ -853,7 +861,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   print("Plotting error rates...")
   metrics <- mixOmics::perf(
     data_splsda, validation=validation, folds=folds, nrepeat=nrepeat,
-    progressBar=TRUE, auc=TRUE
+    progressBar=TRUE, auc=TRUE, near_zero_var=low_var
   )
   print(metrics$error.rate)
   plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
@@ -1065,11 +1073,13 @@ cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
 #' @param design matrix with linkage
 #' @param ncomp integer assigning number of components for multi-block sPLSDA. Defaults to 0.
 #' @param cpus integer number of cpus for parallel processing. Defaults to 2.
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @seealso [multiomics::create_design()], [multiomics::tune_diablo_ncomp()], [multiomics::tune_diablo_keepx()], [multiomics::run_diablo()]
 #' @export
 # @examples
 # tune_diablo_ncomp(data, classes, ncomp=0, design, cpus=2)
-tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1) {
+tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
+  near_zero_var=FALSE) {
   # First, we fit a DIABLO model without variable selection to assess the global
   # performance and choose the number of components for the final DIABLO model.
   # The function perf is run with 10-fold cross validation repeated 10 times.
@@ -1079,7 +1089,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1) {
     ncomp <- min(2, ncomp)
   }
   sgccda_res <- block.splsda(
-    X=data, Y=classes, ncomp=ncomp, design=design
+    X=data, Y=classes, ncomp=ncomp, design=design, near.zero.var=near_zero_var
   )
 
   # this code takes a couple of min to run
@@ -1130,13 +1140,14 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1) {
 #' @param validation character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".
 #' @param folds if M-fold validation, number of folds. Defaults to 10. No effect for "loo"
 #' @param nrepeat if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @seealso [multiomics::create_design()], [multiomics::tune_diablo_ncomp()], [multiomics::tune_diablo_keepx()], [multiomics::run_diablo()]
 #' @export
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
   test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE,
-  validation="loo", folds=10, nrepeat=10) {
+  validation="loo", folds=10, nrepeat=10, near_zero_var=FALSE) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
   # We choose the optimal number of variables to select in each data set using
@@ -1157,7 +1168,7 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   tune_data <- tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
     validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
-    progressBar=progressBar)
+    progressBar=progressBar, near.zero.var=near_zero_var)
   list_keepX <- tune_data$choice.keepX
   return(list_keepX)
 }
@@ -1184,13 +1195,18 @@ force_unique_blocks <- function(data) {
 #' @param ncomp integer assigning number of components for multi-block sPLSDA.
 #' @param design matrix with linkage.
 #' @param keepx vector of integers for feature selection. Defaults to NULL.
+#' @param near_zero_var if variance approaches zero, enable this option
 #' @export
 # @examples
 # run_diablo(data, classes, ncomp, design, keepx=NULL)
-run_diablo <- function(data, classes, ncomp, design, keepx=NULL) {
+run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
+  near_zero_var=FALSE) {
   # this is the actual part where diablo is run
   print("Running DIABLO...")
-  block.splsda(X=data,Y=classes,ncomp=ncomp,keepX=keepx,design=design)
+  block.splsda(
+    X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design,
+    near.zero.var=near_zero_var
+  )
 }
 
 #' Make plots for diablo
