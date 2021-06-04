@@ -143,6 +143,10 @@ parse_argv <- function() {
     help="correlation cutoff for displaying lines on circos plot"
   )
   p <- argparser::add_argument(
+    p, "--low_var", flag=TRUE,
+    help="enable low variance mode (if you have low variance or sparse data)"
+  )
+  p <- argparser::add_argument(
     p, "--tune_off", flag=TRUE,
     help="turn off tuning (if you already know the values or for debugging)"
   )
@@ -218,6 +222,8 @@ main <- function() {
   print("Degree of linkage for omics blocks:")
   linkage <- argv$linkage
   print(linkage)
+  print("Use low variance mode (for sparse or low variance data):")
+  low_var <- argv$low_var
   dist_plsda <- argv$dist_plsda
   dist_splsda <- argv$dist_splsda
   dist_diablo <- argv$dist_diablo
@@ -400,13 +406,13 @@ main <- function() {
       data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
         validation=argv$cross_val, folds=argv$cross_val_folds,
-        nrepeat=argv$cross_val_nrepeat
+        nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
       )
     } else {
       data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
         argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
         validation=argv$cross_val, folds=argv$cross_val_folds,
-        nrepeat=argv$cross_val_nrepeat
+        nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
       )
     }
   } else { data_plsda <- NA }
@@ -434,14 +440,14 @@ main <- function() {
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=TRUE)
+            progressBar=TRUE, near_zero_var=low_var)
         } else {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
             NULL,
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=TRUE)
+            progressBar=TRUE, near_zero_var=low_var)
         }
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
@@ -463,12 +469,14 @@ main <- function() {
       if (length(pch) > 1) {
         data_splsda <- classify_splsda(
           input_data, classes, pch, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
+          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
+          near_zero_var=low_var
         )
       } else {
         data_splsda <- classify_splsda(
           input_data, classes, pch=NA, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE
+          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
+          near_zero_var=low_var
         )
       }
   } else {
@@ -481,7 +489,8 @@ main <- function() {
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (!tune_off) {
     tuned_diablo <- tune_diablo_ncomp(
-      data, classes, design, argv$diablocomp, cpus=argv$ncpus
+      data, classes, design, argv$diablocomp, cpus=argv$ncpus,
+      near_zero_var=low_var
     )
     perf_diablo <- tuned_diablo
     print("Parameters with lowest error rate:")
@@ -520,11 +529,13 @@ main <- function() {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
       validation=argv$cross_val, folds=argv$cross_val_folds,
-      nrepeat=argv$cross_val_nrepeat
+      nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
     )
     print("Diablo keepx:")
     print(diablo_keepx)
-    diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+    diablo <- run_diablo(
+      diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var
+    )
   } else {
     print("No DIABLO tuning (keepX) performed!")
     diablo_keepx <- rep(diablo_keepx, length(data_names))
@@ -534,7 +545,9 @@ main <- function() {
     names(diablo_keepx) <- data_names
     print("Diablo keepx:")
     print(diablo_keepx)
-    diablo <- run_diablo(diablo_input, classes, diablo_ncomp, design, diablo_keepx)
+    diablo <- run_diablo(
+      diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var
+    )
   }
 
   print("Diablo design:")
