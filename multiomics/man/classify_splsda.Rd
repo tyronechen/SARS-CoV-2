@@ -15,7 +15,11 @@ classify_splsda(
   outdir = "./",
   mappings = NULL,
   dist = "centroids.dist",
-  bg = TRUE
+  bg = TRUE,
+  validation = "loo",
+  nrepeat = 10,
+  folds = 10,
+  near_zero_var = FALSE
 )
 }
 \arguments{
@@ -40,6 +44,14 @@ classify_splsda(
 \item{dist}{string describing distance metric "centroids.dist", "max.dist", "mahalanobis.dist". Defaults to "centroids.dist"}
 
 \item{bg}{boolean describing if background should be plotted. Defaults to TRUE}
+
+\item{validation}{character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".}
+
+\item{nrepeat}{if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"}
+
+\item{folds}{if M-fold validation, number of folds. Defaults to 10. No effect for "loo"}
+
+\item{near_zero_var}{if variance approaches zero, enable this option}
 }
 \description{
 Perform sPLSDA (can account for repeated measurments if specified):

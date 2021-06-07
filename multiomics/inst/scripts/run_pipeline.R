@@ -376,6 +376,8 @@ main <- function() {
     input_data <- data
   }
 
+  show_variance(input_data, do_log2=TRUE)
+
   if (!is.na(argv$classes_secondary)) {
     data_pca_multilevel <- plot_pca_multilevel(
       input_data, classes, pch=pch, ncomp=argv$pcomp,
