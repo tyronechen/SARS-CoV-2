@@ -204,6 +204,34 @@ remove_novar <- function(data) {
   return(data)
 }
 
+#' Show distribution of feature variance in data
+#'
+#' Show distribution of feature variance in data: dataframe -> plot of variances
+#' @param data dataframe with na values.
+#' @param do_log2 perform log2 transform for visualisation. Defaults to TRUE.
+#' @seealso [multiomics::remove_na_class()], [multiomics::remove_na_prop()], [multiomics::remove_novar()]
+#' @export
+# @examples
+# show_variance(dataframe_with_data)
+show_variance <- function(data, do_log2=TRUE) {
+  variances <- lapply(
+    lapply(data, data.frame),
+    function(y) sapply(y, function(x) var(x, na.rm=TRUE))
+  )
+  variances <- lapply(variances, unname)
+  if (do_log2) {variances <- lapply(variances, log2)}
+  names(variances) <- names(data)
+  warning(
+    "If variance is too low, downstream steps may not work! You can inspect \
+    the distribution of variance per feature with the box plots, and filter \
+    or drop variables as needed."
+  )
+  boxplot(
+    variances, xlab="Omics", ylab="Feature variance (log2)",
+    main="Feature variances (log2) per omics"
+  )
+}
+
 #' Load in class data
 #'
 #' Load in class data for data: infile_path -> vector (of strings)

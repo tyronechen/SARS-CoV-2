@@ -4,7 +4,7 @@
 \alias{run_diablo}
 \title{Run the multi-omic pipeline}
 \usage{
-run_diablo(data, classes, ncomp, design, keepx = NULL)
+run_diablo(data, classes, ncomp, design, keepx = NULL, near_zero_var = FALSE)
 }
 \arguments{
 \item{data}{list of dataframes with quantitative multi-omics data.}
@@ -16,6 +16,8 @@ run_diablo(data, classes, ncomp, design, keepx = NULL)
 \item{design}{matrix with linkage.}
 
 \item{keepx}{vector of integers for feature selection. Defaults to NULL.}
+
+\item{near_zero_var}{if variance approaches zero, enable this option}
 }
 \description{
 Run the multi-block splsda on the multi omics data

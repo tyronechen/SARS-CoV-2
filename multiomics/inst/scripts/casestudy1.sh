@@ -11,7 +11,7 @@ Rscript  inst/scripts/run_pipeline.R --tune_off --low_var \
   --diablocomp 3 \
   --linkage 0.1 \
   --diablo_keepx 10 25 50 \
-  --icomp 0 \
+  --icomp 10 \
   --zero_as_na TRUE \
   --replace_missing FALSE \
   --pcomp 3 \

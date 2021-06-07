@@ -4,7 +4,14 @@
 \alias{tune_diablo_ncomp}
 \title{Tune sPLSDA multi-block (DIABLO) number of components}
 \usage{
-tune_diablo_ncomp(data, classes, design, ncomp = 0, cpus = 1)
+tune_diablo_ncomp(
+  data,
+  classes,
+  design,
+  ncomp = 0,
+  cpus = 1,
+  near_zero_var = FALSE
+)
 }
 \arguments{
 \item{data}{list of dataframes with original data.}
@@ -16,6 +23,8 @@ tune_diablo_ncomp(data, classes, design, ncomp = 0, cpus = 1)
 \item{ncomp}{integer assigning number of components for multi-block sPLSDA. Defaults to 0.}
 
 \item{cpus}{integer number of cpus for parallel processing. Defaults to 2.}
+
+\item{near_zero_var}{if variance approaches zero, enable this option}
 }
 \description{
 Tune sPLSDA multi-block optimal components

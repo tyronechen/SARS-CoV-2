@@ -13,9 +13,10 @@ tune_diablo_keepx(
   cpus = 2,
   dist = "centroids.dist",
   progressBar = TRUE,
-  cross_val = "loo",
+  validation = "loo",
   folds = 10,
-  nrepeat = 10
+  nrepeat = 10,
+  near_zero_var = FALSE
 )
 }
 \arguments{
@@ -35,7 +36,13 @@ tune_diablo_keepx(
 
 \item{progressBar}{boolean showing progress bar. Defaults to TRUE.}
 
-\item{cross_val}{character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".}
+\item{validation}{character specifying "loo" or "M-fold" cross-validation. Defaults to "loo".}
+
+\item{folds}{if M-fold validation, number of folds. Defaults to 10. No effect for "loo"}
+
+\item{nrepeat}{if M-fold validation, number of repeats. Defaults to 10. No effect for "loo"}
+
+\item{near_zero_var}{if variance approaches zero, enable this option}
 }
 \description{
 Tune sPLSDA multi-block features to keep

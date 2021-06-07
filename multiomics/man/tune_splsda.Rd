@@ -17,7 +17,8 @@ tune_splsda(
   folds = 10,
   dist = "centroids.dist",
   cpus = 2,
-  progressBar = TRUE
+  progressBar = TRUE,
+  near_zero_var = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ tune_splsda(
 \item{cpus}{integer number of cpus for parallel processing. Defaults to 2.}
 
 \item{progressBar}{boolean showing progress bar. Defaults to TRUE.}
+
+\item{near_zero_var}{if variance approaches zero, enable this option}
 }
 \description{
 Tune sPLSDA optimal components
