@@ -780,7 +780,8 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
     validation=validation, folds=folds, dist=dist, cpus=cpus,
     progressBar=progressBar, near.zero.var=near_zero_var
   )
-  print(plot(tuned, main=names))
+  if (nrepeat == 1 | validation == "loo") { sd <- FALSE } else { sd <- TRUE }
+  print(mixOmics:::plot.tune.splsda(tuned, sd=sd, main=names))
   return(tuned)
 }
 
@@ -812,10 +813,13 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   # mapply(function(x, y, c, k) classify_splsda_(
   #   x, classes, pch, y, c, k, contrib, outdir
   # ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
+  print(keepX)
+  print(ncomp)
   data_new <- list()
   for(i in 1:length(data)){
+    if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
     data_tmp <- classify_splsda_(
-      data[[i]], classes, pch, title[[i]], ncomp, keepX,
+      data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]],
       validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
@@ -1192,10 +1196,10 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
   #   test_keepX <- append(test_keepX, list(data_tmp))
   # }
-
+  cpus <- NULL
   tune_data <- tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
-    validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
+    validation=validation, folds=folds, nrepeat=nrepeat, dist=dist,
     progressBar=progressBar, near.zero.var=near_zero_var)
   list_keepX <- tune_data$choice.keepX
   return(list_keepX)
@@ -1231,10 +1235,17 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   near_zero_var=FALSE) {
   # this is the actual part where diablo is run
   print("Running DIABLO...")
-  block.splsda(
+  for (i in names(keepx)) {
+    if (ncomp < length(keepx[[i]])) {
+      keepx[[i]] <- head(keepx[[i]], n=ncomp)
+    }
+  }
+
+  data <- block.splsda(
     X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design,
     near.zero.var=near_zero_var
   )
+  return(data)
 }
 
 #' Make plots for diablo
@@ -1317,7 +1328,6 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   sink()
   # mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   for(i in 1:ncomp) {plotDiablo(data, ncomp=i)}
-
   if (ncomp > 1) {
     print("Plotting individual samples into space spanned by block components...")
     plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO',

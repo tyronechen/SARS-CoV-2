@@ -3,7 +3,7 @@
 library(mixOmics)
 library(argparser, quietly=TRUE)
 library(ggplot2)
-library(multiomics)
+# library(multiomics)
 library(parallel)
 library(reshape2)
 
@@ -453,11 +453,17 @@ main <- function() {
         }
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
+        print(tuned_splsda$choice.ncomp)
 
         print("Tuned splsda to use number of components:")
         splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
         splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
         names(splsda_ncomp) <- data_names
+        print(splsda_ncomp)
+
+        # if error rate is equal it may not be able to pick
+        fill_null <- as.vector(unlist(lapply(splsda_ncomp, is.null)))
+        splsda_ncomp[fill_null] <- 1
         print(splsda_ncomp)
 
         print("Tuned the number of variables selected on each component to:")
@@ -475,6 +481,7 @@ main <- function() {
           near_zero_var=low_var
         )
       } else {
+        print("COCONUT")
         data_splsda <- classify_splsda(
           input_data, classes, pch=NA, title=data_names, splsda_ncomp,
           splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
@@ -554,6 +561,7 @@ main <- function() {
 
   print("Diablo design:")
   print(diablo$design)
+
   plot_diablo(diablo, diablo_ncomp, outdir, data_names, "keepx", corr_cutoff)
   # assess_performance(diablo, dist=dist_diablo, diablo_ncomp)
 
