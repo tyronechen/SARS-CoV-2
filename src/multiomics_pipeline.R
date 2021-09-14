@@ -778,7 +778,7 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
   tuned <- tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
-    progressBar=progressBar, near.zero.var=near_zero_var
+    progressBar=progressBar, near.zero.var=near_zero_var, measure="BER"
   )
   if (nrepeat == 1 | validation == "loo") { sd <- FALSE } else { sd <- TRUE }
   print(mixOmics:::plot.tune.splsda(tuned, sd=sd, main=names))
@@ -1111,7 +1111,7 @@ cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
 # @examples
 # tune_diablo_ncomp(data, classes, ncomp=0, design, cpus=2)
 tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
-  near_zero_var=FALSE) {
+  near_zero_var=FALSE, nrepeat=1, validation="loo", folds=1) {
   # First, we fit a DIABLO model without variable selection to assess the global
   # performance and choose the number of components for the final DIABLO model.
   # The function perf is run with 10-fold cross validation repeated 10 times.
@@ -1126,7 +1126,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
 
   # this code takes a couple of min to run
   perf_diablo <- perf(
-    sgccda_res, validation='loo', folds=10, nrepeat=10, cpus=cpus
+    sgccda_res, validation=validation, folds=folds, nrepeat=nrepeat, cpus=cpus
   )
   print(perf_diablo$error.rate)
   plot(perf_diablo, main="DIABLO optimal components")
@@ -1188,14 +1188,17 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   # sufficient number of variables for downstream validation / interpretation.
   # See ?tune.block.splsda.
   print("Tuning keepX parameter...")
+  print(test_keepX)
   test_keepX <- mapply(function(name, dims) list(name=dims), names(data),
     rep(list(test_keepX))
   )
+  print(test_keepX)
   # test_keepX <- list()
   # for(i in 1:length(rep(list(test_keepX)))){
   #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
   #   test_keepX <- append(test_keepX, list(data_tmp))
   # }
+
   cpus <- NULL
   tune_data <- tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,

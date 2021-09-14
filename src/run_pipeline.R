@@ -451,25 +451,28 @@ main <- function() {
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
             progressBar=TRUE, near_zero_var=low_var)
         }
+
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-        print(tuned_splsda$choice.ncomp)
-
+        for (i in 1:length(splsda_ncomp)) {
+          splsda_ncomp[[i]] <- splsda_ncomp[[i]]$choice.ncomp$ncomp
+        }
         print("Tuned splsda to use number of components:")
-        splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
-        splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
+        # splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
+        # print(splsda_ncomp)
+        # splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
         names(splsda_ncomp) <- data_names
         print(splsda_ncomp)
-
         # if error rate is equal it may not be able to pick
-        fill_null <- as.vector(unlist(lapply(splsda_ncomp, is.null)))
-        splsda_ncomp[fill_null] <- 1
-        print(splsda_ncomp)
-
+        # fill_null <- as.vector(unlist(lapply(splsda_ncomp, is.null)))
+        # splsda_ncomp[fill_null] <- 1
         print("Tuned the number of variables selected on each component to:")
-        print(splsda_keepx)
         splsda_keepx <- unlist(splsda_keepx, recursive = FALSE)
         names(splsda_keepx) <- data_names
+        # print(splsda_keepx)
+        for (i in 1:length(splsda_keepx)) {
+          splsda_keepx[[i]] <- head(splsda_keepx[[i]], n=splsda_ncomp[[i]])
+        }
       } else {
         print("No sPLSDA tuning performed!")
       }
@@ -481,13 +484,13 @@ main <- function() {
           near_zero_var=low_var
         )
       } else {
-        print("COCONUT")
         data_splsda <- classify_splsda(
           input_data, classes, pch=NA, title=data_names, splsda_ncomp,
           splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
           near_zero_var=low_var
         )
       }
+
   } else {
     data_splsda <- NA
     tuned_splsda <- NA
@@ -498,19 +501,25 @@ main <- function() {
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
   if (!tune_off) {
     tuned_diablo <- tune_diablo_ncomp(
-      data, classes, design, argv$diablocomp, cpus=argv$ncpus,
-      near_zero_var=low_var
+      data, classes, design, ncomp=argv$diablocomp, cpus=argv$ncpus,
+      near_zero_var=low_var, nrepeat=argv$cross_val_nrepeat,
+      validation=argv$cross_val, folds=argv$cross_val_folds
     )
     perf_diablo <- tuned_diablo
     print("Parameters with lowest error rate:")
-    tuned_diablo <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER",]
-    diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
+    print(tuned_diablo$choice.ncomp$WeightedVote)
+    print(tuned_diablo$error.rate)
+    diablo_ncomp <- tuned_diablo$choice.ncomp$WeightedVote[
+      "Overall.BER", argv$dist_diablo
+      ]
+    diablo_ncomp <- diablo_ncomp[which.max(diablo_ncomp)]
   } else {
     print("No DIABLO tuning (number of components) performed!")
     diablo_ncomp <- argv$diablocomp
     tuned_diablo <- NA
     perf_diablo <- NA
   }
+
   print("Number of components:")
   print(diablo_ncomp)
 
@@ -533,7 +542,8 @@ main <- function() {
 
   # tune diablo parameters and run diablo
   diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
-
+  # diablo_keepx <- head(diablo_keepx, n=diablo_ncomp)
+  print(diablo_keepx)
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
