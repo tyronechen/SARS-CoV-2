@@ -1,0 +1,49 @@
+citHeader("To cite multiomics in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "{A multi-modal data harmonisation approach for discovery of COVID-19 drug targets}",
+  author   = "Tyrone Chen, Melcy Philip, Kim-Anh Lê Cao, Sonika Tyagi",
+  journal  = "Briefings in Bioinformatics",
+  year     = "2021",
+  volume   = "bbab185",
+  url      = "https://doi.org/10.1093/bib/bbab185",
+  doi      = "{10.1093/bib/bbab185}",
+  textVersion = paste(
+    "Tyrone Chen, Melcy Philip, Kim-Anh Lê Cao, Sonika Tyagi, ",
+    "A multi-modal data harmonisation approach for discovery of COVID-19 ",
+    "drug targets, Briefings in Bioinformatics, 2021;, bbab185, ",
+    "https://doi.org/10.1093/bib/bbab185"
+  )
+)
+
+citEntry(
+  entry    = "Article",
+  title    = "{multiomics: A user-friendly multi-omics data harmonisation R pipeline [version 1; peer review: awaiting peer review]}",
+  author   = "Tyrone Chen, Al J Abadi, Kim-Anh Lê Cao, Sonika Tyagi",
+  journal  = "F1000Research",
+  year     = "2021",
+  volume   = "10",
+  number   = "538",
+  url      = "https://doi.org/10.12688/f1000research.53453.1",
+  textVersion = paste(
+    "Tyrone Chen, Al J Abadi, Kim-Anh Lê Cao, Sonika Tyagi, ",
+    "multiomics: A user-friendly multi-omics data harmonisation R pipeline, ",
+    "[version 1; peer review: awaiting peer review]. F1000Research 2021, 10:538, ",
+    "https://doi.org/10.12688/f1000research.53453.1"
+  )
+)
+
+citEntry(
+  entry    = "Software",
+  title    = "{A multi-modal data harmonisation approach for discovery of COVID-19 drug targets}",
+  author   = "Tyrone Chen, Melcy Philip, Al J Abadi, Kim-Anh Lê Cao, Sonika Tyagi, ",
+  journal  = "Zenodo",
+  year     = "2021",
+  url      = "https://doi.org/10.5281/zenodo.4562010",
+  textVersion = paste(
+    "Tyrone Chen, Melcy Philip, Al J Abadi, Kim-Anh Lê Cao, Sonika Tyagi, ",
+    "Multi-omics data harmonisation for the discovery of COVID-19 drug targets, ",
+    "Zenodo 2021, https://doi.org/10.5281/zenodo.4562010"
+  )
+)
