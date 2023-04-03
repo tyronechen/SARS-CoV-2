@@ -1135,19 +1135,19 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
   print("Plotting stability of DIABLO components...")
   for (i in perf_diablo$features$stable$nrep1) {
     for (j in names(perf_diablo$features$stable$nrep1)) {
-      if (any(is.infinite(i$comp1)) == FALSE) {
+      if (any(is.infinite(i$comp1)) == FALSE && !is.null(i$comp1)) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 1"), xaxt='n'
         )
         print(paste(j, "Comp 1"))
       }
-      if (any(is.infinite(i$comp2)) == FALSE) {
+      if (any(is.infinite(i$comp2)) == FALSE && !is.null(i$comp2)) {
         plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 2"), xaxt='n'
         )
         print(paste(j, "Comp 2"))
       }
-      if (any(is.infinite(i$comp3)) == FALSE) {
+      if (any(is.infinite(i$comp3)) == FALSE && !is.null(i$comp3)) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 3"), xaxt='n'
         )
