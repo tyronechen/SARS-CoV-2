@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 # combine multi-omics data
+library(dplyr)
 library(mixOmics)
 library(argparser, quietly=TRUE)
 library(ggplot2)
@@ -410,13 +411,13 @@ main <- function() {
   if (argv$plsdacomp > 0) {
     if (length(pch) > 1) {
       data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        argv$plsdacomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
         validation=argv$cross_val, folds=argv$cross_val_folds,
         nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
       )
     } else {
       data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+        argv$plsdacomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
         validation=argv$cross_val, folds=argv$cross_val_folds,
         nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
       )
@@ -484,14 +485,16 @@ main <- function() {
       if (length(pch) > 1) {
         data_splsda <- classify_splsda(
           input_data, classes, pch, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
-          near_zero_var=low_var
+          splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+          near_zero_var=low_var, validation=argv$cross_val,
+          folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
         )
       } else {
         data_splsda <- classify_splsda(
           input_data, classes, pch=NA, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, data_splsda, bg=TRUE,
-          near_zero_var=low_var
+          splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+          near_zero_var=low_var, validation=argv$cross_val,
+          folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
         )
       }
 
