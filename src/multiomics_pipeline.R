@@ -819,8 +819,8 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   for(i in 1:length(data)){
     if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
     data_tmp <- classify_splsda_(
-      data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]],
-      validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
+      data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]], contrib,
+      outdir, validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
   }
