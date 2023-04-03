@@ -253,6 +253,10 @@ main <- function() {
   print("Parsing classes")
   classes <- parse_classes(argv$classes)
 
+  if (is.null(argv$classes_secondary)) {
+    argv$classes_secondary <- NA
+  }
+
   if (!is.na(argv$classes_secondary)) {
     print("Parsing secondary classes")
     pch <- parse_classes(argv$classes_secondary)
