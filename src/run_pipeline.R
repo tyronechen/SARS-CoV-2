@@ -432,6 +432,8 @@ main <- function() {
       if (!is.na(argv$splsda_keepx)) {
         splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
         # splsda_ncomp = length(splsda_keepx)
+      } else {
+        splsda_keepx <- seq(5, 100, 5)
       }
 
       splsda_ncomp <- argv$splsdacomp
