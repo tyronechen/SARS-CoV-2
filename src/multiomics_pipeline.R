@@ -579,6 +579,7 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
       dist, bg, validation=validation, nrepeat=nrepeat, folds=folds,
       near_zero_var
     )
+    print(data_tmp)
     data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
@@ -658,11 +659,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   print("Getting performance metrics")
   print("Plotting error rates...")
   metrics <- mixOmics::perf(
-    data_plsda, progressBar=TRUE, auc=TRUE,
+    data_plsda, progressBar=FALSE, auc=TRUE,
     validation=validation, nrepeat=nrepeat, folds=folds
   )
-  print(metrics$error.rate)
-  plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
+  print(metrics[c("error.rate", "choice.ncomp")])
+  plot(metrics, main="Error rate PLSDA", overlay = "measure", sd = TRUE) # plot this tuning
+  # plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
 
   # supporess roc printing automatically to stdout
   sink("/dev/null")
@@ -675,10 +677,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   sink()
 
   # consider using plotvar for some datasets
-  if (ncomp > 1) {
-    print("Plotting arrow plot...")
-    plotArrow(data_plsda, ind.names=FALSE, legend=TRUE, title="PLSDA")
-  }
+  # print(class(data_plsda))
+  # deprecated in mixOmics 6.23.4 - not appropriate
+  # if (ncomp > 1) {
+  #   print("Plotting arrow plot...")
+  #   plotArrow(data_plsda, ind.names=FALSE, legend=TRUE, title="PLSDA")
+  # }
 
   print("Getting loadings and plotting clustered image maps")
 
@@ -754,7 +758,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 # tune_splsda(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10, logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10, dist="centroids.dist", cpus=2, progressBar=TRUE)
 tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
+  dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
     # mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
     #   nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
     #   data, names, SIMPLIFY=FALSE)
@@ -772,7 +776,7 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
 
 tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
   logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
+  dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
   # tune splsda components
   tuned <- tune.splsda(data, Y=classes, multilevel=multilevel,
@@ -893,7 +897,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   print("Plotting error rates...")
   metrics <- mixOmics::perf(
     data_splsda, validation=validation, folds=folds, nrepeat=nrepeat,
-    progressBar=TRUE, auc=TRUE, near_zero_var=low_var
+    progressBar=FALSE, auc=TRUE, near_zero_var=low_var
   )
   print(metrics$error.rate)
   plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
@@ -1178,7 +1182,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
-  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE,
+  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=FALSE,
   validation="loo", folds=10, nrepeat=10, near_zero_var=FALSE) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
