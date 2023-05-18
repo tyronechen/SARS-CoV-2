@@ -924,10 +924,10 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   }
   sink()
 
-  if (ncomp > 1) {
-    print("Plotting arrow plot...")
-    plotArrow(data_splsda, ind.names=FALSE, legend=TRUE, title="sPLSDA")
-  }
+  # if (ncomp > 1) {
+  #   print("Plotting arrow plot...")
+  #   plotArrow(data_splsda, ind.names=FALSE, legend=TRUE, title="sPLSDA")
+  # }
   print("Getting loadings and plotting clustered image maps")
 
   # setup colour map for clustered image plots
