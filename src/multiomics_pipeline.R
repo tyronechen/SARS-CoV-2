@@ -709,8 +709,6 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     legend=list(title="Status"), col.names=show_cols
   )
 
-  print(data_plsda$names$block)
-
   for (comp in seq(ncomp)) {
     cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status"),
@@ -723,9 +721,9 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA min loadings"))
     loading_max <- plotLoadings(data_plsda, contrib="max", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', name.var=colnames(data))
     loading_min <- plotLoadings(data_plsda, contrib="min", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', name.var=colnames(data))
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_PLSDA_max.txt", sep="")
     path_min <- paste(outdir, "/", title, "_", comp, "_PLSDA_min.txt", sep="")
@@ -781,6 +779,7 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
   logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
+  cpus <- BiocParallel::MulticoreParam(cpus)
   # tune splsda components
   tuned <- mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
@@ -968,9 +967,9 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
     loading_max <- plotLoadings(data_splsda, contrib="max", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
     loading_min <- plotLoadings(data_splsda, contrib="min", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_sPLSDA_max.txt", sep="")
     path_min <- paste(outdir, "/", title, "_", comp, "_sPLSDA_min.txt", sep="")
@@ -1206,7 +1205,8 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   #   test_keepX <- append(test_keepX, list(data_tmp))
   # }
 
-  cpus <- NULL
+  # cpus <- NULL
+  cpus <- BiocParallel::MulticoreParam(cpus)
   tune_data <- tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
     validation=validation, folds=folds, nrepeat=nrepeat, dist=dist,
@@ -1418,11 +1418,11 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
 
       loading_max <- plotLoadings(
         data, contrib="max", comp=comp, block=j, method='median', ndisplay=NULL,
-        name.var=colnames(data), plot=FALSE
+        name.var=colnames(data)#, plot=FALSE
       )
       loading_min <- plotLoadings(
         data, contrib="min", comp=comp, block=j, method='median', ndisplay=NULL,
-        name.var=colnames(data), plot=FALSE
+        name.var=colnames(data)#, plot=FALSE
       )
 
       path_max <- paste(
