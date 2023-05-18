@@ -778,7 +778,7 @@ tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat
   logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
-  cpus <- BiocParallel::MulticoreParam(cpus)
+  # cpus <- BiocParallel::MulticoreParam(cpus)
   # tune splsda components
   tuned <- mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
