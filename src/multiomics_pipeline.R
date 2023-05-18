@@ -579,7 +579,6 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
       dist, bg, validation=validation, nrepeat=nrepeat, folds=folds,
       near_zero_var
     )
-    print(data_tmp)
     data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
