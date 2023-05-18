@@ -253,6 +253,7 @@ main <- function() {
   print(paths)
   print("Parsing classes")
   classes <- parse_classes(argv$classes)
+  print(classes)
 
   if (is.null(argv$classes_secondary)) {
     argv$classes_secondary <- NA
@@ -447,18 +448,22 @@ main <- function() {
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=TRUE, near_zero_var=low_var)
+            progressBar=FALSE, near_zero_var=low_var)
         } else {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
             NULL,
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=TRUE, near_zero_var=low_var)
+            progressBar=FALSE, near_zero_var=low_var)
         }
 
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
+        print(tuned_splsda)
+        print(names(tuned_splsda))
+        print(splsda_keepx)
+        print(splsda_ncomp)
         for (i in 1:length(splsda_ncomp)) {
           splsda_ncomp[[i]] <- splsda_ncomp[[i]]$choice.ncomp$ncomp
         }
@@ -553,7 +558,7 @@ main <- function() {
   print(diablo_keepx)
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
-      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=TRUE,
+      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=FALSE,
       validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
     )
