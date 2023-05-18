@@ -627,7 +627,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     }
 
   } else {
-    print("Plotting multi level partial least squares discriminant analysis")
+    print("Plotting single level partial least squares discriminant analysis")
     title_plt <- paste(title, "PLSDA single")
     data_plsda <- plsda(data, Y=classes, ncomp=ncomp)
 
@@ -708,6 +708,9 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
     legend=list(title="Status"), col.names=show_cols
   )
+
+  print(data_plsda$names$block)
+
   for (comp in seq(ncomp)) {
     cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status"),
@@ -757,7 +760,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 # @examples
 # tune_splsda(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10, logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10, dist="centroids.dist", cpus=2, progressBar=TRUE)
 tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
-  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
+  logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
     # mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
     #   nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
@@ -775,11 +778,11 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
   }
 
 tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
-  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
+  logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
   dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
   # tune splsda components
-  tuned <- tune.splsda(data, Y=classes, multilevel=multilevel,
+  tuned <- mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
     progressBar=progressBar, near.zero.var=near_zero_var, measure="BER"
@@ -820,7 +823,7 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   print(keepX)
   print(ncomp)
   data_new <- list()
-  for(i in 1:length(data)){
+  for(i in 1:length(data)) {
     if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
     data_tmp <- classify_splsda_(
       data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]], contrib,
