@@ -462,7 +462,7 @@ main <- function() {
 
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
         splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-        print(tuned_splsda)
+        # print(tuned_splsda)
         print(names(tuned_splsda))
         print(splsda_keepx)
         print(splsda_ncomp)

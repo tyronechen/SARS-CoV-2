@@ -965,10 +965,12 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
     plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
+    sink("/dev/null")
     loading_max <- plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
     loading_min <- plotLoadings(data_splsda, contrib="min", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
+    sink()
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_sPLSDA_max.txt", sep="")
     path_min <- paste(outdir, "/", title, "_", comp, "_sPLSDA_min.txt", sep="")
@@ -1414,7 +1416,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
       for (i in block_to_trim) {
         data$names$colnames[[i]] <- trimmed_names[[i]][["all_names"]]
       }
-
+      sink("/dev/null")
       loading_max <- plotLoadings(
         data, contrib="max", comp=comp, block=j, method='median', ndisplay=NULL,
         name.var=colnames(data)#, plot=FALSE
@@ -1423,7 +1425,7 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
         data, contrib="min", comp=comp, block=j, method='median', ndisplay=NULL,
         name.var=colnames(data)#, plot=FALSE
       )
-
+      sink()
       path_max <- paste(
         outdir, "/", j, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
       )
