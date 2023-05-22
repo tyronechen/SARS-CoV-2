@@ -1104,6 +1104,41 @@ cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
   }
 }
 
+#' Plot correlation between unimputed and imputed data. This version takes in files as input.
+#'
+#' Quality control plot to check if data has mutated significantly. This version takes in files as input.
+#' @param data_one file path to table 1
+#' @param data_two file path to table 2
+#' @param data_names single label for a name
+#' @param classes file path to classes
+#' @param pcomp number of principal components to plot
+#' @param outfile_path path to output file
+#' @seealso [multiomics::impute_missing()], [multiomics::replace_missing()], [multiomics::cor_imputed_unimputed()]
+#' @export
+# @examples
+# compare_data(pca_withna, pca_impute, names)
+compare_data <- function(data_one, data_two, data_names, classes, pcomp, outfile_path="compare.pdf") {
+  print(paste("Saving plots to (overwriting existing):", outfile_path))
+  pdf(outfile_path)
+  data_one <- parse_data(infile_path=data_one)
+  data_two <- parse_data(infile_path=data_two)
+  classes <- parse_classes(classes)
+  pca_one <- plot_pca_single(
+    list(data_one), classes,
+    pch = pch, ncomp = pcomp,
+    title = paste("No Impute n_PCs =", pcomp, "\n")
+  )
+  pca_two <- plot_pca_single(
+    list(data_two), classes,
+    pch = pch, ncomp = pcomp,
+    title = paste("Imputed n_PCs =", pcomp, "\n")
+  )
+  heatmaps <- cor_imputed_unimputed(pca_one, pca_two, data_names)
+  print(heatmaps)
+  dev.off()
+  return(heatmaps)
+}
+
 #' Tune sPLSDA multi-block (DIABLO) number of components
 #'
 #' Tune sPLSDA multi-block optimal components
@@ -1185,7 +1220,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
-  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=FALSE,
+  test_keepX=c(5,100,5), cpus=2, dist="centroids.dist", progressBar=FALSE,
   validation="loo", folds=10, nrepeat=10, near_zero_var=FALSE) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
@@ -1245,12 +1280,14 @@ force_unique_blocks <- function(data) {
 run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   near_zero_var=FALSE) {
   # this is the actual part where diablo is run
-  print("Running DIABLO...")
-  for (i in names(keepx)) {
-    if (ncomp < length(keepx[[i]])) {
-      keepx[[i]] <- head(keepx[[i]], n=ncomp)
-    }
-  }
+  print("Running DIABLO with following settings...")
+  print(ncomp)
+  print(keepx)
+  # for (i in names(keepx)) {
+  #   if (ncomp < length(keepx[[i]])) {
+  #     keepx[[i]] <- head(keepx[[i]], n=ncomp)
+  #   }
+  # }
 
   data <- block.splsda(
     X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design,
