@@ -18,6 +18,7 @@ parse_data <- function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
   print("Parsing file:")
   print(infile_path)
   data <- read.table(infile_path, sep="\t", header=TRUE, row.names=1) + offset
+  warning("Only one column detected, is your data formatted as a tsv file?")
   if (is.na(missing_as)) {
     data[which(data == 0, arr.ind=TRUE)] <- NA
   } else {
