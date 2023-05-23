@@ -171,6 +171,10 @@ parse_argv <- function() {
     p, "--mini_run", flag=TRUE,
     help="whether to run on first 100 features (max) from each dataset"
   )
+  p <- argparser::add_argument(
+    p, "--progress_bar", flag = TRUE, 
+    help = "display progressbar or not (off by default)"
+  )
   # Parse the command line arguments
   argv <- argparser::parse_args(p)
 
@@ -242,8 +246,20 @@ main <- function() {
   print(dist_plsda)
   print("Distance measure (sPLSDA):")
   print(dist_splsda)
+  print("Search grid (sPLSDA):")
+  if (is.na(argv$splsda_keepx)) {
+    print(seq(5, 100, 5))
+  } else {
+    print(argv$splsda_keepx)
+  }
   print("Distance measure (DIABLO):")
   print(dist_diablo)
+  print("Search grid (DIABLO):")
+  if (is.na(argv$diablo_keepx)) {
+    print(seq(5, 50, 5))
+  } else {
+    print(argv$diablo_keepx)
+  }
   print("Display correlation cutoff:")
   print(corr_cutoff)
   options(warn=1)
@@ -281,6 +297,10 @@ main <- function() {
     quit(save="no", status=1)
   }
 
+  # show progress bar
+  print("Progress bar shown:")
+  print(argv$progress_bar)
+
   # initialise plots
   print(paste("Saving plots to (overwriting existing):", plot))
   pdf(plot)
@@ -298,7 +318,6 @@ main <- function() {
       x[,seq_len(minirun_ncol)]
     })
   }
-
 
   # show proportion of NA values in unfiltered data
   for (i in length(data))
@@ -386,6 +405,9 @@ main <- function() {
   # multilevel decomposition if secondary variables are specified
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
   # multilevel pca
+
+  print(data_imp)
+
   if (!is.na(data_imp)) {
     input_data <- data_imp
   } else {
@@ -450,14 +472,14 @@ main <- function() {
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=FALSE, near_zero_var=low_var)
+            progressBar=argv$progress_bar, near_zero_var=low_var)
         } else {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
             NULL,
             ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
             test_keepX=splsda_keepx, validation=argv$cross_val,
             folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=FALSE, near_zero_var=low_var)
+            progressBar=argv$progress_bar, near_zero_var=low_var)
         }
 
         splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
@@ -555,16 +577,20 @@ main <- function() {
   save(list = ls(all.names = TRUE), file=rdata)
 
   # tune diablo parameters and run diablo
-  diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
-  # diablo_keepx <- head(diablo_keepx, n=diablo_ncomp)
+  if (!is.na(argv$diablo_keepx)) {
+    diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
+  } else {
+    diablo_keepx <- seq(5,50,5)
+  }
+  
   print(diablo_keepx)
   if (!tune_off) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
-      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=FALSE,
+      design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=argv$progress_bar,
       validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
     )
-    print("Diablo keepx:")
+    print("Diablo keepx (optimal):")
     print(diablo_keepx)
     diablo <- run_diablo(
       diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var
@@ -576,7 +602,7 @@ main <- function() {
       diablo_keepx, sort(rep_len(1:length(data_names), length(diablo_keepx)))
     )
     names(diablo_keepx) <- data_names
-    print("Diablo keepx:")
+    print("Diablo keepx (user-provided):")
     print(diablo_keepx)
     diablo <- run_diablo(
       diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var

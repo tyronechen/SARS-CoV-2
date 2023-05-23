@@ -1229,12 +1229,12 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   # been set to favor the small-ish signature while allowing to obtain a
   # sufficient number of variables for downstream validation / interpretation.
   # See ?tune.block.splsda.
-  print("Tuning keepX parameter...")
+  print("Tuning keepX parameter using input grid...")
   print(test_keepX)
   test_keepX <- mapply(function(name, dims) list(name=dims), names(data),
     rep(list(test_keepX))
   )
-  print(test_keepX)
+  
   # test_keepX <- list()
   # for(i in 1:length(rep(list(test_keepX)))){
   #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
