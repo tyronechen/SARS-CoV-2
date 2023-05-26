@@ -406,9 +406,8 @@ main <- function() {
   # refer to http://mixomics.org/case-studies/multilevel-vac18/
   # multilevel pca
 
-  print(data_imp)
-
   if (argv$icomp > 0) {
+    print(data_imp[1:3, 1:3])
     input_data <- data_imp
   } else {
     input_data <- data
