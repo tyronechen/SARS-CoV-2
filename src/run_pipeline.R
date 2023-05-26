@@ -408,7 +408,7 @@ main <- function() {
 
   print(data_imp)
 
-  if (!is.na(data_imp)) {
+  if (argv$icomp > 0) {
     input_data <- data_imp
   } else {
     input_data <- data
