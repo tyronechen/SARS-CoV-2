@@ -328,7 +328,7 @@ impute_missing <- function(data, ncomps, outdir) {
   # )
   data_new <- list()
   for(i in 1:length(data)){
-    data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]])
+    data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]], outdir)
     data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
