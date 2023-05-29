@@ -148,7 +148,7 @@ export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp
     method = rep("splsda", length(dist_plsda)),
     blocks = names(dist_plsda),
     distance = as.matrix(dist_plsda),
-    ncomp = as.matrix(plsda_comp),
+    ncomp = as.matrix(plsda_ncomp),
     keepx = rep(0, length(dist_plsda)),
     row.names = NULL
   )
@@ -156,7 +156,7 @@ export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp
     method=rep("splsda", length(dist_splsda)), 
     blocks=names(dist_splsda), 
     distance=as.matrix(dist_splsda), 
-    ncomp=as.matrix(splsda_comp), 
+    ncomp=as.matrix(splsda_ncomp), 
     keepx=as.matrix(splsda_keepx), 
     row.names = NULL
     )
@@ -164,7 +164,7 @@ export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp
     method = rep("diablo", length(dist_diablo)),
     blocks = names(dist_diablo),
     distance = as.matrix(dist_diablo),
-    ncomp = as.matrix(diablo_comp),
+    ncomp = as.matrix(diablo_ncomp),
     keepx = as.matrix(diablo_keepx),
     row.names = NULL
   )
