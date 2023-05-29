@@ -439,7 +439,7 @@ main <- function() {
   # multilevel pca
 
   if (argv$icomp > 0) {
-    print(data_imp[1:3, 1:3])
+    print(data_imp[[1]][1:3, 1:3])
     input_data <- data_imp
   } else {
     input_data <- data
