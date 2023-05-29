@@ -204,6 +204,17 @@ main <- function() {
   if (!is.na(argv$json)) {
     print("Json file passed to pipeline, override all other command input!")
     argv <- rjson::fromJSON(file=argv$json)
+    # R cant handle NULL values so this accounts for it internally
+
+    null_to_na_recurse <- function(obj) {
+      # from https://github.com/jeroen/jsonlite/issues/70#issuecomment-840416596
+      if (is.list(obj)) {
+        obj <- jsonlite:::null_to_na(obj)
+        obj <- lapply(obj, null_to_na_recurse)
+      }
+      return(obj)
+    }
+    argv <- null_to_na_recurse(argv)
   }
 
   print("Creating output files directory (will overwrite existing data!)")
