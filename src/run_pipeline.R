@@ -148,8 +148,8 @@ parse_argv <- function() {
     help="enable low variance mode (if you have low variance or sparse data)"
   )
   p <- argparser::add_argument(
-    p, "--tune_off", flag=TRUE,
-    help="turn off tuning (if you already know the values or for debugging)"
+    p, "--optimal_params", type="character", default=NA,
+    help="provide path to optimal parameters (order must match input --data --data_names)"
   )
   p <- argparser::add_argument(
     p, "--outfile_dir", type="character", default="./",
@@ -233,9 +233,32 @@ main <- function() {
   dist_splsda <- argv$dist_splsda
   dist_diablo <- argv$dist_diablo
   corr_cutoff <- argv$corr_cutoff
-  print("Perform tuning of sPLSDA and DIABLO:")
-  tune_off <- argv$tune_off
-  print(!tune_off)
+  optimal_params <- argv$optimal_params
+  if (is.na(optimal_params)) {
+    print("Perform tuning of sPLSDA and DIABLO:")
+    print("Search grid (sPLSDA):")
+    if (is.na(argv$splsda_keepx)) {
+      print(seq(5, 100, 5))
+    } else {
+      print(argv$splsda_keepx)
+    }
+    print("Search grid (DIABLO):")
+    if (is.na(argv$diablo_keepx)) {
+      print(seq(5, 50, 5))
+    } else {
+      print(argv$diablo_keepx)
+    }
+  } else {
+    print("Load optimal params from file:")
+    params <- parse_parameters(optimal_params)
+    dist_splsda <- params$dist_splsda
+    splsda_ncomp <- params$splsda_ncomp
+    splsda_keepx <- params$splsda_keepx
+    dist_diablo <- params$dist_diablo
+    diablo_ncomp <- params$diablo_ncomp
+    diablo_keepx <- params$diablo_keepx
+  }
+
   print("Cross-validation method:")
   print(argv$cross_val)
   print("Cross-validation nrepeat:")
@@ -246,20 +269,9 @@ main <- function() {
   print(dist_plsda)
   print("Distance measure (sPLSDA):")
   print(dist_splsda)
-  print("Search grid (sPLSDA):")
-  if (is.na(argv$splsda_keepx)) {
-    print(seq(5, 100, 5))
-  } else {
-    print(argv$splsda_keepx)
-  }
   print("Distance measure (DIABLO):")
   print(dist_diablo)
-  print("Search grid (DIABLO):")
-  if (is.na(argv$diablo_keepx)) {
-    print(seq(5, 50, 5))
-  } else {
-    print(argv$diablo_keepx)
-  }
+
   print("Display correlation cutoff:")
   print(corr_cutoff)
   options(warn=1)
@@ -463,7 +475,7 @@ main <- function() {
       print("sPLSDA ncomp:")
       print(splsda_ncomp)
 
-      if (!tune_off) {
+      if (is.na(optimal_params)) {
         print("Tuning splsda components and selected variables")
         if (length(pch) > 1) {
           tuned_splsda <- tune_splsda(input_data, classes, data_names,
@@ -534,7 +546,7 @@ main <- function() {
   save(list = ls(all.names = TRUE), file=rdata)
 
   # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
-  if (!tune_off) {
+  if (!is.na(optimal_params)) {
     tuned_diablo <- tune_diablo_ncomp(
       data, classes, design, ncomp=argv$diablocomp, cpus=argv$ncpus,
       near_zero_var=low_var, nrepeat=argv$cross_val_nrepeat,
@@ -550,12 +562,12 @@ main <- function() {
     diablo_ncomp <- diablo_ncomp[which.max(diablo_ncomp)]
   } else {
     print("No DIABLO tuning (number of components) performed!")
-    diablo_ncomp <- argv$diablocomp
-    tuned_diablo <- NA
-    perf_diablo <- NA
+    # diablo_ncomp <- argv$diablocomp
+    # tuned_diablo <- NA
+    # perf_diablo <- NA
   }
 
-  print("Number of components:")
+  print("Number of DIABLO components:")
   print(diablo_ncomp)
 
   # remove invariant columns
@@ -583,12 +595,14 @@ main <- function() {
   }
   
   print(diablo_keepx)
-  if (!tune_off) {
+  if (is.na(optimal_params)) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=argv$progress_bar,
       validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
     )
+    print("Number of DIABLO components (user-provided):")
+    print(diablo_ncomp)
     print("Diablo keepx (optimal):")
     print(diablo_keepx)
     diablo <- run_diablo(
@@ -596,11 +610,13 @@ main <- function() {
     )
   } else {
     print("No DIABLO tuning (keepX) performed!")
-    diablo_keepx <- rep(diablo_keepx, length(data_names))
-    diablo_keepx <- split(
-      diablo_keepx, sort(rep_len(1:length(data_names), length(diablo_keepx)))
-    )
-    names(diablo_keepx) <- data_names
+    # diablo_keepx <- rep(diablo_keepx, length(data_names))
+    # diablo_keepx <- split(
+    #   diablo_keepx, sort(rep_len(1:length(data_names), length(diablo_keepx)))
+    # )
+    # names(diablo_keepx) <- data_names
+    print("Number of DIABLO components (user-provided):")
+    print(diablo_ncomp)
     print("Diablo keepx (user-provided):")
     print(diablo_keepx)
     diablo <- run_diablo(
