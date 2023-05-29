@@ -1415,7 +1415,8 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   print("ncomp (if multiple, will pick smallest to avoid overfit):")
   if (length(ncomp) > 1) {ncomp <- min(unlist(ncomp))}
   print(ncomp)
-  print("keepx")
+  print("keepx (must be equal across blocks, trimmed to smallest ncomp)")
+  keepx <- lapply(keepx, `[`, 1:min(unlist(lapply(keepx, length))))
   print(keepx)
   # for (i in names(keepx)) {
   #   if (ncomp < length(keepx[[i]])) {
