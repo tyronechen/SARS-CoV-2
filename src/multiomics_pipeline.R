@@ -56,21 +56,22 @@ parse_mappings <- function(infile_path) {
 #'
 #' Load in tuned parameters into a mapping table, format: infile_path -> dataframe
 #' Must follow specific format!
-#' method           blocks       distance                                   ncomp    keepx
-#' <splsda/diablo>  <data block> <max.dist/centroids.dist/mahalanobis.dist> <int>    <1,2,3...>
+#' method           blocks       distance                                   ncomp keepx
+#' <s/plsda/diablo> <data block> <max.dist/centroids.dist/mahalanobis.dist> <int> <1,2,3...>
 #' ...
 #' 
 #' For example:
 #' 
 #' method blocks       distance ncomp    keepx
+#' plsda  lncrna centroids.dist     3        0
+#' plsda   mirna centroids.dist     2        0
+#' plsda    mrna centroids.dist     5        0
 #' splsda lncrna centroids.dist     2     5,25
 #' splsda  mirna centroids.dist     2   75,100
 #' splsda   mrna centroids.dist     2    85,20
 #' diablo lncrna centroids.dist     1        5
 #' diablo  mirna centroids.dist     4 5,10,5,5
 #' diablo   mrna centroids.dist     1       25
-#' 
-#' Note that PLSDA component counts is not included (set with the --plsdacomp argument)
 #' 
 #' @param infile_path path to tab separated input file.
 #' @seealso [multiomics::export_parameters()]
@@ -83,8 +84,16 @@ parse_parameters <- function(infile_path) {
   print(infile_path)
   data <- read.table(infile_path, sep="\t", header=TRUE)
 
+  plsda_params <- data[data$method == "plsda", ][, 2:5]
   splsda_params <- data[data$method == "splsda", ][, 2:5]
   diablo_params <- data[data$method == "diablo", ][, 2:5]
+
+  plsda_dist <- as.list(plsda_params$distance)
+  names(plsda_dist) <- plsda_params$blocks
+  plsda_comp <- as.list(plsda_params$ncomp)
+  names(plsda_comp) <- plsda_params$blocks
+  plsda_keepx <- as.list(rep(0, length(names(plsda_dist))))
+  names(plsda_keepx) <- plsda_params$blocks
 
   splsda_dist <- as.list(splsda_params$distance)
   names(splsda_dist) <- splsda_params$blocks
@@ -101,6 +110,8 @@ parse_parameters <- function(infile_path) {
   names(diablo_keepx) <- diablo_params$blocks
 
   formatted_params <- list(
+    dist_plsda = plsda_dist,
+    plsda_ncomp = plsda_comp,
     dist_splsda = splsda_dist,
     splsda_ncomp = splsda_comp,
     splsda_keepx = splsda_keepx,
@@ -119,6 +130,8 @@ parse_parameters <- function(infile_path) {
 #' Note that the order of data blocks/omics must match the order provided in input --data and --data_names!
 #' Also returns the dataframe.
 #'
+#' @param dist_plsda list of distance metrics.
+#' @param plsda_ncomp list of optimal components.
 #' @param dist_splsda list of distance metrics.
 #' @param splsda_ncomp list of optimal components.
 #' @param splsda_keepx list of selected values from grid.
@@ -130,7 +143,15 @@ parse_parameters <- function(infile_path) {
 #' @export
 # @examples
 # parse_parameters("infile_path")
-export_parameters <- function(dist_splsda, splsda_ncomp, splsda_keepx, dist_diablo, diablo_ncomp, diablo_keepx, outdir="./") {
+export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp, splsda_keepx, dist_diablo, diablo_ncomp, diablo_keepx, outdir="./") {
+  params_plsda <- data.frame(
+    method = rep("splsda", length(dist_plsda)),
+    blocks = names(dist_plsda),
+    distance = as.matrix(dist_plsda),
+    ncomp = as.matrix(plsda_comp),
+    keepx = rep(0, length(dist_plsda)),
+    row.names = NULL
+  )
   params_splsda <- data.frame(
     method=rep("splsda", length(dist_splsda)), 
     blocks=names(dist_splsda), 
@@ -147,7 +168,7 @@ export_parameters <- function(dist_splsda, splsda_ncomp, splsda_keepx, dist_diab
     keepx = as.matrix(diablo_keepx),
     row.names = NULL
   )
-  params <- rbind(params_splsda, params_diablo)
+  params <- rbind(params_plsda, params_splsda, params_diablo)
   params$keepx <- mapply(function(x) gsub(" ", "", x), lapply(params$keepx, toString), SIMPLIFY = FALSE)
   # need coerce values to character, R parses data structures abnormally as usual
   outfile_path <- paste(outdir, "/", "optimal_parameters.tsv", sep = "")
@@ -680,9 +701,11 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   #   SIMPLIFY=FALSE)
   data_new <- list()
   for(i in 1:length(data)){
+    if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
+    if (length(dist) > 1) {dist_tmp <- dist[[i]]} else {dist_tmp <- dist}
     data_tmp <- classify_plsda_(
-      data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
-      dist, bg, validation=validation, nrepeat=nrepeat, folds=folds,
+      data[[i]], classes, pch, title[[i]], ncomp_tmp, contrib, outdir, mappings,
+      dist_tmp, bg, validation=validation, nrepeat=nrepeat, folds=folds,
       near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
