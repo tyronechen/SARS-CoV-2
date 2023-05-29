@@ -246,22 +246,31 @@ main <- function() {
   corr_cutoff <- argv$corr_cutoff
   optimal_params <- argv$optimal_params
   if (is.na(optimal_params)) {
+    plsda_ncomp <- argv$plsdacomp
+
     print("Perform tuning of sPLSDA and DIABLO:")
-    print("Search grid (sPLSDA):")
-    if (is.na(argv$splsda_keepx)) {
-      print(seq(5, 100, 5))
+    if (!is.na(argv$splsda_keepx)) {
+      splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
     } else {
-      print(argv$splsda_keepx)
+      splsda_keepx <- seq(5, 100, 5)
+    }
+    print("Search grid (sPLSDA):")
+    print(splsda_keepx)
+    splsda_ncomp <- argv$splsdacomp
+
+    if (!is.na(argv$diablo_keepx)) {
+      diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
+    } else {
+      diablo_keepx <- seq(5, 50, 5)
     }
     print("Search grid (DIABLO):")
-    if (is.na(argv$diablo_keepx)) {
-      print(seq(5, 50, 5))
-    } else {
-      print(argv$diablo_keepx)
-    }
+    print(diablo_keepx)
+    diablo_ncomp <- argv$diablocomp
   } else {
     print("Load optimal params from file (this overrides all splsda and diablo arguments!):")
     params <- parse_parameters(optimal_params)
+    dist_plsda <- params$dist_plsda
+    plsda_ncomp <- params$plsda_ncomp
     dist_splsda <- params$dist_splsda
     splsda_ncomp <- params$splsda_ncomp
     splsda_keepx <- params$splsda_keepx
@@ -453,113 +462,99 @@ main <- function() {
   save(list = ls(all.names = TRUE), file=rdata)
 
   # partial least squares discriminant analysis
-  if (argv$plsdacomp > 0) {
-    if (length(pch) > 1) {
-      data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
-        validation=argv$cross_val, folds=argv$cross_val_folds,
-        nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
-      )
-    } else {
-      data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
-        argv$plsdacomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
-        validation=argv$cross_val, folds=argv$cross_val_folds,
-        nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
-      )
-    }
-  } else { data_plsda <- NA }
+  print("PLSDA ncomp:")
+  print(plsda_ncomp)
 
-  save(list = ls(all.names = TRUE), file=rdata)
-
-  # sparse partial least squares discriminant analysis
-  if (argv$splsdacomp > 0) {
-      if (!is.na(argv$splsda_keepx)) {
-        splsda_keepx <- lapply(strsplit(argv$splsda_keepx, ","), as.integer)[[1]]
-        # splsda_ncomp = length(splsda_keepx)
-      } else {
-        splsda_keepx <- seq(5, 100, 5)
-      }
-
-      splsda_ncomp <- argv$splsdacomp
-      print("sPLSDA keepX:")
-      print(splsda_keepx)
-      print("sPLSDA ncomp:")
-      print(splsda_ncomp)
-
-      if (is.na(optimal_params)) {
-        print("Tuning splsda components and selected variables")
-        if (length(pch) > 1) {
-          tuned_splsda <- tune_splsda(input_data, classes, data_names,
-            data.frame(pch),
-            ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
-            test_keepX=splsda_keepx, validation=argv$cross_val,
-            folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=argv$progress_bar, near_zero_var=low_var)
-        } else {
-          tuned_splsda <- tune_splsda(input_data, classes, data_names,
-            NULL,
-            ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
-            test_keepX=splsda_keepx, validation=argv$cross_val,
-            folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
-            progressBar=argv$progress_bar, near_zero_var=low_var)
-        }
-
-        splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
-        splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-        # print(tuned_splsda)
-        print(names(tuned_splsda))
-        print(splsda_keepx)
-        print(splsda_ncomp)
-        for (i in 1:length(splsda_ncomp)) {
-          splsda_ncomp[[i]] <- splsda_ncomp[[i]]$choice.ncomp$ncomp
-        }
-        print("Tuned splsda to use number of components:")
-        # splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
-        # print(splsda_ncomp)
-        # splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
-        names(splsda_ncomp) <- data_names
-        print(splsda_ncomp)
-        # if error rate is equal it may not be able to pick
-        # fill_null <- as.vector(unlist(lapply(splsda_ncomp, is.null)))
-        # splsda_ncomp[fill_null] <- 1
-        print("Tuned the number of variables selected on each component to:")
-        splsda_keepx <- unlist(splsda_keepx, recursive = FALSE)
-        names(splsda_keepx) <- data_names
-        # print(splsda_keepx)
-        for (i in 1:length(splsda_keepx)) {
-          splsda_keepx[[i]] <- head(splsda_keepx[[i]], n=splsda_ncomp[[i]])
-        }
-      } else {
-        print("No sPLSDA tuning performed!")
-      }
-
-      if (length(pch) > 1) {
-        data_splsda <- classify_splsda(
-          input_data, classes, pch, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
-          near_zero_var=low_var, validation=argv$cross_val,
-          folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
-        )
-      } else {
-        data_splsda <- classify_splsda(
-          input_data, classes, pch=NA, title=data_names, splsda_ncomp,
-          splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
-          near_zero_var=low_var, validation=argv$cross_val,
-          folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
-        )
-      }
-
+  if (length(pch) > 1) {
+    data_plsda <- classify_plsda(input_data, classes, pch, title=data_names,
+      plsda_ncomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
+      validation=argv$cross_val, folds=argv$cross_val_folds,
+      nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
+    )
   } else {
-    data_splsda <- NA
-    tuned_splsda <- NA
+    data_plsda <- classify_plsda(input_data, classes, pch=NA, title=data_names,
+      plsda_ncomp, contrib, outdir, mappings, dist_plsda, bg=TRUE,
+      validation=argv$cross_val, folds=argv$cross_val_folds,
+      nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
+    )
   }
 
   save(list = ls(all.names = TRUE), file=rdata)
 
-  # NOTE: if you get tuning errors, set dcomp manually with --dcomp N
-  if (!is.na(optimal_params)) {
+  # sparse partial least squares discriminant analysis
+  print("sPLSDA keepX:")
+  print(splsda_keepx)
+  print("sPLSDA ncomp:")
+  print(splsda_ncomp)
+  
+  if (is.na(optimal_params)) {
+    print("Tuning splsda components and selected variables")
+    if (length(pch) > 1) {
+      tuned_splsda <- tune_splsda(input_data, classes, data_names,
+        data.frame(pch),
+        ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
+        test_keepX=splsda_keepx, validation=argv$cross_val,
+        folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
+        progressBar=argv$progress_bar, near_zero_var=low_var)
+    } else {
+      tuned_splsda <- tune_splsda(input_data, classes, data_names,
+        NULL,
+        ncomp=splsda_ncomp, nrepeat=argv$cross_val_nrepeat, logratio="none",
+        test_keepX=splsda_keepx, validation=argv$cross_val,
+        folds=argv$cross_val_folds, dist=dist_splsda, cpus=argv$ncpus,
+        progressBar=argv$progress_bar, near_zero_var=low_var)
+    }
+
+    splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
+    splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
+    # print(tuned_splsda)
+    print(names(tuned_splsda))
+    print(splsda_keepx)
+    print(splsda_ncomp)
+    for (i in 1:length(splsda_ncomp)) {
+      splsda_ncomp[[i]] <- splsda_ncomp[[i]]$choice.ncomp$ncomp
+    }
+    print("Tuned splsda to use number of components:")
+    # splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
+    # print(splsda_ncomp)
+    # splsda_ncomp <- unlist(splsda_ncomp, recursive = FALSE)
+    names(splsda_ncomp) <- data_names
+    print(splsda_ncomp)
+    # if error rate is equal it may not be able to pick
+    # fill_null <- as.vector(unlist(lapply(splsda_ncomp, is.null)))
+    # splsda_ncomp[fill_null] <- 1
+    print("Tuned the number of variables selected on each component to:")
+    splsda_keepx <- unlist(splsda_keepx, recursive = FALSE)
+    names(splsda_keepx) <- data_names
+    # print(splsda_keepx)
+    for (i in 1:length(splsda_keepx)) {
+      splsda_keepx[[i]] <- head(splsda_keepx[[i]], n=splsda_ncomp[[i]])
+    }
+  } else {
+    print("No sPLSDA tuning performed!")
+  }
+
+  if (length(pch) > 1) {
+    data_splsda <- classify_splsda(
+      input_data, classes, pch, title=data_names, splsda_ncomp,
+      splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+      near_zero_var=low_var, validation=argv$cross_val,
+      folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
+    )
+  } else {
+    data_splsda <- classify_splsda(
+      input_data, classes, pch=NA, title=data_names, splsda_ncomp,
+      splsda_keepx, contrib, outdir, mappings, dist_splsda, bg=TRUE,
+      near_zero_var=low_var, validation=argv$cross_val,
+      folds=argv$cross_val_folds, nrepeat=argv$cross_val_nrepeat
+    )
+  }
+
+  save(list = ls(all.names = TRUE), file=rdata)
+
+  if (is.na(optimal_params)) {
     tuned_diablo <- tune_diablo_ncomp(
-      data, classes, design, ncomp=argv$diablocomp, cpus=argv$ncpus,
+      data, classes, design, ncomp=diablo_ncomp, cpus=argv$ncpus,
       near_zero_var=low_var, nrepeat=argv$cross_val_nrepeat,
       validation=argv$cross_val, folds=argv$cross_val_folds
     )
@@ -599,13 +594,6 @@ main <- function() {
   save(list = ls(all.names = TRUE), file=rdata)
 
   # tune diablo parameters and run diablo
-  if (!is.na(argv$diablo_keepx)) {
-    diablo_keepx <- lapply(strsplit(argv$diablo_keepx, ","), as.integer)[[1]]
-  } else {
-    diablo_keepx <- seq(5,50,5)
-  }
-  
-  print(diablo_keepx)
   if (is.na(optimal_params)) {
     diablo_keepx <- tune_diablo_keepx(diablo_input, classes, diablo_ncomp,
       design, diablo_keepx, cpus=argv$ncpus, dist=dist_diablo, progressBar=argv$progress_bar,
@@ -636,6 +624,8 @@ main <- function() {
   }
 
   optimal_params_values <- export_parameters(
+    dist_plsda = dist_plsda,
+    plsda_ncomp = plsda_ncomp,
     dist_splsda = dist_splsda, 
     splsda_ncomp = splsda_ncomp, 
     splsda_keepx = splsda_keepx, 
