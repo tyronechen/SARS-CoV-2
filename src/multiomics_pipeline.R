@@ -73,6 +73,7 @@ parse_mappings <- function(infile_path) {
 #' Note that PLSDA component counts is not included (set with the --plsdacomp argument)
 #' 
 #' @param infile_path path to tab separated input file.
+#' @seealso [multiomics::export_parameters()]
 #' @export
 # @examples
 # parse_parameters("infile_path")
@@ -108,6 +109,50 @@ parse_parameters <- function(infile_path) {
     diablo_keepx = diablo_keepx
   )
   return(formatted_params)
+}
+
+#' Export tuned parameters
+#'
+#' Export tuned parameters into a mapping table, format: dataframe -> outfile_path
+#' These are generated automatically as part of the tuning process.
+#' Can be loaded back in directly for tuning in the main script with --optimal_params
+#' Note that the order of data blocks/omics must match the order provided in input --data and --data_names!
+#' Also returns the dataframe.
+#'
+#' @param dist_splsda list of distance metrics.
+#' @param splsda_ncomp list of optimal components.
+#' @param splsda_keepx list of selected values from grid.
+#' @param dist_diablo list of distance metrics.
+#' @param diablo_ncomp list of optimal components.
+#' @param diablo_keepx list of selected values from grid.
+#' @param outfile_path path to tab separated output file.
+#' @seealso [multiomics::parse_parameters()]
+#' @export
+# @examples
+# parse_parameters("infile_path")
+export_parameters <- function(dist_splsda, splsda_ncomp, splsda_keepx, dist_diablo, diablo_ncomp, diablo_keepx, outdir="./") {
+  params_splsda <- data.frame(
+    method=rep("splsda", length(dist_splsda)), 
+    blocks=names(dist_splsda), 
+    distance=as.matrix(dist_splsda), 
+    ncomp=as.matrix(splsda_comp), 
+    keepx=as.matrix(splsda_keepx), 
+    row.names = NULL
+    )
+  params_diablo <- data.frame(
+    method = rep("diablo", length(dist_diablo)),
+    blocks = names(dist_diablo),
+    distance = as.matrix(dist_diablo),
+    ncomp = as.matrix(diablo_comp),
+    keepx = as.matrix(diablo_keepx),
+    row.names = NULL
+  )
+  params <- rbind(params_splsda, params_diablo)
+  params$keepx <- mapply(function(x) gsub(" ", "", x), lapply(params$keepx, toString), SIMPLIFY = FALSE)
+  # need coerce values to character, R parses data structures abnormally as usual
+  outfile_path <- paste(outdir, "/", "optimal_parameters.tsv", sep = "")
+  write.table(apply(params, 2, as.character), file = outfile_path, sep = "\t", quote = FALSE, row.names = FALSE)
+  return(params)
 }
 
 #' Map feature names to feature id
@@ -884,9 +929,11 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   data_new <- list()
   for(i in 1:length(data)) {
     if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
+    if (length(dist) > 1) {dist_tmp <- dist[[i]]} else {dist_tmp <- dist}
     data_tmp <- classify_splsda_(
       data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]], contrib,
-      outdir, validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
+      outdir, mappings=NULL, dist=dist_tmp, bg=TRUE, validation=validation, 
+      nrepeat=nrepeat, folds=folds, near_zero_var=near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
   }

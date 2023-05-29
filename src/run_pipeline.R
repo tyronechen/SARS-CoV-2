@@ -601,9 +601,9 @@ main <- function() {
       validation=argv$cross_val, folds=argv$cross_val_folds,
       nrepeat=argv$cross_val_nrepeat, near_zero_var=low_var
     )
-    print("Number of DIABLO components (user-provided):")
+    print("Number of DIABLO components (tuned):")
     print(diablo_ncomp)
-    print("Diablo keepx (optimal):")
+    print("Diablo keepx (tuned):")
     print(diablo_keepx)
     diablo <- run_diablo(
       diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var
@@ -623,6 +623,16 @@ main <- function() {
       diablo_input, classes, diablo_ncomp, design, diablo_keepx, low_var
     )
   }
+
+  optimal_params_values <- export_parameters(
+    dist_splsda = dist_splsda, 
+    splsda_ncomp = splsda_ncomp, 
+    splsda_keepx = splsda_keepx, 
+    dist_diablo = dist_diablo, 
+    diablo_ncomp = diablo_ncomp, 
+    diablo_keepx = diablo_keepx, 
+    outfile_path = outdir
+    )
 
   print("Diablo design:")
   print(diablo$design)
