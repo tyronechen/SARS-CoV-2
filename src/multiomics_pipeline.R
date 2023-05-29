@@ -100,11 +100,11 @@ parse_parameters <- function(infile_path) {
   names(diablo_keepx) <- diablo_params$blocks
 
   formatted_params <- list(
-    splsda_dist = splsda_dist,
-    splsda_comp = splsda_comp,
+    dist_splsda = splsda_dist,
+    splsda_ncomp = splsda_comp,
     splsda_keepx = splsda_keepx,
-    diablo_dist = diablo_dist,
-    diablo_comp = diablo_comp,
+    dist_diablo = diablo_dist,
+    diablo_ncomp = diablo_comp,
     diablo_keepx = diablo_keepx
   )
   return(formatted_params)
