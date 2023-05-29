@@ -52,6 +52,64 @@ parse_mappings <- function(infile_path) {
   return(data)
 }
 
+#' Load and parse tuned parameters
+#'
+#' Load in tuned parameters into a mapping table, format: infile_path -> dataframe
+#' Must follow specific format!
+#' method           blocks       distance                                   ncomp    keepx
+#' <splsda/diablo>  <data block> <max.dist/centroids.dist/mahalanobis.dist> <int>    <1,2,3...>
+#' ...
+#' 
+#' For example:
+#' 
+#' method blocks       distance ncomp    keepx
+#' splsda lncrna centroids.dist     2     5,25
+#' splsda  mirna centroids.dist     2   75,100
+#' splsda   mrna centroids.dist     2    85,20
+#' diablo lncrna centroids.dist     1        5
+#' diablo  mirna centroids.dist     4 5,10,5,5
+#' diablo   mrna centroids.dist     1       25
+#' 
+#' Note that PLSDA component counts is not included (set with the --plsdacomp argument)
+#' 
+#' @param infile_path path to tab separated input file.
+#' @export
+# @examples
+# parse_parameters("infile_path")
+parse_parameters <- function(infile_path) {
+  # load in tuned data into a table, format: infile_path -> dataframe
+  print("Parsing parameters...")
+  print(infile_path)
+  data <- read.table(infile_path, sep="\t", header=TRUE)
+
+  splsda_params <- data[data$method == "splsda", ][, 2:5]
+  diablo_params <- data[data$method == "diablo", ][, 2:5]
+
+  splsda_dist <- as.list(splsda_params$distance)
+  names(splsda_dist) <- splsda_params$blocks
+  splsda_comp <- as.list(splsda_params$ncomp)
+  names(splsda_comp) <- splsda_params$blocks
+  splsda_keepx <- lapply(strsplit(splsda_params$keepx, ","), as.double)
+  names(splsda_keepx) <- splsda_params$blocks
+
+  diablo_dist <- as.list(diablo_params$distance)
+  names(diablo_dist) <- diablo_params$blocks
+  diablo_comp <- as.list(diablo_params$ncomp)
+  names(diablo_comp) <- diablo_params$blocks
+  diablo_keepx <- lapply(strsplit(diablo_params$keepx, ","), as.double)
+  names(diablo_keepx) <- diablo_params$blocks
+
+  formatted_params <- list(
+    splsda_dist = splsda_dist,
+    splsda_comp = splsda_comp,
+    splsda_keepx = splsda_keepx,
+    diablo_dist = diablo_dist,
+    diablo_comp = diablo_comp,
+    diablo_keepx = diablo_keepx
+  )
+  return(formatted_params)
+}
+
 #' Map feature names to feature id
 #'
 #' Remap feature names to feature id, format: dataframe, dataframe -> dataframe
