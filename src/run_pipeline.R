@@ -632,7 +632,7 @@ main <- function() {
     dist_diablo = dist_diablo, 
     diablo_ncomp = diablo_ncomp, 
     diablo_keepx = diablo_keepx, 
-    outfile_path = outdir
+    outdir = outdir
     )
 
   print("Diablo design:")
