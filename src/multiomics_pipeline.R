@@ -1412,7 +1412,10 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   near_zero_var=FALSE) {
   # this is the actual part where diablo is run
   print("Running DIABLO with following settings...")
+  print("ncomp (if multiple, will pick smallest to avoid overfit):")
+  if (length(ncomp) > 1) {ncomp <- min(unlist(ncomp))}
   print(ncomp)
+  print("keepx")
   print(keepx)
   # for (i in names(keepx)) {
   #   if (ncomp < length(keepx[[i]])) {
