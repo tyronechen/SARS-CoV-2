@@ -149,7 +149,7 @@ parse_argv <- function() {
   )
   p <- argparser::add_argument(
     p, "--optimal_params", type="character", default=NA,
-    help="provide path to optimal parameters (order must match input --data --data_names)"
+    help="provide path to optimal parameters (order must match input --data --data_names). this overrides any splsda and diablo arguments!"
   )
   p <- argparser::add_argument(
     p, "--outfile_dir", type="character", default="./",
@@ -260,7 +260,7 @@ main <- function() {
       print(argv$diablo_keepx)
     }
   } else {
-    print("Load optimal params from file:")
+    print("Load optimal params from file (this overrides all splsda and diablo arguments!):")
     params <- parse_parameters(optimal_params)
     dist_splsda <- params$dist_splsda
     splsda_ncomp <- params$splsda_ncomp
