@@ -1447,6 +1447,10 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   cutoff=0.95) {
   # plot the diablo data with a series of diagnostic plots
 
+  print("ncomp (if multiple, will pick smallest to avoid overfit):")
+  if (length(ncomp) > 1) {ncomp <- min(unlist(ncomp))}
+  print(ncomp)
+
   # need to make a function to squeeze sample names automatically and remap
   trim_names_ <- function(data, trim=6) {
     all_names <- data
