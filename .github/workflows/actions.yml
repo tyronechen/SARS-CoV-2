@@ -95,9 +95,9 @@ jobs:
           options(repos = c(CRAN = "https://cran.r-project.org"))
           #BiocManager::install('aljabadi/mixOmics@devel', Ncpus=2)
           BiocManager::install('mixOmicsTeam/mixOmics', Ncpus=2)
-          remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories(), Ncpus=2)
-          remotes::install_local(dependencies = FALSE, upgrade = FALSE)
-          # remotes::install_gitlab("tyagilab/sars-cov-2", subdir = "multiomics", dependencies = TRUE, Ncpus=2)
+          # remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories(), Ncpus=2)
+          # remotes::install_local(dependencies = FALSE, upgrade = FALSE)
+          remotes::install_gitlab("tyagilab/sars-cov-2", subdir = "multiomics", dependencies = TRUE, Ncpus=2)
           # remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
