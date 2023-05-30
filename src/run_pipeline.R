@@ -623,6 +623,24 @@ main <- function() {
     )
   }
 
+  if (length(dist_plsda) == 1 || length(plsda_ncomp) == 1) {
+    # reformat plsda for export (if no specific parameters are provided)
+    dist_plsda <- as.list(rep(dist_plsda, length(data_names)))
+    names(dist_plsda) <- data_names
+    plsda_ncomp <- as.list(rep(plsda_ncomp, length(data_names)))
+    names(plsda_ncomp) <- data_names
+  }
+  if (length(dist_splsda) == 1) {
+    # reformat plsda for export (if no specific parameters are provided)
+    dist_splsda <- as.list(rep(dist_splsda, length(data_names)))
+    names(dist_splsda) <- data_names
+  }
+  if (length(dist_diablo) == 1) {
+    # reformat plsda for export (if no specific parameters are provided)
+    dist_diablo <- as.list(rep(dist_diablo, length(data_names)))
+    names(dist_diablo) <- data_names
+  }
+
   optimal_params_values <- export_parameters(
     dist_plsda = dist_plsda,
     plsda_ncomp = plsda_ncomp,
