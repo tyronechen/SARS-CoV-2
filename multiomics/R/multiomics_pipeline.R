@@ -18,6 +18,9 @@ parse_data <- function(infile_path, offset=0, missing_as=NA, rmna=TRUE) {
   print("Parsing file:")
   print(infile_path)
   data <- read.table(infile_path, sep="\t", header=TRUE, row.names=1) + offset
+  if (ncol(data) < 2) {
+    warning("Only one column detected, is your data formatted as a tsv file?")
+  }
   if (is.na(missing_as)) {
     data[which(data == 0, arr.ind=TRUE)] <- NA
   } else {
@@ -47,6 +50,130 @@ parse_mappings <- function(infile_path) {
   data <- read.table(infile_path, sep="\t", header=TRUE, row.names=2)
   data["X"] <- NULL
   return(data)
+}
+
+#' Load and parse tuned parameters
+#'
+#' Load in tuned parameters into a mapping table, format: infile_path -> dataframe
+#' Must follow specific format!
+#' method           blocks       distance                                   ncomp keepx
+#' <s/plsda/diablo> <data block> <max.dist/centroids.dist/mahalanobis.dist> <int> <1,2,3...>
+#' ...
+#' 
+#' For example:
+#' 
+#' method blocks       distance ncomp    keepx
+#' plsda  lncrna centroids.dist     3        0
+#' plsda   mirna centroids.dist     2        0
+#' plsda    mrna centroids.dist     5        0
+#' splsda lncrna centroids.dist     2     5,25
+#' splsda  mirna centroids.dist     2   75,100
+#' splsda   mrna centroids.dist     2    85,20
+#' diablo lncrna centroids.dist     1        5
+#' diablo  mirna centroids.dist     4 5,10,5,5
+#' diablo   mrna centroids.dist     1       25
+#' 
+#' @param infile_path path to tab separated input file.
+#' @seealso [multiomics::export_parameters()]
+#' @export
+# @examples
+# parse_parameters("infile_path")
+parse_parameters <- function(infile_path) {
+  # load in tuned data into a table, format: infile_path -> dataframe
+  print("Parsing parameters...")
+  print(infile_path)
+  data <- read.table(infile_path, sep="\t", header=TRUE)
+
+  plsda_params <- data[data$method == "plsda", ][, 2:5]
+  splsda_params <- data[data$method == "splsda", ][, 2:5]
+  diablo_params <- data[data$method == "diablo", ][, 2:5]
+
+  plsda_dist <- as.list(plsda_params$distance)
+  names(plsda_dist) <- plsda_params$blocks
+  plsda_comp <- as.list(plsda_params$ncomp)
+  names(plsda_comp) <- plsda_params$blocks
+  plsda_keepx <- as.list(rep(0, length(names(plsda_dist))))
+  names(plsda_keepx) <- plsda_params$blocks
+
+  splsda_dist <- as.list(splsda_params$distance)
+  names(splsda_dist) <- splsda_params$blocks
+  splsda_comp <- as.list(splsda_params$ncomp)
+  names(splsda_comp) <- splsda_params$blocks
+  splsda_keepx <- lapply(strsplit(splsda_params$keepx, ","), as.double)
+  names(splsda_keepx) <- splsda_params$blocks
+
+  diablo_dist <- as.list(diablo_params$distance)
+  names(diablo_dist) <- diablo_params$blocks
+  diablo_comp <- as.list(diablo_params$ncomp)
+  names(diablo_comp) <- diablo_params$blocks
+  diablo_keepx <- lapply(strsplit(diablo_params$keepx, ","), as.double)
+  names(diablo_keepx) <- diablo_params$blocks
+
+  formatted_params <- list(
+    dist_plsda = plsda_dist,
+    plsda_ncomp = plsda_comp,
+    dist_splsda = splsda_dist,
+    splsda_ncomp = splsda_comp,
+    splsda_keepx = splsda_keepx,
+    dist_diablo = diablo_dist,
+    diablo_ncomp = diablo_comp,
+    diablo_keepx = diablo_keepx
+  )
+  return(formatted_params)
+}
+
+#' Export tuned parameters
+#'
+#' Export tuned parameters into a mapping table, format: dataframe -> outfile_path
+#' These are generated automatically as part of the tuning process.
+#' Can be loaded back in directly for tuning in the main script with --optimal_params
+#' Note that the order of data blocks/omics must match the order provided in input --data and --data_names!
+#' Also returns the dataframe.
+#'
+#' @param dist_plsda list of distance metrics.
+#' @param plsda_ncomp list of optimal components.
+#' @param dist_splsda list of distance metrics.
+#' @param splsda_ncomp list of optimal components.
+#' @param splsda_keepx list of selected values from grid.
+#' @param dist_diablo list of distance metrics.
+#' @param diablo_ncomp list of optimal components.
+#' @param diablo_keepx list of selected values from grid.
+#' @param outfile_path path to tab separated output file.
+#' @seealso [multiomics::parse_parameters()]
+#' @export
+# @examples
+# parse_parameters("infile_path")
+export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp, splsda_keepx, dist_diablo, diablo_ncomp, diablo_keepx, outdir="./") {
+  params_plsda <- data.frame(
+    method = rep("plsda", length(dist_plsda)),
+    blocks = names(plsda_ncomp),
+    distance = as.matrix(dist_plsda),
+    ncomp = as.matrix(plsda_ncomp),
+    keepx = rep(0, length(dist_plsda)),
+    row.names = NULL
+  )
+  params_splsda <- data.frame(
+    method=rep("splsda", length(dist_splsda)), 
+    blocks=names(dist_splsda), 
+    distance=as.matrix(dist_splsda), 
+    ncomp=as.matrix(splsda_ncomp), 
+    keepx=as.matrix(splsda_keepx), 
+    row.names = NULL
+    )
+  params_diablo <- data.frame(
+    method = rep("diablo", length(dist_diablo)),
+    blocks = names(dist_diablo),
+    distance = as.matrix(dist_diablo),
+    ncomp = as.matrix(diablo_ncomp),
+    keepx = as.matrix(diablo_keepx),
+    row.names = NULL
+  )
+  params <- rbind(params_plsda, params_splsda, params_diablo)
+  params$keepx <- mapply(function(x) gsub(" ", "", x), lapply(params$keepx, toString), SIMPLIFY = FALSE)
+  # need coerce values to character, R parses data structures abnormally as usual
+  outfile_path <- paste(outdir, "/", "optimal_parameters.tsv", sep = "")
+  write.table(apply(params, 2, as.character), file = outfile_path, sep = "\t", quote = FALSE, row.names = FALSE)
+  return(params)
 }
 
 #' Map feature names to feature id
@@ -325,7 +452,7 @@ impute_missing <- function(data, ncomps, outdir) {
   # )
   data_new <- list()
   for(i in 1:length(data)){
-    data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]])
+    data_tmp <- impute_missing_(data[[i]], ncomps[[i]], names(data)[[i]], outdir)
     data_new <- append(data_new, list(data_tmp))
   }
   names(data_new) <- names(data)
@@ -574,9 +701,11 @@ classify_plsda <- function(data, classes, pch=NA, title="", ncomp=0,
   #   SIMPLIFY=FALSE)
   data_new <- list()
   for(i in 1:length(data)){
+    if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
+    if (length(dist) > 1) {dist_tmp <- dist[[i]]} else {dist_tmp <- dist}
     data_tmp <- classify_plsda_(
-      data[[i]], classes, pch, title[[i]], ncomp, contrib, outdir, mappings,
-      dist, bg, validation=validation, nrepeat=nrepeat, folds=folds,
+      data[[i]], classes, pch, title[[i]], ncomp_tmp, contrib, outdir, mappings,
+      dist_tmp, bg, validation=validation, nrepeat=nrepeat, folds=folds,
       near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
@@ -626,7 +755,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     }
 
   } else {
-    print("Plotting multi level partial least squares discriminant analysis")
+    print("Plotting single level partial least squares discriminant analysis")
     title_plt <- paste(title, "PLSDA single")
     data_plsda <- plsda(data, Y=classes, ncomp=ncomp)
 
@@ -658,11 +787,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   print("Getting performance metrics")
   print("Plotting error rates...")
   metrics <- mixOmics::perf(
-    data_plsda, progressBar=TRUE, auc=TRUE,
+    data_plsda, progressBar=FALSE, auc=TRUE,
     validation=validation, nrepeat=nrepeat, folds=folds
   )
-  print(metrics$error.rate)
-  plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
+  print(metrics[c("error.rate", "choice.ncomp")])
+  plot(metrics, main="Error rate PLSDA", overlay = "measure", sd = TRUE) # plot this tuning
+  # plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
 
   # supporess roc printing automatically to stdout
   sink("/dev/null")
@@ -675,10 +805,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   sink()
 
   # consider using plotvar for some datasets
-  if (ncomp > 1) {
-    print("Plotting arrow plot...")
-    plotArrow(data_plsda, ind.names=FALSE, legend=TRUE, title="PLSDA")
-  }
+  # print(class(data_plsda))
+  # deprecated in mixOmics 6.23.4 - not appropriate
+  # if (ncomp > 1) {
+  #   print("Plotting arrow plot...")
+  #   plotArrow(data_plsda, ind.names=FALSE, legend=TRUE, title="PLSDA")
+  # }
 
   print("Getting loadings and plotting clustered image maps")
 
@@ -704,6 +836,7 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
     legend=list(title="Status"), col.names=show_cols
   )
+
   for (comp in seq(ncomp)) {
     cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status"),
@@ -716,9 +849,9 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA min loadings"))
     loading_max <- plotLoadings(data_plsda, contrib="max", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', name.var=colnames(data))
     loading_min <- plotLoadings(data_plsda, contrib="min", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', name.var=colnames(data))
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_PLSDA_max.txt", sep="")
     path_min <- paste(outdir, "/", title, "_", comp, "_PLSDA_min.txt", sep="")
@@ -753,8 +886,8 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
 # @examples
 # tune_splsda(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10, logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10, dist="centroids.dist", cpus=2, progressBar=TRUE)
 tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=10,
-  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
+  logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
+  dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
     # mapply(function(x, y) tune_splsda_(x, classes, names, multilevel, ncomp,
     #   nrepeat, logratio, test_keepX, validation, folds, dist, cpus, progressBar),
     #   data, names, SIMPLIFY=FALSE)
@@ -771,16 +904,18 @@ tune_splsda <- function(data, classes, names, multilevel=NULL, ncomp=3, nrepeat=
   }
 
 tune_splsda_ <- function(data, classes, names, multilevel=NULL, ncomp=0, nrepeat=10,
-  logratio="none", test_keepX=c(5, 50, 100), validation="loo", folds=10,
-  dist="centroids.dist", cpus=2, progressBar=TRUE, near_zero_var=FALSE) {
+  logratio="none", test_keepX=seq(5, 100, 5), validation="loo", folds=10,
+  dist="centroids.dist", cpus=2, progressBar=FALSE, near_zero_var=FALSE) {
   if (ncomp == 0) {ncomp <- (length(test_keepX))}
+  # cpus <- BiocParallel::MulticoreParam(cpus)
   # tune splsda components
-  tuned <- tune.splsda(data, Y=classes, multilevel=multilevel,
+  tuned <- mixOmics::tune.splsda(data, Y=classes, multilevel=multilevel,
     ncomp=ncomp, nrepeat=nrepeat, logratio=logratio, test.keepX=test_keepX,
     validation=validation, folds=folds, dist=dist, cpus=cpus,
-    progressBar=progressBar, near.zero.var=near_zero_var
+    progressBar=progressBar, near.zero.var=near_zero_var, measure="BER"
   )
-  print(plot(tuned, main=names))
+  if (nrepeat == 1 | validation == "loo") { sd <- FALSE } else { sd <- TRUE }
+  print(mixOmics:::plot.tune.splsda(tuned, sd=sd, main=names))
   return(tuned)
 }
 
@@ -812,11 +947,16 @@ classify_splsda <- function(data, classes, pch=NA, title="", ncomp=NULL,
   # mapply(function(x, y, c, k) classify_splsda_(
   #   x, classes, pch, y, c, k, contrib, outdir
   # ), data, title, ncomp, keepX, SIMPLIFY=FALSE)
+  print(keepX)
+  print(ncomp)
   data_new <- list()
-  for(i in 1:length(data)){
+  for(i in 1:length(data)) {
+    if (length(ncomp) > 1) {ncomp_tmp <- ncomp[[i]]} else {ncomp_tmp <- ncomp}
+    if (length(dist) > 1) {dist_tmp <- dist[[i]]} else {dist_tmp <- dist}
     data_tmp <- classify_splsda_(
-      data[[i]], classes, pch, title[[i]], ncomp, keepX,
-      validation=validation, nrepeat=nrepeat, folds=folds, near_zero_var
+      data[[i]], classes, pch, title[[i]], ncomp_tmp, keepX[[i]], contrib,
+      outdir, mappings=NULL, dist=dist_tmp, bg=TRUE, validation=validation, 
+      nrepeat=nrepeat, folds=folds, near_zero_var=near_zero_var
     )
     data_new <- append(data_new, list(data_tmp))
   }
@@ -889,7 +1029,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   print("Plotting error rates...")
   metrics <- mixOmics::perf(
     data_splsda, validation=validation, folds=folds, nrepeat=nrepeat,
-    progressBar=TRUE, auc=TRUE, near_zero_var=low_var
+    progressBar=FALSE, auc=TRUE, near_zero_var=low_var
   )
   print(metrics$error.rate)
   plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
@@ -916,10 +1056,10 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   }
   sink()
 
-  if (ncomp > 1) {
-    print("Plotting arrow plot...")
-    plotArrow(data_splsda, ind.names=FALSE, legend=TRUE, title="sPLSDA")
-  }
+  # if (ncomp > 1) {
+  #   print("Plotting arrow plot...")
+  #   plotArrow(data_splsda, ind.names=FALSE, legend=TRUE, title="sPLSDA")
+  # }
   print("Getting loadings and plotting clustered image maps")
 
   # setup colour map for clustered image plots
@@ -956,10 +1096,12 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
     plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
+    sink("/dev/null")
     loading_max <- plotLoadings(data_splsda, contrib="max", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
     loading_min <- plotLoadings(data_splsda, contrib="min", comp=comp,
-      method='median', ndisplay=NULL, name.var=colnames(data), plot=FALSE)
+      method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
+    sink()
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_sPLSDA_max.txt", sep="")
     path_min <- paste(outdir, "/", title, "_", comp, "_sPLSDA_min.txt", sep="")
@@ -1093,6 +1235,41 @@ cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
   }
 }
 
+#' Plot correlation between unimputed and imputed data. This version takes in files as input.
+#'
+#' Quality control plot to check if data has mutated significantly. This version takes in files as input.
+#' @param data_one file path to table 1
+#' @param data_two file path to table 2
+#' @param data_names single label for a name
+#' @param classes file path to classes
+#' @param pcomp number of principal components to plot
+#' @param outfile_path path to output file
+#' @seealso [multiomics::impute_missing()], [multiomics::replace_missing()], [multiomics::cor_imputed_unimputed()]
+#' @export
+# @examples
+# compare_data(pca_withna, pca_impute, names)
+compare_data <- function(data_one, data_two, data_names, classes, pcomp, outfile_path="compare.pdf") {
+  print(paste("Saving plots to (overwriting existing):", outfile_path))
+  pdf(outfile_path)
+  data_one <- parse_data(infile_path=data_one)
+  data_two <- parse_data(infile_path=data_two)
+  classes <- parse_classes(classes)
+  pca_one <- plot_pca_single(
+    list(data_one), classes,
+    pch = pch, ncomp = pcomp,
+    title = paste("No Impute n_PCs =", pcomp, "\n")
+  )
+  pca_two <- plot_pca_single(
+    list(data_two), classes,
+    pch = pch, ncomp = pcomp,
+    title = paste("Imputed n_PCs =", pcomp, "\n")
+  )
+  heatmaps <- cor_imputed_unimputed(pca_one, pca_two, data_names)
+  print(heatmaps)
+  dev.off()
+  return(heatmaps)
+}
+
 #' Tune sPLSDA multi-block (DIABLO) number of components
 #'
 #' Tune sPLSDA multi-block optimal components
@@ -1107,7 +1284,7 @@ cor_imputed_unimputed <- function(pca_withna, pca_impute, names) {
 # @examples
 # tune_diablo_ncomp(data, classes, ncomp=0, design, cpus=2)
 tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
-  near_zero_var=FALSE) {
+  near_zero_var=FALSE, nrepeat=1, validation="loo", folds=1) {
   # First, we fit a DIABLO model without variable selection to assess the global
   # performance and choose the number of components for the final DIABLO model.
   # The function perf is run with 10-fold cross validation repeated 10 times.
@@ -1122,7 +1299,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
 
   # this code takes a couple of min to run
   perf_diablo <- perf(
-    sgccda_res, validation='loo', folds=10, nrepeat=10, cpus=cpus
+    sgccda_res, validation=validation, folds=folds, nrepeat=nrepeat, cpus=cpus
   )
   print(perf_diablo$error.rate)
   plot(perf_diablo, main="DIABLO optimal components")
@@ -1131,19 +1308,19 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
   print("Plotting stability of DIABLO components...")
   for (i in perf_diablo$features$stable$nrep1) {
     for (j in names(perf_diablo$features$stable$nrep1)) {
-      if (any(is.infinite(i$comp1)) == FALSE) {
+      if (any(is.infinite(i$comp1)) == FALSE && !is.null(i$comp1)) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 1"), xaxt='n'
         )
         print(paste(j, "Comp 1"))
       }
-      if (any(is.infinite(i$comp2)) == FALSE) {
+      if (any(is.infinite(i$comp2)) == FALSE && !is.null(i$comp2)) {
         plot(i$comp2, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 2"), xaxt='n'
         )
         print(paste(j, "Comp 2"))
       }
-      if (any(is.infinite(i$comp3)) == FALSE) {
+      if (any(is.infinite(i$comp3)) == FALSE && !is.null(i$comp3)) {
         plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 3"), xaxt='n'
         )
@@ -1174,7 +1351,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
 # @examples
 # tune_diablo_keepx(data, classes, ncomp, design, test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE)
 tune_diablo_keepx <- function(data, classes, ncomp, design,
-  test_keepX=c(5,50,100), cpus=2, dist="centroids.dist", progressBar=TRUE,
+  test_keepX=c(5,100,5), cpus=2, dist="centroids.dist", progressBar=FALSE,
   validation="loo", folds=10, nrepeat=10, near_zero_var=FALSE) {
   # This tuning function should be used to tune the keepX parameters in the
   #   block.splsda function.
@@ -1183,19 +1360,23 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
   # been set to favor the small-ish signature while allowing to obtain a
   # sufficient number of variables for downstream validation / interpretation.
   # See ?tune.block.splsda.
-  print("Tuning keepX parameter...")
+  print("Tuning keepX parameter using input grid...")
+  print(test_keepX)
   test_keepX <- mapply(function(name, dims) list(name=dims), names(data),
     rep(list(test_keepX))
   )
+  
   # test_keepX <- list()
   # for(i in 1:length(rep(list(test_keepX)))){
   #   data_tmp <- list(names(data)[[i]]=rep(list(test_keepX))[[i]])
   #   test_keepX <- append(test_keepX, list(data_tmp))
   # }
 
+  # cpus <- NULL
+  cpus <- BiocParallel::MulticoreParam(cpus)
   tune_data <- tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
-    validation=cross_val, folds=folds, nrepeat=nrepeat, cpus=cpus, dist=dist,
+    validation=validation, folds=folds, nrepeat=nrepeat, dist=dist,
     progressBar=progressBar, near.zero.var=near_zero_var)
   list_keepX <- tune_data$choice.keepX
   return(list_keepX)
@@ -1230,11 +1411,24 @@ force_unique_blocks <- function(data) {
 run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   near_zero_var=FALSE) {
   # this is the actual part where diablo is run
-  print("Running DIABLO...")
-  block.splsda(
+  print("Running DIABLO with following settings...")
+  print("ncomp (if multiple, will pick smallest to avoid overfit):")
+  if (length(ncomp) > 1) {ncomp <- min(unlist(ncomp))}
+  print(ncomp)
+  print("keepx (must be equal across blocks, trimmed to smallest ncomp)")
+  keepx <- lapply(keepx, `[`, 1:min(unlist(lapply(keepx, length))))
+  print(keepx)
+  # for (i in names(keepx)) {
+  #   if (ncomp < length(keepx[[i]])) {
+  #     keepx[[i]] <- head(keepx[[i]], n=ncomp)
+  #   }
+  # }
+
+  data <- block.splsda(
     X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design,
     near.zero.var=near_zero_var
   )
+  return(data)
 }
 
 #' Make plots for diablo
@@ -1252,6 +1446,10 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
 plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   cutoff=0.95) {
   # plot the diablo data with a series of diagnostic plots
+
+  print("ncomp (if multiple, will pick smallest to avoid overfit):")
+  if (length(ncomp) > 1) {ncomp <- min(unlist(ncomp))}
+  print(ncomp)
 
   # need to make a function to squeeze sample names automatically and remap
   trim_names_ <- function(data, trim=6) {
@@ -1317,7 +1515,6 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   sink()
   # mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
   for(i in 1:ncomp) {plotDiablo(data, ncomp=i)}
-
   if (ncomp > 1) {
     print("Plotting individual samples into space spanned by block components...")
     plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO',
@@ -1395,16 +1592,16 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
       for (i in block_to_trim) {
         data$names$colnames[[i]] <- trimmed_names[[i]][["all_names"]]
       }
-
+      sink("/dev/null")
       loading_max <- plotLoadings(
         data, contrib="max", comp=comp, block=j, method='median', ndisplay=NULL,
-        name.var=colnames(data), plot=FALSE
+        name.var=colnames(data)#, plot=FALSE
       )
       loading_min <- plotLoadings(
         data, contrib="min", comp=comp, block=j, method='median', ndisplay=NULL,
-        name.var=colnames(data), plot=FALSE
+        name.var=colnames(data)#, plot=FALSE
       )
-
+      sink()
       path_max <- paste(
         outdir, "/", j, "_", comp, "_DIABLO_var_", keepvar, "_max.txt", sep=""
       )

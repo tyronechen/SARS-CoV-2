@@ -6,7 +6,7 @@
 
 # SARS-CoV-2
 
-> **NOTE**: Some users have reported that they are unable to install or run the pipeline. We are investigating this issue.
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper, please use the specific version of the pipeline available on zenodo.
 
 > **NOTE**: The [main repository has been moved to github](https://github.com/tyronechen/SARS-CoV-2). It is [also mirrored on gitlab](https://gitlab.com/tyagilab/sars-cov-2) but please submit any issues to the main gitlab repository only.
 
@@ -17,8 +17,6 @@ Code in this repository is provided under a [MIT license](https://opensource.org
 [Visit our lab website here.](https://bioinformaticslab.erc.monash.edu/) Contact Sonika Tyagi at [sonika.tyagi@monash.edu](mailto:sonika.tyagi@monash.edu).
 
 This work was presented at the [ABACBS (Australian Bioinformatics and Computational Biology Society) Conference 2020](https://doi.org/10.7490/F1000RESEARCH.1118362.1), winning the best asynchronous talk award.
-
-Future work will involve the application of deep learning to better identify latent patterns in high dimensional data. [An example of some of our preliminary work on this topic is available here.](https://gitlab.com/tyagilab/integrativeepigenomics)
 
 You can cite this pipeline as:
 
@@ -100,9 +98,11 @@ A visual summary of the pipeline is below:
 
 ### [Introduction and install instructions](introduction.md)
 
-### [Case study 1](case_study_1.md)
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper, please use the specific version of the pipeline available on zenodo.
 
-### [Case study 2](case_study_2.md)
+### [(Ref only) Case study 1](case_study_1.md)
+
+### [(Ref only) Case study 2](case_study_2.md)
 
 ### Downstream analyses
 

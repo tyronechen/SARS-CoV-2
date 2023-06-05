@@ -1,6 +1,6 @@
 Package: multiomics
 Title: Takes quantitative multi-omics data as matrices and identifies correlating features of interest
-Version: 1.0.11
+Version: 1.1.0
 Authors@R: c(
     person(given = "Tyrone",
            family = "Chen",
@@ -22,40 +22,43 @@ Authors@R: c(
            role = c("aut", "cph"),
            email = "sonika.tyagi@monash.edu",
            comment = c(ORCID = "0000-0003-0181-6258")))
-Description: Contains a pipeline for running a set of multi-omics analyses from end to end. Takes quantitative multi-omics data as input in tab separated format. All samples must be matched. <20% missing values are allowed, these values will be imputed. Generates a series of quality control plots and tables showing highly scoring features within omics and across omics. Uses functions from the mixOmics software package, more information available at (www.mixomics.org). This pipeline is also available on gitlab at (https://gitlab.com/tyagilab/sars-cov-2).
+Description: Contains a pipeline for running a set of multi-omics analyses from end to end. Takes quantitative multi-omics data as input in tab separated format. All samples must be matched. <20% missing values are allowed, these values will be imputed. Generates a series of quality control plots and tables showing highly scoring features within omics and across omics. Uses functions from the mixOmics software package, more information available at (www.mixomics.org). This pipeline is also available on gitlab at (https://github.com/tyronechen/SARS-CoV-2).
+biocViews:
+Depends:
+	R (>= 4.0.0),
 Imports:
-	argparser,
-	brio,
-	colorspace,
-	diffobj,
-	dplyr,
-	ellipsis,
-	farver,
-	ggplot2,
-	ggrepel,
-	igraph,
-	isoband,
-	matrixStats,
-	mixOmics,
-	parallel,
-	plyr,
-	rARPACK,
-	Rcpp,
-	RcppEigen,
-	reshape2,
-	RSpectra,
-	stringi,
-	testthat,
-	tibble,
-	tidyr,
-	utf8,
-	vctrs,
-	zeallot
+	argparser (>= 0.7.1),
+	BiocParallel (>= 1.32.5),
+	brio (>= 1.1.3),
+	colorspace (>= 2.1.0),
+	diffobj (>= 0.3.5),
+	dplyr (>= 1.1.1),
+	ellipsis (>= 0.3.2),
+	farver (>= 2.1.1),
+	ggplot2 (>= 3.4.1),
+	ggrepel (>= 0.9.3),
+	igraph (>= 1.4.1),
+	isoband (>= 0.2.7),
+	matrixStats (>= 0.63.0),
+	mixOmics (>= 6.3.2),
+	plyr (>= 1.8.8),
+	rARPACK (>= 0.11.0),
+	Rcpp (>= 1.0.10),
+	RcppEigen (>= 0.3.3.9.3),
+	reshape2 (>= 1.4.4),
+	RSpectra (>= 0.16.1),
+	stringi (>= 1.7.12),
+	testthat (>= 3.1.7),
+	tibble (>= 3.2.1),
+	tidyr (>= 1.3.0),
+	utf8 (>= 1.2.3),
+	vctrs (>= 0.6.1),
+	zeallot (>= 0.1.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Suggests:
     knitr,
     rmarkdown

@@ -10,7 +10,10 @@ tune_diablo_ncomp(
   design,
   ncomp = 0,
   cpus = 1,
-  near_zero_var = FALSE
+  near_zero_var = FALSE,
+  nrepeat = 1,
+  validation = "loo",
+  folds = 1
 )
 }
 \arguments{

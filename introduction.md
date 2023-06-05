@@ -38,18 +38,22 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
+
 -   [Introduction](introduction.html)
 -   [Case study 1](case_study_1.html)
 -   [Case study 2](case_study_2.html)
+-   [Case study 3](case_study_3.html)
 
 # 2 Installation
 
 ## 2.1 Quick
 
-You can install this directly as an R package from gitlab:
+You can install this directly as an R package from gitlab. Note that you may get errors if you don't have libgit2 and freetype libraries installed (these are not R packages).
 
-    install.packages(devtools)
-    install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE)
+    install.packages("devtools") 2.4.4
+    library("devtools")
+    install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE, INSTALL_opts="--no-multiarch")
 
 The actual script used to run the pipeline is not directly callable but
 provided as a separate script.

@@ -19,6 +19,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
+
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -121,6 +123,8 @@ Rscript run_pipeline.R --help
 ```
 
 A minimal script to run the pipeline is shown. [You can also download this here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/test_run.sh). This may take a few minutes.
+
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
 
 ```
 Rscript run_pipeline.R \

@@ -12,12 +12,12 @@ tune_splsda(
   ncomp = 3,
   nrepeat = 10,
   logratio = "none",
-  test_keepX = c(5, 50, 100),
+  test_keepX = seq(5, 100, 5),
   validation = "loo",
   folds = 10,
   dist = "centroids.dist",
   cpus = 2,
-  progressBar = TRUE,
+  progressBar = FALSE,
   near_zero_var = FALSE
 )
 }

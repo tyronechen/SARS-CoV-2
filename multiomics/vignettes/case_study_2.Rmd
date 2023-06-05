@@ -19,6 +19,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
+
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -480,8 +482,8 @@ With the tuned parameters, we run multi-block sPLSDA (DIABLO).
   ```{r run_diablo, eval=FALSE}
   diablo_ncomp <- tuned_diablo[which.max(tuned_diablo)]
   # these values were precomputed, newer versions of code save these values for use
-  diablo_keepx <- list(lipidome=c(7, 7)
-                       metabolome=c(6, 10)
+  diablo_keepx <- list(lipidome=c(7, 7),
+                       metabolome=c(6, 10),
                        proteome=c(8, 5),
                        translatome=c(7, 30))
 
