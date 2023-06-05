@@ -155,7 +155,7 @@ export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp
   params_splsda <- data.frame(
     method=rep("splsda", length(dist_splsda)), 
     blocks=names(dist_splsda), 
-    distance=as.matrix(splsda_ncomp), 
+    distance=as.matrix(dist_splsda), 
     ncomp=as.matrix(splsda_ncomp), 
     keepx=as.matrix(splsda_keepx), 
     row.names = NULL
@@ -163,7 +163,7 @@ export_parameters <- function(dist_plsda, plsda_ncomp, dist_splsda, splsda_ncomp
   params_diablo <- data.frame(
     method = rep("diablo", length(dist_diablo)),
     blocks = names(dist_diablo),
-    distance = as.matrix(diablo_ncomp),
+    distance = as.matrix(dist_diablo),
     ncomp = as.matrix(diablo_ncomp),
     keepx = as.matrix(diablo_keepx),
     row.names = NULL
