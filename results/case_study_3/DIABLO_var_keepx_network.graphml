@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+         http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+<!-- Created by igraph -->
+  <key id="v_name" for="node" attr.name="name" attr.type="string"/>
+  <key id="v_group" for="node" attr.name="group" attr.type="string"/>
+  <key id="v_label.color" for="node" attr.name="label.color" attr.type="string"/>
+  <key id="v_label.family" for="node" attr.name="label.family" attr.type="string"/>
+  <key id="v_label" for="node" attr.name="label" attr.type="string"/>
+  <key id="v_color" for="node" attr.name="color" attr.type="string"/>
+  <key id="v_shape" for="node" attr.name="shape" attr.type="string"/>
+  <key id="v_label.cex" for="node" attr.name="label.cex" attr.type="double"/>
+  <key id="v_size" for="node" attr.name="size" attr.type="double"/>
+  <key id="v_size2" for="node" attr.name="size2" attr.type="double"/>
+  <key id="e_weight" for="edge" attr.name="weight" attr.type="double"/>
+  <key id="e_label.color" for="edge" attr.name="label.color" attr.type="string"/>
+  <key id="e_color" for="edge" attr.name="color" attr.type="string"/>
+  <key id="e_lty" for="edge" attr.name="lty" attr.type="string"/>
+  <key id="e_width" for="edge" attr.name="width" attr.type="double"/>
+  <key id="e_label.cex" for="edge" attr.name="label.cex" attr.type="double"/>
+  <graph id="G" edgedefault="undirected">
+    <node id="n0">
+      <data key="v_name">Metabolomics_GC_MS_HMDB0000067_Metabolomics_GC_MS</data>
+      <data key="v_group">Metabolomics_GC_MS</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Metabolomics_GC_MS_HMDB0000067</data>
+      <data key="v_color">darkorchid</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">139.20984</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n1">
+      <data key="v_name">Metabolomics_GC_MS_HMDB0000207_Metabolomics_GC_MS</data>
+      <data key="v_group">Metabolomics_GC_MS</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Metabolomics_GC_MS_HMDB0000207</data>
+      <data key="v_color">darkorchid</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">139.20984</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n2">
+      <data key="v_name">Metabolomics_GC_MS_HMDB0000273_Metabolomics_GC_MS</data>
+      <data key="v_group">Metabolomics_GC_MS</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Metabolomics_GC_MS_HMDB0000273</data>
+      <data key="v_color">darkorchid</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">139.20984</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n3">
+      <data key="v_name">Metabolomics_GC_MS_HMDB0000673_Metabolomics_GC_MS</data>
+      <data key="v_group">Metabolomics_GC_MS</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Metabolomics_GC_MS_HMDB0000673</data>
+      <data key="v_color">darkorchid</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">139.20984</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n4">
+      <data key="v_name">Metabolomics_GC_MS_HMDB0003229_Metabolomics_GC_MS</data>
+      <data key="v_group">Metabolomics_GC_MS</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Metabolomics_GC_MS_HMDB0003229</data>
+      <data key="v_color">darkorchid</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">139.20984</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n5">
+      <data key="v_name">Proteomics_MS1_DDA_WP_000514408.1_Proteomics_MS1_DDA</data>
+      <data key="v_group">Proteomics_MS1_DDA</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Proteomics_MS1_DDA_WP_000514408.1</data>
+      <data key="v_color">lightgreen</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">147.832174285714</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n6">
+      <data key="v_name">Proteomics_MS1_DDA_WP_000791581.1_Proteomics_MS1_DDA</data>
+      <data key="v_group">Proteomics_MS1_DDA</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Proteomics_MS1_DDA_WP_000791581.1</data>
+      <data key="v_color">lightgreen</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">147.832174285714</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n7">
+      <data key="v_name">Proteomics_MS1_DDA_WP_001126606.1_Proteomics_MS1_DDA</data>
+      <data key="v_group">Proteomics_MS1_DDA</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Proteomics_MS1_DDA_WP_001126606.1</data>
+      <data key="v_color">lightgreen</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">147.832174285714</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n8">
+      <data key="v_name">Proteomics_MS1_DDA_WP_020808056.1_Proteomics_MS1_DDA</data>
+      <data key="v_group">Proteomics_MS1_DDA</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Proteomics_MS1_DDA_WP_020808056.1</data>
+      <data key="v_color">lightgreen</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">147.832174285714</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <node id="n9">
+      <data key="v_name">Proteomics_MS1_DDA_WP_129622244.1_Proteomics_MS1_DDA</data>
+      <data key="v_group">Proteomics_MS1_DDA</data>
+      <data key="v_label.color">black</data>
+      <data key="v_label.family">sans</data>
+      <data key="v_label">Proteomics_MS1_DDA_WP_129622244.1</data>
+      <data key="v_color">lightgreen</data>
+      <data key="v_shape">circle</data>
+      <data key="v_label.cex">1</data>
+      <data key="v_size">147.832174285714</data>
+      <data key="v_size2">10.9669371428571</data>
+    </node>
+    <edge source="n0" target="n5">
+      <data key="e_weight">-0.972581841128149</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n0" target="n6">
+      <data key="e_weight">0.98008250608062</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n0" target="n7">
+      <data key="e_weight">-0.983386405275019</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n0" target="n8">
+      <data key="e_weight">0.982614977150322</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n0" target="n9">
+      <data key="e_weight">-0.975039144512489</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n1" target="n5">
+      <data key="e_weight">-0.970651797038593</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00F800FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n1" target="n6">
+      <data key="e_weight">0.978137577265227</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n1" target="n7">
+      <data key="e_weight">-0.981434920023095</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n1" target="n8">
+      <data key="e_weight">0.980665022762156</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n1" target="n9">
+      <data key="e_weight">-0.973104224016987</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n2" target="n5">
+      <data key="e_weight">-0.97645500059978</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n2" target="n6">
+      <data key="e_weight">0.983985535811262</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n2" target="n7">
+      <data key="e_weight">-0.987302592282424</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n2" target="n8">
+      <data key="e_weight">0.986528092062381</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n2" target="n9">
+      <data key="e_weight">-0.978922089821646</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n3" target="n5">
+      <data key="e_weight">-0.978279831211223</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n3" target="n6">
+      <data key="e_weight">0.985824439729888</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n3" target="n7">
+      <data key="e_weight">-0.989147695223212</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n3" target="n8">
+      <data key="e_weight">0.988371747592167</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n3" target="n9">
+      <data key="e_weight">-0.980751531009029</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n4" target="n5">
+      <data key="e_weight">-0.962794736003002</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00F800FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n4" target="n6">
+      <data key="e_weight">0.97021992165564</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FA0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n4" target="n7">
+      <data key="e_weight">-0.973490573664691</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00FF00FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n4" target="n8">
+      <data key="e_weight">0.972726908432363</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#FF0000FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+    <edge source="n4" target="n9">
+      <data key="e_weight">-0.965227311507867</data>
+      <data key="e_label.color">black</data>
+      <data key="e_color">#00F800FF</data>
+      <data key="e_lty">solid</data>
+      <data key="e_width">1</data>
+      <data key="e_label.cex">0.977162584282317</data>
+    </edge>
+  </graph>
+</graphml>

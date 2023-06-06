@@ -49,11 +49,11 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 ## 2.1 Quick
 
-You can install this directly as an R package from gitlab. Note that you may get errors if you don't have libgit2 and freetype libraries installed (these are not R packages).
+You can install this directly as an R package from gitlab. Note that you may get errors if you don't have `libgit2` and `freetype` libraries installed (these are not R packages).
 
-    install.packages("devtools") 2.4.4
+    install.packages("devtools")
     library("devtools")
-    install_gitlab("tyagilab/sars-cov-2", subdir="multiomics", build_vignettes=TRUE, INSTALL_opts="--no-multiarch")
+    install_git("https://github.com/tyronechen/SARS-CoV-2.git", subdir="multiomics", build_vignettes=FALSE, INSTALL_opts="--no-multiarch")
 
 The actual script used to run the pipeline is not directly callable but
 provided as a separate script.
@@ -61,11 +61,11 @@ provided as a separate script.
     # this will show you the path to the script
     system.file("scripts", "run_pipeline.R", package="multiomics")
 
-## 2.2 Manual
+## 2.2 Manual (for developers or if above doesnt work)
 
 Alternatively, clone the git repository with:
 
-    git clone "https://gitlab.com/tyagilab/sars-cov-2.git"
+    git clone "https://github.com/tyronechen/SARS-CoV-2.git"
 
 ### 2.2.1 Install dependencies
 
@@ -93,6 +93,8 @@ You can also install dependencies in `R` directly:
       "BiocParallel")
     sapply(install_me, install.packages)
 
+If you run into any issues with the manual install, please double check the library versions against `multiomics/DESCRIPTION`.
+
 # 3 Usage
 
 Load the library.
@@ -109,7 +111,7 @@ environment:
 
 Otherwise, you can find a copy of this script in the public git
 repository:
-<https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/run_pipeline.R>
+<https://github.com/tyronechen/SARS-CoV-2/blob/master/src/run_pipeline.R>
 
 To inspect the arguments to the script, run this command:
 
@@ -118,32 +120,49 @@ To inspect the arguments to the script, run this command:
 A minimal script to run the pipeline is shown. [You can also download
 this
 here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/test_run.sh).
-This may take a few minutes.
+This example may take a few hours to run fully.
 
-    Rscript run_pipeline.R \
-       classes.tsv  \
-       --dropna_classes FALSE \
-       --dropna_prop 0 \
-       --data lipidomics.tsv metabolomics.tsv \
-       --data_names lipidomics metabolomics \
-       --force_unique FALSE \
-       --ncpus 2 \
-       --diablocomp 0 \
-       --linkage 0.1 \
-       --diablo_keepx 5 10 \
-       --icomp 0 \
-       --pcomp 10 \
-       --plsdacomp 2 \
-       --splsdacomp 2 \
-       --splsda_keepx 5 10 \
-       --dist_plsda centroids.dist \
-       --dist_splsda centroids.dist \
-       --dist_diablo centroids.dist \
-       --contrib max \
-       --outfile_dir ./results/test_run/ \
-       --rdata RData.RData \
-       --plot Rplots.pdf \
-       --args Rscript.sh
+Data is provided as part of the `multiomics` package and not directly as files. Extract it first with this:
+
+```
+Rscript -e 'library(multiomics); data(BPH2819); names(BPH2819); export <- function(name, data) {write.table(data.frame(data), paste(name, ".tsv", sep=""), quote=FALSE, sep="\t", row.names=TRUE, col.names=NA)}; mapply(export, names(BPH2819), BPH2819, SIMPLIFY=FALSE)'
+```
+
+Four files will be generated in the current working directory, where classes contains sample information and remaining files contain corresponding omics data:
+
+```
+classes.tsv
+metabolome.tsv
+proteome.tsv
+transcriptome.tsv
+```
+
+Then run the multiomics pipeline on the data:
+
+```
+Rscript run_pipeline.R \
+  --classes classes.tsv \
+  --data metabolome.tsv \
+         proteome.tsv \
+         transcriptome.tsv \
+  --data_names metabolome proteome transcriptome \
+  --ncpus 2 \
+  --icomp 12 \
+  --pcomp 10 \
+  --plsdacomp 2 \
+  --splsdacomp 2 \
+  --diablocomp 2 \
+  --dist_plsda "centroids.dist" \
+  --dist_splsda "centroids.dist" \
+  --dist_diablo "centroids.dist" \
+  --cross_val "Mfold" \
+  --cross_val_folds 5 \
+  --cross_val_nrepeat 50 \
+  --corr_cutoff 0.1 \
+  --outfile_dir BPH2819 \
+  --contrib "max" \
+  --progress_bar
+```       
 
 # 4 Pipeline minimum input data
 
@@ -154,83 +173,76 @@ files of quantitative omics data. Tab separated data is expected by
 default.
 
 A small example subset of test data is included in the package for
-reference.
+reference. In this test case, data has already been log2 transformed and missing values filled in with imputation.
 
 ``` r
-data(two_omics)
-names(two_omics)
-#> [1] "classes"    "lipidome"   "metabolome"
+data(BPH2819)
+names(BPH2819)
+#> [1] "classes"       "metabolome"    "proteome"      "transcriptome"
 ```
 
 The class information is available as a vector:
 
 ``` r
-head(two_omics$classes)
-#> [1] "More severe" "More severe" "Less severe" "Less severe" "More severe"
-#> [6] "More severe"
+BPH2819$classes
+#> [1] "RPMI" "RPMI" "RPMI" "RPMI" "RPMI" "RPMI"
+#> [6] "Sera" "Sera" "Sera" "Sera" "Sera" "Sera"
 ```
 
-The lipidomics and metabolomics data have 100 matched samples and an
+Each of the three omics data blocks have 12 matched samples and an
 arbitrary number of features.
 
 ``` r
-sapply(two_omics, dim)
+sapply(BPH2819, dim)
 #> $classes
 #> NULL
-#> 
-#> $lipidome
-#> [1]  100 3357
-#> 
 #> $metabolome
-#> [1] 100 150
+#> [1]  12 153
+#> $proteome
+#> [1]   12 1451
+#> $transcriptome
+#> [1]   12 2771
 ```
 
 ``` r
-head(two_omics$lipidome[, 1:2])
-#>      AC.10.0_RT_6.936 AC.12.0_RT_7.955
-#> C1           18.13745         16.84196
-#> C10          20.48135         18.06048
-#> C100         22.32588         21.30632
-#> C101         20.56189         18.84777
-#> C102         22.28591         17.98330
-#> C103         18.18658         16.97716
-head(two_omics$metabolome[, 1:2])
-#>      X1.2.Propanediol..2TMS.de X2.3.Dihydroxybutanoic.ac
-#> C1                    22.52599                  13.89898
-#> C10                   22.63460                  17.85105
-#> C100                  22.12956                  13.34028
-#> C101                  21.94220                  17.44137
-#> C102                  21.87579                  17.88084
-#> C103                  21.37599                  14.28262
+BPH2819$metabolome[,1:3]
+#>         X3.Aminoglutaric.acid HMDB0000005 HMDB0000008
+#> RPMI_0             -1.7814083   -9.103010   -3.471373
+#> RPMI_1             -1.9108074   -5.401229   -3.488496
+#> RPMI_2             -1.5458964  -10.898804   -2.845025
+#> RPMI_3             -2.1842312   -9.563557   -1.232155
+#> RPMI_4             -1.3106881   -4.755440   -1.723564
+#> RPMI_5             -0.9600247   -4.771127   -1.403044
+#> Sera_6             -0.8764074   -6.507606   -2.884537
+#> Sera_7             -1.4139388  -11.175670   -2.861640
+#> Sera_8             -3.7537269  -10.883382   -1.238028
+#> Sera_9             -2.6902848  -10.744718   -2.635249
+#> Sera_10            -3.3605788  -10.439710   -1.774845
+#> Sera_11            -2.9362071   -5.850829   -1.139523
 ```
 
 Important notes on input data:
 
 1.  Class information and the **sample order in each omics dataset must
     be identical**.
-2.  Feature names in each omics dataset are truncated. Too long names
-    may cause issues.
-3.  `R` silently replaces all non-alphanumeric characters in feature
+2.  Ideally data should be already preprocessed and missing values should be   below 20%.
+3.  Feature names in each omics dataset may be truncated. Too long names
+    cause issues with visualisation.
+4.  `R` silently replaces all non-alphanumeric characters in feature
     names with `.`.
 
-To work around (2) and (3), you can rename your feature names to a short
+To work around (3) and (4), you can rename your feature names to a short
 alphanumeric ID in your files, and remap them back later.
 
 ## 4.2 Input files
 
-For examples of input files, you can see them by running this command:
+If you did not install the `R` package, you can obtain these example files from
+github:
 
-    list.files(system.file("extdata", package="multiomics"), full.names=TRUE)
-
-If you did not install the `R` package, you can obtain these files from
-gitlab:
-
--   [classes
-    information](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/classes_diablo.tsv)
--   [lipidomics
-    data](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_lipidomics.tsv)
--   [metabolomics
-    data](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/data/case_study_2/data_metabolomics.tsv)
+-   [classes](https://github.com/tyronechen/SARS-CoV-2/blob/master/multiomics/data/classes.tsv)
+-   [metabolome](https://github.com/tyronechen/SARS-CoV-2/blob/master/multiomics/data/metabolome.tsv)
+-   [proteome](https://github.com/tyronechen/SARS-CoV-2/blob/master/multiomics/data/proteome.tsv)
+-   [transcriptome](https://github.com/tyronechen/SARS-CoV-2/blob/master/multiomics/data/transcriptome.tsv)
 
 # 5 Pipeline output data
 
@@ -243,9 +255,9 @@ Files output by the pipeline include:
     data block
 
 [A `RData` object with all input and output is available in the git
-repository.](https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/results/case_study_2/RData.RData)
+repository.](https://github.com/tyronechen/SARS-CoV-2/tree/master/results/case_study_3/data.RData)
 This is not included directly in the `multiomics` package because of
-size constraints, and includes data from four omics datasets.
+size constraints, and includes data from three omics datasets.
 
 # 6 Acknowledgements
 
@@ -283,6 +295,7 @@ stand](https://www.monash.edu/indigenous-australians/about-us/recognising-tradit
     Trujillo, E.A. and He, Y., 2021. Large-scale multi-omic analysis of
     COVID-19 severity. Cell
     systems.](https://dx.doi.org/10.1016%2Fj.cels.2020.10.003)
+-   [Mu, A., Klare, W.P., Baines, S.L. et al. Integrative omics identifies conserved and pathogen-specific responses of sepsis-causing bacteria. Nat Commun 14, 1530 (2023)](https://doi.org/10.1038/s41467-023-37200-w)
 
 ## 7.2 Methods used in package
 

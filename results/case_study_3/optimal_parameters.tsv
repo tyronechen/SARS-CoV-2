@@ -1,0 +1,10 @@
+method	blocks	distance	ncomp	keepx
+plsda	Metabolomics_GC_MS	centroids.dist	2	0
+plsda	Proteomics_MS1_DDA	centroids.dist	2	0
+plsda	RNA_Seq	centroids.dist	2	0
+splsda	Metabolomics_GC_MS	centroids.dist	1	10
+splsda	Proteomics_MS1_DDA	centroids.dist	1	5
+splsda	RNA_Seq	centroids.dist	1	15
+diablo	Metabolomics_GC_MS	centroids.dist	1	5
+diablo	Proteomics_MS1_DDA	centroids.dist	1	5
+diablo	RNA_Seq	centroids.dist	1	5
