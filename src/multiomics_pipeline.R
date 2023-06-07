@@ -424,11 +424,11 @@ impute_missing_ <- function(data, ncomp=10, block_name="", outdir="./") {
   print(ncomp)
   # data <- data[!is.na(apply(data, 1, function(x) var(x, na.rm = TRUE))),
   #              !is.na(apply(data, 2, function(x) var(x, na.rm = TRUE)))]
-  nipals_tune <- nipals(data, ncomp=ncomp)
+  nipals_tune <- mixOmics::nipals(data, ncomp=ncomp)
   barplot(nipals_tune$eig, main=paste(block_name, "Screeplot (nipals imputed)"),
     xlab="Number of components", ylab="Explained variance"
   )
-  nipals_impute <- impute.nipals(data, ncomp = ncomp)
+  nipals_impute <- mixOmics::impute.nipals(data, ncomp = ncomp)
   outfile_path <- paste(outdir, "/", "data_", block_name, "_imputed.tsv", sep="")
   write.table(
     as.data.frame(nipals_impute), file=outfile_path, quote=FALSE, sep="\t"
@@ -519,6 +519,12 @@ plot_pca_single <- function(data, classes, pch=NA, title="", ncomp=0, show=FALSE
   for(i in 1:length(data_pca)) {
     plot(data_pca[[i]], main=paste(names[[i]], "screeplot"))
   }
+
+  if (ncomp <= 3) {
+    warning("<= 3 components, skipping plots.")
+    return(data_pca)
+  }
+
   if (length(pch) > 1) {
     print("Plotting PCA by groups...")
     # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
@@ -531,15 +537,15 @@ plot_pca_single <- function(data, classes, pch=NA, title="", ncomp=0, show=FALSE
     #   group=classes, legend=TRUE, ncomp=ncomp,
     #   title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
     for(i in 1:length(data_pca)){
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (1,2)"), pch=pch, legend.title = "Class", legend.title.pch = "Secondary Class",
       )
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (2,3)"), pch=pch, legend.title = "Class", legend.title.pch = "Secondary Class",
       )
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (1,3)"), pch=pch, legend.title = "Class", legend.title.pch = "Secondary Class",
       )
@@ -557,15 +563,15 @@ plot_pca_single <- function(data, classes, pch=NA, title="", ncomp=0, show=FALSE
     #   group=classes, legend=TRUE, ncomp=ncomp,
     #   title=paste(title, y, "PCA 2/3"), pch=pch), data_pca, names)
     for(i in 1:length(data_pca)) {
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (1,2)"), legend.title = "Class",
       )
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (2,3)"), legend.title = "Class",
       )
-      plotIndiv(
+      mixOmics::plotIndiv(
         data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
         ncomp=ncomp, title=paste(title, names[[i]], "PCs (1,3)"), legend.title = "Class",
       )
@@ -644,6 +650,11 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
     plot(data_pca[[i]], main=paste(names[[i]], "Screeplot multilevel"))
   }
 
+  if (ncomp <= 3) {
+    warning("<= 3 components, skipping plots.")
+    return(data_pca)
+  }
+
   print("Plotting PCA multilevel...")
   # mapply(function(x, y) plotIndiv(x, comp=c(1,2), ind.names=FALSE,
   #   group=classes, legend=TRUE, ncomp=ncomp,
@@ -655,15 +666,15 @@ plot_pca_multilevel <- function(data, classes, pch, title="", ncomp=0, show=FALS
   #   group=classes, legend=TRUE, ncomp=ncomp,
   #   title=paste(title, y, "PCA M 2/3"), pch=pch), data_pca, names)
   for(i in 1:length(data_pca)){
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(1,2), ind.names=FALSE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PCA M 1/2"), pch=pch
     )
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(1,3), ind.names=FALSE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PCA M 1/3"), pch=pch
     )
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(2,3), ind.names=FALSE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PCA M 2/3"), pch=pch
     )
@@ -723,15 +734,15 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     print("Plotting multi level partial least squares discriminant analysis")
     pch <- c(as.factor(pch))
     title_plt <- paste(title, "PLSDA multi")
-    data_plsda <- plsda(
+    data_plsda <- mixOmics::plsda(
       data, Y=classes, multilevel=c(as.factor(pch)), ncomp=ncomp,
       near.zero.var=near_zero_var
     )
 
     if (ncomp > 1) {
       if (!is.na(bg)) {
-        bg = background.predict(data_plsda,comp.predicted=2,dist=dist)
-        plotIndiv(data_plsda, ind.names=FALSE, group=classes,
+        bg <- mixOmics::background.predict(data_plsda, comp.predicted = 2, dist = dist)
+        mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes,
           legend=TRUE, pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2),
           ellipse=TRUE, background=bg
         )
@@ -739,17 +750,17 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     }
 
     if (ncomp > 1) {
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes,
         legend=TRUE, pch=pch, title=paste(title_plt, "1/2"), comp=c(1,2),
         ellipse=TRUE,
       )
     }
 
     if (ncomp > 2) {
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         pch=pch, title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
       )
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         pch=pch, title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
       )
     }
@@ -757,12 +768,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   } else {
     print("Plotting single level partial least squares discriminant analysis")
     title_plt <- paste(title, "PLSDA single")
-    data_plsda <- plsda(data, Y=classes, ncomp=ncomp)
+    data_plsda <- mixOmics::plsda(data, Y = classes, ncomp = ncomp)
 
     if (ncomp > 1) {
       if (!is.na(bg)) {
-        bg <- background.predict(data_plsda,comp.predicted=2,dist=dist)
-        plotIndiv(data_plsda, ind.names=FALSE, group=classes,
+        bg <- mixOmics::background.predict(data_plsda, comp.predicted = 2, dist = dist)
+        mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes,
           legend=TRUE, title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
           background=bg
         )
@@ -770,15 +781,15 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     }
 
     if (ncomp > 1) {
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         title=paste(title_plt, "1/2"), comp=c(1,2), ellipse=TRUE,
       )
     }
     if (ncomp > 2) {
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         title=paste(title_plt, "1/3"), comp=c(1,3), ellipse=TRUE
       )
-      plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
+      mixOmics::plotIndiv(data_plsda, ind.names=FALSE, group=classes, legend=TRUE,
         title=paste(title_plt, "2/3"), comp=c(2,3), ellipse=TRUE
       )
     }
@@ -792,14 +803,13 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   )
   print(metrics[c("error.rate", "choice.ncomp")])
   plot(metrics, main="Error rate PLSDA", overlay = "measure", sd = TRUE) # plot this tuning
-  # plot(metrics, main="Error rate PLSDA", col=color.mixo(5:7), sd=TRUE)
 
-  # supporess roc printing automatically to stdout
+  # suppress roc printing automatically to stdout
   sink("/dev/null")
   # roc <- mapply(function(x) auroc(data_plsda, roc.comp=x), seq(ncomp))
   roc <- list()
   for(i in 1:ncomp){
-    data_tmp <- auroc(data_plsda, roc.comp=i)
+    data_tmp <- mixOmics::auroc(data_plsda, roc.comp = i)
     roc <- append(roc, list(data_tmp))
   }
   sink()
@@ -815,12 +825,12 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
   print("Getting loadings and plotting clustered image maps")
 
   # setup colour map for clustered image plots
-  colours_class <- color.mixo(
+  colours_class <- mixOmics::color.mixo(
     1:length(unique(classes))
   )[as.numeric(as.factor(classes))]
 
   if (length(pch) > 1) {
-    colours_pch <- color.mixo(
+    colours_pch <- mixOmics::color.mixo(
       1:length(unique(pch))
     )[as.numeric(as.factor(pch))]
     colours_cim <- cbind(colours_class, colours_pch)
@@ -833,24 +843,24 @@ classify_plsda_ <- function(data, classes, pch=NA, title="", ncomp=0,
     show_cols = TRUE
   }
 
-  cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
+  mixOmics::cim(data_plsda, title="PLSDA", row.sideColors=colours_cim,
     legend=list(title="Status"), col.names=show_cols
   )
 
   for (comp in seq(ncomp)) {
-    cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
+    mixOmics::cim(data_plsda, comp=comp, title=paste("PLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status"),
       col.names=show_cols
     )
-    plotLoadings(data_plsda, contrib="max", comp=comp, max.name.length=16,
+    mixOmics::plotLoadings(data_plsda, contrib="max", comp=comp, max.name.length=16,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA max loadings"))
-    plotLoadings(data_plsda, contrib="min", comp=comp, max.name.length=16,
+    mixOmics::plotLoadings(data_plsda, contrib="min", comp=comp, max.name.length=16,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "PLSDA min loadings"))
-    loading_max <- plotLoadings(data_plsda, contrib="max", comp=comp,
+    loading_max <- mixOmics::plotLoadings(data_plsda, contrib="max", comp=comp,
       method='median', name.var=colnames(data))
-    loading_min <- plotLoadings(data_plsda, contrib="min", comp=comp,
+    loading_min <- mixOmics::plotLoadings(data_plsda, contrib="min", comp=comp,
       method='median', name.var=colnames(data))
     title <- gsub(" ", "_", title)
     path_max <- paste(outdir, "/", title, "_", comp, "_PLSDA_max.txt", sep="")
@@ -985,25 +995,25 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   classes <- as.factor(classes)
 
   if (length(pch) > 1) {
-    data_splsda <- splsda(
+    data_splsda <- mixOmics::splsda(
       data,Y=classes, multilevel=pch, ncomp=ncomp, keepX=keepX,
       near.zero.var=near_zero_var
     )
   } else {
-    data_splsda <- splsda(
+    data_splsda <- mixOmics::splsda(
       data, Y=classes, ncomp=ncomp, keepX=keepX, near.zero.var=near_zero_var
     )
   }
 
   if (ncomp > 1) {
     if (!is.na(bg)) {
-      bg <- background.predict(data_splsda, comp.predicted=2, dist=dist)
-      plotIndiv(data_splsda, ind.names=FALSE, group=classes,
+      bg <- mixOmics::background.predict(data_splsda, comp.predicted = 2, dist = dist)
+      mixOmics::plotIndiv(data_splsda, ind.names=FALSE, group=classes,
         legend=TRUE, pch=pch, title=paste(title, "sPLSDA multi 1/2"),
         comp=c(1,2), ellipse=TRUE, background=bg
       )
     } else {
-      plotIndiv(data_splsda, ind.names=FALSE, group=classes,
+      mixOmics::plotIndiv(data_splsda, ind.names=FALSE, group=classes,
         legend=TRUE, pch=pch, title=paste(title, "sPLSDA multi 1/2"),
         comp=c(1,2), ellipse=TRUE, background=NULL
       )
@@ -1011,16 +1021,16 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   }
 
   if (ncomp > 1) {
-    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+    mixOmics::plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "sPLSDA multi 1/2"), comp=c(1,2), ellipse=TRUE
     )
   }
 
   if (ncomp > 2) {
-    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+    mixOmics::plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "sPLSDA multi 1/3"), comp=c(1,3), ellipse=TRUE
     )
-    plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
+    mixOmics::plotIndiv(data_splsda, ind.names=FALSE, group=classes, legend=TRUE,
       pch=pch, title=paste(title, "sPLSDA multi 2/3"), comp=c(2,3), ellipse=TRUE
     )
   }
@@ -1032,7 +1042,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
     progressBar=FALSE, auc=TRUE, near_zero_var=low_var
   )
   print(metrics$error.rate)
-  plot(metrics, main="Error rate sPLSDA", col=color.mixo(5:7), sd=TRUE)
+  plot(metrics, main = "Error rate sPLSDA", col = mixOmics::color.mixo(5:7), sd = TRUE)
   print("Plotting stability of sPLSDA...")
   plot(metrics$features$stable[[1]], type="h", main="Comp 1", las=2,
     ylab="Stability", xlab="Features", xaxt='n'
@@ -1051,7 +1061,7 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   # roc <- mapply(function(x) auroc(data_splsda, roc.comp=x), seq(ncomp))
   roc <- list()
   for(i in 1:ncomp){
-    data_tmp <- auroc(data_splsda, roc.comp=i)
+    data_tmp <- mixOmics::auroc(data_splsda, roc.comp = i)
     roc <- append(roc, list(data_tmp))
   }
   sink()
@@ -1063,12 +1073,12 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   print("Getting loadings and plotting clustered image maps")
 
   # setup colour map for clustered image plots
-  colours_class <- color.mixo(
+  colours_class <- mixOmics::color.mixo(
     1:length(unique(classes))
   )[as.numeric(as.factor(classes))]
 
   if (length(pch) > 1) {
-    colours_pch <- color.mixo(
+    colours_pch <- mixOmics::color.mixo(
       1:length(unique(pch))
     )[as.numeric(as.factor(pch))]
     colours_cim <- cbind(colours_class, colours_pch)
@@ -1080,26 +1090,26 @@ classify_splsda_ <- function(data, classes, pch=NA, title="", ncomp=NULL,
   } else {
     show_cols <- TRUE
   }
-  cim(data_splsda, title="sPLSDA", row.sideColors=colours_cim,
+  mixOmics::cim(data_splsda, title="sPLSDA", row.sideColors=colours_cim,
     legend=list(title="Status"), col.names=show_cols
   )
 
   short <- make.names(sapply(colnames(data), strtrim, 6, USE.NAMES=FALSE), unique=TRUE)
   for (comp in seq(ncomp)) {
-    cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
+    mixOmics::cim(data_splsda, comp=comp, title=paste("sPLSDA Component", comp),
       row.sideColors=colours_cim, legend=list(title="Status"),
       col.names=show_cols
     )
-    plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
+    mixOmics::plotLoadings(data_splsda, contrib="max", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA max loadings"))
-    plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
+    mixOmics::plotLoadings(data_splsda, contrib="min", comp=comp, max.name.length=8,
       method='median', ndisplay=20, name.var=short, size.name=0.6,
       size.legend=0.6, title=paste(title, comp, "sPLSDA min loadings"))
     sink("/dev/null")
-    loading_max <- plotLoadings(data_splsda, contrib="max", comp=comp,
+    loading_max <- mixOmics::plotLoadings(data_splsda, contrib="max", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
-    loading_min <- plotLoadings(data_splsda, contrib="min", comp=comp,
+    loading_min <- mixOmics::plotLoadings(data_splsda, contrib="min", comp=comp,
       method='median', ndisplay=NULL, name.var=colnames(data))#, plot=FALSE)
     sink()
     title <- gsub(" ", "_", title)
@@ -1134,17 +1144,19 @@ plot_plsda <- function(data, classes, pch, title="", ncomp=0) {
     plot(data[[i]], main=paste(names[[i]], "Screeplot multilevel"))
   }
 
+  if (ncomp <= 3) {warning("<= 3 components, skipping plots."); return(data_pca)}
+
   print("Plotting plsda...")
   for(i in 1:length(names)){
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(1,2), ind.names=TRUE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 1/2"), pch=pch
     )
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(1,3), ind.names=TRUE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 1/3"), pch=pch
     )
-    plotIndiv(
+    mixOmics::plotIndiv(
       data_pca[[i]], comp=c(2,3), ind.names=TRUE, group=classes, legend=TRUE,
       ncomp=ncomp, title=paste(title, names[[i]], "PLSDA 2/3"), pch=pch
     )
@@ -1185,7 +1197,7 @@ plot_loadings <- function(data, contrib="max", ncomp=2, method="median",
 plot_loadings_ <- function(data, contrib="max", ncomp=2, method="median",
   ndisplay=50, title="Loadings") {
   name_var <- names(data)
-  loadings <- plotLoadings(
+  loadings <- mixOmics::plotLoadings(
     data, contrib, ncomp, method, ndisplay, name_var, title
   )
   print(loadings)
@@ -1293,12 +1305,12 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
     ncomp <- length(unique(classes)) - 1
     ncomp <- min(2, ncomp)
   }
-  sgccda_res <- block.splsda(
+  sgccda_res <- mixOmics::block.splsda(
     X=data, Y=classes, ncomp=ncomp, design=design, near.zero.var=near_zero_var
   )
 
   # this code takes a couple of min to run
-  perf_diablo <- perf(
+  perf_diablo <- mixOmics::perf(
     sgccda_res, validation=validation, folds=folds, nrepeat=nrepeat, cpus=cpus
   )
   print(perf_diablo$error.rate)
@@ -1321,7 +1333,7 @@ tune_diablo_ncomp <- function(data, classes, design, ncomp=0, cpus=1,
         print(paste(j, "Comp 2"))
       }
       if (any(is.infinite(i$comp3)) == FALSE && !is.null(i$comp3)) {
-        plot(i$comp1, type="h", las=2, ylab="Stability", xlab="Features",
+        plot(i$comp3, type="h", las=2, ylab="Stability", xlab="Features",
           main=paste(j, "Comp 3"), xaxt='n'
         )
         print(paste(j, "Comp 3"))
@@ -1374,7 +1386,7 @@ tune_diablo_keepx <- function(data, classes, ncomp, design,
 
   # cpus <- NULL
   cpus <- BiocParallel::MulticoreParam(cpus)
-  tune_data <- tune.block.splsda(
+  tune_data <- mixOmics::tune.block.splsda(
     X=data, Y=classes, ncomp=ncomp, test.keepX=test_keepX, design=design,
     validation=validation, folds=folds, nrepeat=nrepeat, dist=dist,
     progressBar=progressBar, near.zero.var=near_zero_var)
@@ -1424,7 +1436,7 @@ run_diablo <- function(data, classes, ncomp, design, keepx=NULL,
   #   }
   # }
 
-  data <- block.splsda(
+  data <- mixOmics::block.splsda(
     X=data, Y=classes, ncomp=ncomp, keepX=keepx, design=design,
     near.zero.var=near_zero_var
   )
@@ -1509,42 +1521,42 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   # roc <- mapply(function(x) auroc(data, roc.comp=x), seq(ncomp))
   roc <- list()
   for(i in 1:ncomp){
-    data_tmp <- auroc(data, roc.comp=i)
+    data_tmp <- mixOmics::auroc(data, roc.comp=i)
     roc <- append(roc, list(data_tmp))
   }
   sink()
   # mapply(function(x) plotDiablo(data, ncomp=x), seq(ncomp))
-  for(i in 1:ncomp) {plotDiablo(data, ncomp=i)}
+  for(i in 1:ncomp) {mixOmics::plotDiablo(data, ncomp=i)}
   if (ncomp > 1) {
     print("Plotting individual samples into space spanned by block components...")
-    plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO',
+    mixOmics::plotIndiv(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO',
       ellipse=TRUE
     )
     print("Plotting arrow plot...")
-    plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
+    mixOmics::plotArrow(data_vis, ind.names=FALSE, legend=TRUE, title='DIABLO')
     print("Plotting correlation circle plot...")
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
+    mixOmics::plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,2),
       title="DIABLO 1/2", var.names=FALSE
     )
   }
   if (ncomp > 2) {
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3),
+    mixOmics::plotVar(data_vis, style='graphics', legend=TRUE, comp=c(1,3),
       title="DIABLO 1/3", var.names=FALSE
     )
-    plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3),
+    mixOmics::plotVar(data_vis, style='graphics', legend=TRUE, comp=c(2,3),
       title="DIABLO 2/3", var.names=FALSE
     )
   }
   print("Plotting circos from similarity matrix...")
   # cant remove feature labels, need to make label size 0.001 or lower
-  corr_diablo <- circosPlot(
+  corr_diablo <- mixOmics::circosPlot(
     data, cutoff=cutoff, line=TRUE, size.legend=0.5, size.variables=0.001,
     var.names=truncated
   )
   corr_out <- paste(outdir,"/DIABLO_var_",keepvar,"_correlations.txt",sep="")
   write.table(corr_diablo, file=corr_out, sep="\t", quote=FALSE)
   print("Plotting relevance network from similarity matrix...")
-  cyto <- network(
+  cyto <- mixOmics::network(
     data, blocks=c(1,2), color.node=c('darkorchid','lightgreen'), cutoff=cutoff
   )
   cyto_out <- paste(outdir, "/DIABLO_var_", keepvar, "_network.graphml", sep="")
@@ -1557,18 +1569,18 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
   } else {
     show_cols = TRUE
   }
-  cimDiablo(data, size.legend=0.5, col.names=show_cols)
+  mixOmics::cimDiablo(data, size.legend=0.5, col.names=show_cols)
   block_to_trim <- names(trimmed_names[lapply(trimmed_names, length) > 0])
   print("Plotting loading weight of selected variables on each component...")
   for (comp in seq(ncomp)) {
     for (i in block_to_trim) {
       data$names$colnames[[i]] = trimmed_names[[i]][["data"]]
     }
-    cimDiablo(data, comp=comp, size.legend=0.5, col.names=show_cols)
-    plotLoadings(data, contrib="max", comp=comp, max.name.length=6,
+    mixOmics::cimDiablo(data, comp=comp, size.legend=0.5, col.names=show_cols)
+    mixOmics::plotLoadings(data, contrib="max", comp=comp, max.name.length=6,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO max loadings"))
-    plotLoadings(data, contrib="min", comp=comp, max.name.length=6,
+    mixOmics::plotLoadings(data, contrib="min", comp=comp, max.name.length=6,
       method='median', ndisplay=20, name.var=colnames(data), size.name=0.6,
       size.legend=0.6, title=paste(comp, "DIABLO min loadings"))
     for (i in block_to_trim) {
@@ -1579,12 +1591,12 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
       for (i in block_to_trim) {
         data$names$colnames[[i]] <- trimmed_names[[i]][["data"]]
       }
-      plotLoadings(data, contrib="max", comp=comp, block=j,
+      mixOmics::plotLoadings(data, contrib="max", comp=comp, block=j,
         max.name.length=6, method='median', ndisplay=20,
         name.var=colnames(data), plot=TRUE,
         title=paste(comp, j, "DIABLO max loadings"), size.name=0.6
       )
-      plotLoadings(data, contrib="min", comp=comp, block=j,
+      mixOmics::plotLoadings(data, contrib="min", comp=comp, block=j,
         max.name.length=6, method='median', ndisplay=20,
         name.var=colnames(data), plot=TRUE,
         title=paste(comp, j, "DIABLO min loadings"), size.name=0.6
@@ -1593,11 +1605,11 @@ plot_diablo <- function(data, ncomp=0, outdir="./", data_names=NA, keepvar="",
         data$names$colnames[[i]] <- trimmed_names[[i]][["all_names"]]
       }
       sink("/dev/null")
-      loading_max <- plotLoadings(
+      loading_max <- mixOmics::plotLoadings(
         data, contrib="max", comp=comp, block=j, method='median', ndisplay=NULL,
         name.var=colnames(data)#, plot=FALSE
       )
-      loading_min <- plotLoadings(
+      loading_min <- mixOmics::plotLoadings(
         data, contrib="min", comp=comp, block=j, method='median', ndisplay=NULL,
         name.var=colnames(data)#, plot=FALSE
       )
@@ -1639,7 +1651,7 @@ assess_performance <- function(data, dist, ncomp) {
   # performance evaluation of our methods, but can complement the analysis.
   print("Plotting ROC...")
   # mapply(function(x) auroc(data, x), seq(ncomp))
-  for(i in 1:ncomp) {auroc(data, roc.comp=i)}
+  for(i in 1:ncomp) {mixOmics::auroc(data, roc.comp=i)}
   return(perf_diablo)
 }
 
@@ -1654,12 +1666,12 @@ assess_performance <- function(data, dist, ncomp) {
 predict_diablo <- function(data, test, classes) {
   # prepare test set data: here one block (proteins) is missing
   print("Predicting data on an external test set...")
-  predict.diablo <- predict(data, newdata = test)
+  predict.diablo <- mixOmics::predict(data, newdata = test)
   # the warning message will inform us that one block is missing
   #predict.diablo # list the different outputs
   print("Getting confusion matrix...")
-  confusion_matrix <- get.confusion_matrix(
+  confusion_matrix <- mixOmics::get.confusion_matrix(
     truth=classes, predicted=predict.diablo$WeightedVote$max.dist[,2])
   print(confusion_matrix)
-  print(get.BER(confusion_matrix))
+  print(mixOmics::get.BER(confusion_matrix))
 }
