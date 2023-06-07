@@ -28,7 +28,7 @@ Copyright (c) 2020
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
 
 Code in this package and git repository
-<https://gitlab.com/tyagilab/sars-cov-2/> is provided under a [MIT
+<https://github.com/tyronechen/SARS-CoV-2/> is provided under a [MIT
 license](https://opensource.org/licenses/MIT). This documentation is
 provided under a [CC-BY-3.0 AU
 license](https://creativecommons.org/licenses/by/3.0/au/).
@@ -51,26 +51,33 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 You can install this directly as an R package from gitlab. Note that you may get errors if you don't have `libgit2` and `freetype` libraries installed (these are not R packages).
 
+```
     install.packages("devtools")
     library("devtools")
     install_git("https://github.com/tyronechen/SARS-CoV-2.git", subdir="multiomics", build_vignettes=FALSE, INSTALL_opts="--no-multiarch")
+```
 
 The actual script used to run the pipeline is not directly callable but
 provided as a separate script.
 
+```
     # this will show you the path to the script
     system.file("scripts", "run_pipeline.R", package="multiomics")
+```
 
 ## 2.2 Manual (for developers or if above doesnt work)
 
 Alternatively, clone the git repository with:
 
+```
     git clone "https://github.com/tyronechen/SARS-CoV-2.git"
+```
 
 ### 2.2.1 Install dependencies
 
 [With `conda`](https://bioconda.github.io/user/install.html):
 
+```
     conda config --add channels defaults
     conda config --add channels bioconda
     conda config --add channels conda-forge
@@ -82,9 +89,11 @@ Alternatively, clone the git repository with:
      bioconductor-biocparallel"
 
     conda create -n my_environment install ${install_me}
+```
 
 You can also install dependencies in `R` directly:
 
+```
     install_me <- c(
       "argparser", "brio", "colorspace", "diffobj", "dplyr", "ellipsis", "farver",
       "ggplot2", "ggrepel", "igraph", "isoband", "matrixStats", "mixOmics",
@@ -92,6 +101,7 @@ You can also install dependencies in `R` directly:
       "stringi", "testthat", "tibble", "tidyr", "utf8", "vctrs", "zeallot",
       "BiocParallel")
     sapply(install_me, install.packages)
+```
 
 If you run into any issues with the manual install, please double check the library versions against `multiomics/DESCRIPTION`.
 
@@ -107,7 +117,9 @@ If you installed this pipeline as an `R` package, an example pipeline
 script is included. You can find it by running this command in your `R`
 environment:
 
-    system.file("scripts", "run_pipeline.R", package="multiomics")
+```
+system.file("scripts", "run_pipeline.R", package="multiomics")
+```
 
 Otherwise, you can find a copy of this script in the public git
 repository:
@@ -115,11 +127,13 @@ repository:
 
 To inspect the arguments to the script, run this command:
 
-    Rscript run_pipeline.R --help
+```
+Rscript run_pipeline.R --help
+```
 
-A minimal script to run the pipeline is shown. [You can also download
+A minimal script to run the pipeline is below. [You can also download
 this
-here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/test_run.sh).
+here](https://github.com/tyronechen/SARS-CoV-2/blob/master/src/case_study_3/example.sh).
 This example may take a few hours to run fully.
 
 Data is provided as part of the `multiomics` package and not directly as files. Extract it first with this:
