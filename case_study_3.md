@@ -493,6 +493,11 @@ We also run sPLSDA on selected features for comparison.
 
 Unlike PLSDA, we tune the number of selected features. Using the pipeline:
 
+<details>
+<summary>
+Click to expand code block
+</summary>
+
 ``` r
 # this step can take some time
 tuned_splsda <- tune_splsda(
