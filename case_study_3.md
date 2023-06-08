@@ -41,7 +41,7 @@ Copyright (c) 2020
 <img alt="ORCID logo" src="https://info.orcid.org/wp-content/uploads/2019/11/orcid_16x16.png" width="16" height="16" /></a>
 
 Code in this package and git repository
-<https://gitlab.com/tyagilab/sars-cov-2/> is provided under a [MIT
+<https://github.com/tyronechen/SARS-CoV-2/> is provided under a [MIT
 license](https://opensource.org/licenses/MIT). This documentation is
 provided under a [CC-BY-3.0 AU
 license](https://creativecommons.org/licenses/by/3.0/au/).
@@ -51,10 +51,10 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.html)
--   [Case study 1](case_study_1.html)
--   [Case study 2](case_study_2.html)
--   [Case study 3](case_study_3.html)
+-   [Introduction](introduction.md)
+-   [Case study 1](case_study_1.md)
+-   [Case study 2](case_study_2.md)
+-   [Case study 3](case_study_3.md)
 
 # 2 Running the script
 
@@ -67,7 +67,7 @@ library(multiomics)
 A script to reproduce our analysis for case study 3 is shown. [You can
 also download this
 here](https://gitlab.com/tyagilab/sars-cov-2/-/raw/master/src/case_study_3/example.sh).
-This may take few hours to run.
+This may take few hours to run (if tuning is performed).
 
 ## 2.1 Load data
 
@@ -84,6 +84,11 @@ The data is extracted from the `RData` object to generate the input files. Scrip
 
 ## 2.2 Run script
 
+This runs the pipeline from end to end and generates all the results
+which are shown below. The code blocks below show each step if you want
+to perform them manually.
+
+```
 Rscript run_pipeline.R \
   --classes classes.tsv \
   --data metabolome.tsv \
@@ -106,17 +111,19 @@ Rscript run_pipeline.R \
   --outfile_dir BPH2819 \
   --contrib "max" \
   --progress_bar
+```
 
-# 3 Input data
+# 3 Dataset
 
 ## 3.1 Biological context
 
 This dataset contains three omics data: metabolome, proteome
 and transcriptome. There are 6 biological replicates for 2 sample
-types: sepsis-causing bacteria grown on RPMI growth media as a control and sepsis-causing bacteria obtained from human sera. The original
-publication with the source data is here:
+types: sepsis-causing bacteria grown on RPMI growth media as a 
+control and sepsis-causing bacteria obtained from human sera. 
+The original publication with the source data is here:
 
--   
+-   [Mu, A., Klare, W.P., Baines, S.L. et al. Integrative omics identifies conserved and pathogen-specific responses of sepsis-causing bacteria. Nat Commun 14, 1530 (2023)](https://doi.org/10.1038/s41467-023-37200-w)
 
 ## 3.2 Summary
 
@@ -129,7 +136,7 @@ The data used as input to this pipeline available in gitlab:
 
 ## 3.3 Metadata
 
-The `classes_diablo.tsv` sample information file is loaded as a vector:
+The `classes.tsv` sample information file is loaded as a vector:
 
 ```
 BPH2819$classes
@@ -141,7 +148,7 @@ No repeated measurements were known to be carried out.
 
 ## 3.4 Data
 
-The lipidome, metabolome, proteome and transcriptome data have 100
+The metabolome, proteome and transcriptome data have 100
 matched samples and an arbitrary number of features.
 
 # 4 Input data
@@ -295,16 +302,16 @@ Click to expand code block
 </summary>
 
 ``` r
-  # the sample data object is already been cleaned
-  # we show steps for reference only
-  # we previously already downloaded this file in above step  
-  unimputed_path <- "metabolome.tsv"
-  unimputed <- read.table(unimputed_path, sep="\t", header=TRUE, row.names=1)
-  unimputed[unimputed == 0] <- NA
-  na_prop_tran <- show_na_prop(unimputed, "Metabolome")
+# the sample data object is already been cleaned
+# we show steps for reference only
+# we previously already downloaded this file in above step  
+unimputed_path <- "metabolome.tsv"
+unimputed <- read.table(unimputed_path, sep="\t", header=TRUE, row.names=1)
+unimputed[unimputed == 0] <- NA
+na_prop_tran <- show_na_prop(unimputed, "Metabolome")
 ```
 
-<!--![](figs_2/check_na-1.png) -->
+<!--![](images/case_study_3/check_na-1.png) -->
 </details>
 <details>
 <summary>
@@ -314,17 +321,16 @@ Click to expand code block
 Using the pipeline:
 
 ``` r
-  data <- lapply(data, remove_na_class, classes)
+data <- lapply(data, remove_na_class, classes)
 ```
 
 </details>
 
-We corrected for the missing values in the transcruptome data (\~0.5% of
-original data) by imputation with the NIPALS algorithm, effective on
-data with &lt; 20% missing values. We considered that the proportion of
-missing values are low and imputation would be effective. Note that
-imputation can take some time, increasing with data size and component
-count.
+We corrected for the missing values in the data by imputation with the 
+NIPALS algorithm, effective on data with &lt; 20% missing values.
+We considered that the proportion of missing values are low in each 
+data block and imputation would be effective. Note that imputation 
+can take some time, increasing with data size and component count.
 
 <details>
 <summary>
@@ -334,9 +340,9 @@ Click to expand code block
 Using the pipeline:
 
 ``` r
-  # this step is important, some functions use the names internally
-  names(data) <- data_names
-  data_imp <- impute_missing(data, rep(10, length(data)), outdir="./")
+# this step is important, some functions use the names internally
+names(data) <- data_names
+data_imp <- impute_missing(data, rep(10, length(data)), outdir="./")
 ```
 
 </details>
@@ -379,12 +385,46 @@ In this case, there is a strong correlation between the variates on at
 least the first 5 principal components corresponding to at least 50% of
 the variation in the data.
 
-## 5.2 Accounting for unwanted variation
+## 5.2 Review single omics data
+
+Examine the distribution of the data:
+
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0032.png)
+
+</details>
+
+We examine the data with PCA:
+
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0002.png)
+![](images/case_study_3/pg_0003.png)
+![](images/case_study_3/pg_0004.png)
+![](images/case_study_3/pg_0005.png)
+![](images/case_study_3/pg_0008.png)
+![](images/case_study_3/pg_0011.png)
+
+</details>
+
+## 5.3 Accounting for unwanted variation
 
 The experimental design of this study contains no repeated measurements
 on the same sample. There is also no known variation from batch effects.
+To see an older example of this, please refer to case study 1.
 
 # 6 Single omics analyses
+
+> **NOTE**: In all cases, where number of components are lower than 3,
+> some plots will be omitted due to plotting limitations. This does not
+> mean the results are incorrect.
 
 We next apply the PLSDA (Partial Least Squares Discriminant Analysis)
 and sPLSDA (sparse variant of PLSDA) method for each block of
@@ -405,6 +445,20 @@ Click to expand code block
 
 Using the pipeline on all features (PLSDA):
 
+![](images/case_study_3/pg_0034.png)
+![](images/case_study_3/pg_0035.png)
+![](images/case_study_3/pg_0036.png)
+![](images/case_study_3/pg_0037.png)
+![](images/case_study_3/pg_0038.png)
+![](images/case_study_3/pg_0039.png)
+![](images/case_study_3/pg_0040.png)
+![](images/case_study_3/pg_0041.png)
+
+In this example, results for only one omics data is shown.
+
+</details>
+
+
 <details>
 <summary>
 Click to expand code block
@@ -413,20 +467,18 @@ Click to expand code block
 Using the pipeline:
 
 ``` r
-  # this step can take some time
-  data_plsda <- classify_plsda(
-    data=data, classes=classes, pch=pch, title=data_names,
-    ncomp=2, contrib="max", outdir="./",
-    mappings=NULL, dist="centroids.dist", bg=TRUE
-  )
+# this step can take some time
+data_plsda <- classify_plsda(
+  data=data, classes=classes, pch=pch, title=data_names,
+  ncomp=2, contrib="max", outdir="./",
+  mappings=NULL, dist="centroids.dist", bg=TRUE
+)
 ```
 
 Using the R data object:
 
 ``` r
 lapply(data_plsda, names)
-$lipidome
-[1] "data_plsda" "perf_plsda"
 $metabolome
 [1] "data_plsda" "perf_plsda"
 $proteome
@@ -442,26 +494,26 @@ We also run sPLSDA on selected features for comparison.
 Unlike PLSDA, we tune the number of selected features. Using the pipeline:
 
 ``` r
-  # this step can take some time
-  tuned_splsda <- tune_splsda(
-    data, classes, data_names, multilevel=NULL, ncomp=2, nrepeat=50,
-    logratio="none", test_keepX=c(5, 10, 15, 20), validation="Mfold", folds=5,
-    dist="centroids.dist", cpus=1, progressBar=FALSE
-  )
-  splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
-  splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
-  
-  print("Tuned splsda to use number of components:")
-  splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
-  splsda_ncomp <- unlist(splsda_ncomp, recursive=FALSE)
-  names(splsda_ncomp) <- data_names
-  print(splsda_ncomp)
-  
-  print("Tuned the number of variables selected on each component to:")
-  print(splsda_keepx)
-  splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
-  names(splsda_keepx) <- data_names
-  print(splsda_keepx)
+# this step can take some time
+tuned_splsda <- tune_splsda(
+  data, classes, data_names, multilevel=NULL, ncomp=2, nrepeat=50,
+  logratio="none", test_keepX=c(5, 10, 15, 20), validation="Mfold", folds=5,
+  dist="centroids.dist", cpus=1, progressBar=FALSE
+)
+splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
+splsda_ncomp <- lapply(tuned_splsda, `[`, "choice.ncomp")
+
+print("Tuned splsda to use number of components:")
+splsda_ncomp <- lapply(splsda_ncomp, `[`, "ncomp")
+splsda_ncomp <- unlist(splsda_ncomp, recursive=FALSE)
+names(splsda_ncomp) <- data_names
+print(splsda_ncomp)
+
+print("Tuned the number of variables selected on each component to:")
+print(splsda_keepx)
+splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
+names(splsda_keepx) <- data_names
+print(splsda_keepx)
 ```
 
 Using the R data object:
@@ -475,6 +527,11 @@ splsda_keepx <- lapply(tuned_splsda, `[`, "choice.keepX")
 splsda_keepx <- unlist(splsda_keepx, recursive=FALSE)
 names(splsda_keepx) <- data_names
 ```
+
+![](images/case_study_3/pg_0081.png)
+![](images/case_study_3/pg_0084.png)
+
+In this example, results for only one omics data is shown.
 
 </details>
 
@@ -512,6 +569,15 @@ $transcriptome
 [1] "data_splsda" "perf_splsda"
 ```
 
+![](images/case_study_3/pg_0081.png)
+![](images/case_study_3/pg_0082.png)
+![](images/case_study_3/pg_0083.png)
+![](images/case_study_3/pg_0087.png)
+![](images/case_study_3/pg_0089.png)
+![](images/case_study_3/pg_0090.png)
+
+In this example, results for only one omics data is shown.
+
 </details>
 
 These automatically generate a large series of plots. Figures are
@@ -533,6 +599,10 @@ explained in the order that they appear in this document.
 Plotting the first few components of the sPLSDA reveals a clear 
 separation of phenotypes from RPMI media grown to human sera.
 
+These will be conceptually similar to PLSDA, the only difference is
+that a subset of features are used. Only displayed if number of
+components are more than 1.
+
 ### 6.3.2 Classification error
 
 > **NOTE**: Balanced error rate can be used in cases where classes are
@@ -550,6 +620,17 @@ horizontal bars represent a feature. The height of the bar corresponds
 to stability. For each omics data, we observe a subset of highly stable 
 features and a subset of highly unstable features.
 
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0085.png)
+![](images/case_study_3/pg_0094.png)
+![](images/case_study_3/pg_0103.png)
+
+</details>
+
 ### 6.3.4 ROC curves
 
 As a supplementary layer of validation, ROC curves showing
@@ -557,6 +638,17 @@ classification accuracy are available, but we note that these have
 limited applicability given the specific context of the method. The
 underlying method already internally specifies the prediction cutoff to
 achieve maximal sensitivity and specificity.
+
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0086.png)
+![](images/case_study_3/pg_0095.png)
+![](images/case_study_3/pg_0104.png)
+
+</details>
 
 ### 6.3.5 Arrow plots
 
@@ -570,6 +662,17 @@ interpreted like heatmaps. They are coloured by biological class as well
 as batch information. Individual components can be extracted for custom
 visualisation if needed.
 
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0087.png)
+![](images/case_study_3/pg_0096.png)
+![](images/case_study_3/pg_0105.png)
+
+</details>
+
 ### 6.3.7 Variable loadings
 
 To understand how much a feature contributes to the biological
@@ -582,6 +685,17 @@ Note that only a subset of these features are visualised. The full list
 is exported into a tab-separated `txt` file, functionally similar to 
 that from a `limma` differential expression analysis.
 
+<details>
+<summary>
+Click to expand code block
+</summary>
+
+![](images/case_study_3/pg_0085.png)
+![](images/case_study_3/pg_0094.png)
+![](images/case_study_3/pg_0103.png)
+
+</details>
+
 ### 6.3.8 PLSDA
 
 To supplement the sPLSDA, we also compared the performance of PLSDA (a
@@ -591,6 +705,10 @@ identical, but several plots are excluded as they are not applicable
 (feature selection, variable stability).
 
 # 7 Multi omics analyses
+
+> **NOTE**: In all cases, where number of components are lower than 3,
+> some plots will be omitted due to plotting limitations. This does not
+> mean the results are incorrect.
 
 Having assessed the major sources of variation and features of interest
 contributing to biological conditions within the individual blocks of
@@ -619,23 +737,23 @@ Click to expand code block
 Using the pipeline:
 
 ``` r
-  # tune number of components
-  tuned_diablo <- tune_diablo_ncomp(data, classes, design, ncomp=diablo_ncomp, cpus=1)
-  print("Parameters with lowest error rate:")
-  diablo_ncomp <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER", "centroids.dist"]
-  diablo_ncomp <- as.list(diablo_ncomp, length(data_names))
-  names(diablo_ncomp) <- data_names
-  diablo_ncomp <- diablo_ncomp[which.max(diablo_ncomp)]
-  print("Number of components:")
-  print(diablo_ncomp)
-  
-  # tune keepx
-  diablo_keepx <- tune_diablo_keepx(
-    data, classes, 5, design, diablo_keepx, cpus=2, 
-    dist="centroids.dist", progressBar=TRUE, validation="Mfold", 
-    folds=5, nrepeat=50)
-  print("Diablo keepx:")
-  print(diablo_keepx)
+# tune number of components
+tuned_diablo <- tune_diablo_ncomp(data, classes, design, ncomp=diablo_ncomp, cpus=1)
+print("Parameters with lowest error rate:")
+diablo_ncomp <- tuned_diablo$choice.ncomp$WeightedVote["Overall.BER", "centroids.dist"]
+diablo_ncomp <- as.list(diablo_ncomp, length(data_names))
+names(diablo_ncomp) <- data_names
+diablo_ncomp <- diablo_ncomp[which.max(diablo_ncomp)]
+print("Number of components:")
+print(diablo_ncomp)
+
+# tune keepx
+diablo_keepx <- tune_diablo_keepx(
+  data, classes, 5, design, diablo_keepx, cpus=2, 
+  dist="centroids.dist", progressBar=TRUE, validation="Mfold", 
+  folds=5, nrepeat=50)
+print("Diablo keepx:")
+print(diablo_keepx)
 ```
 
 Using the R object:
@@ -649,6 +767,8 @@ $Proteomics_MS1_DDA
 $RNA_Seq
 [1] 5
 ```
+
+![](images/case_study_3/pg_0111.png)
 
 </details>
 
@@ -718,6 +838,8 @@ Call:
  selectVar, perf, auc
 ```
 
+![](images/case_study_3/pg_0131.png)
+
 </details>
 
 ## 7.3 Explanation of output
@@ -754,7 +876,8 @@ Performing repeated cross-validation with nrepeat = 50...
 plot(perf_diablo)
 ```
 
-<!-- ![](figs_2/perf_diablo-1.png) -->
+![](images/case_study_3/pg_0111.png)
+
 </details>
 
 ### 7.3.2 Feature stability
@@ -779,10 +902,9 @@ mapply(
 )
 ```
 
-<!-- ![](figs_2/perf_diablo_stability-1.png) -->
-<!-- ![](figs_2/perf_diablo_stability-2.png) -->
-<!-- ![](figs_2/perf_diablo_stability-3.png) -->
-<!-- ![](figs_2/perf_diablo_stability-4.png) -->
+![](images/case_study_3/pg_0112.png)
+![](images/case_study_3/pg_0114.png)
+![](images/case_study_3/pg_0116.png)
 
 </details>
 
@@ -796,11 +918,12 @@ Click to expand code block
 </summary>
 
 ``` r
-  # to keep the case study concise we use a custom function to output main plots
-  mixOmics::plotDiablo(diablo, ncomp=1)
+# to keep the case study concise we use a custom function to output main plots
+mixOmics::plotDiablo(diablo, ncomp=1)
 ```
 
-<!-- ![](figs_2/diablo-1.png) -->
+![](images/case_study_3/pg_0132.png)
+
 </details>
 
 ### 7.3.4 Scatter plots
@@ -821,7 +944,8 @@ mixOmics::plotIndiv(
 )
 ```
 
-<!-- ![](figs_2/perf_scatter-1.png) -->
+![](images/case_study_3/pg_0131.png)
+
 </details>
 
 ### 7.3.5 ROC curves
@@ -873,10 +997,10 @@ Click to expand code block
 </summary>
 
 ``` r
-  # to keep the case study concise we use a custom function to output main plots
-  mixOmics::plotVar(diablo, style='graphics', legend=TRUE, comp=c(1,2),
-    title="DIABLO 1/2", var.names=FALSE
-  )
+# to keep the case study concise we use a custom function to output main plots
+mixOmics::plotVar(diablo, style='graphics', legend=TRUE, comp=c(1,2),
+  title="DIABLO 1/2", var.names=FALSE
+)
 ```
 
 <!-- ![](figs_2/perf_correlation-1.png) -->
@@ -895,11 +1019,12 @@ Click to expand code block
 </summary>
 
 ``` r
-  # to keep the case study concise we use a custom function to output main plots
-  mixOmics::cimDiablo(diablo, size.legend=0.5, col.names=FALSE)
+# to keep the case study concise we use a custom function to output main plots
+mixOmics::cimDiablo(diablo, size.legend=0.5, col.names=FALSE)
 ```
 
-<!-- ![](figs_2/cim-1.png) -->
+![](images/case_study_3/pg_0134.png)
+
 </details>
 
 ### 7.3.9 Variable loadings
@@ -927,7 +1052,8 @@ mixOmics::plotLoadings(diablo, contrib="max", comp=1, max.name.length=6,
 )
 ```
 
-<!-- ![](figs_2/loadings-1.png) -->
+![](images/case_study_3/pg_0136.png)
+
 </details>
 
 ### 7.3.10 Circos plot
@@ -953,7 +1079,8 @@ mixOmics::circosPlot(
 )
 ```
 
-<!-- ![](figs_2/circos-1.png) -->
+![](images/case_study_3/pg_0132.png)
+
 </details>
 
 ### 7.3.11 Network plot
@@ -975,7 +1102,8 @@ mixOmics::network(
 )
 ```
 
-<!-- ![](figs_2/network-1.png) -->
+![](images/case_study_3/pg_0133.png)
+
 </details>
 
 # 8 Output data
@@ -995,8 +1123,8 @@ size constraints, and includes data from four omics datasets.
 
 # 9 Acknowledgements
 
-[Please refer to introduction.](introduction.html)
+[Please refer to introduction.](introduction.md)
 
 # 10 References
 
-[Please refer to introduction.](introduction.html)
+[Please refer to introduction.](introduction.md)
