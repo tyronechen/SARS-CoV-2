@@ -1122,9 +1122,9 @@ Files output by the pipeline include:
     data block
 
 [A `RData` object with all input and output is available in the git
-repository.](https://gitlab.com/tyagilab/sars-cov-2/-/blob/master/results/case_study_2/RData.RData)
+repository.](https://github.com/tyronechen/SARS-CoV-2/blob/master/results/case_study_3/data.RData)
 This is not included directly in the `multiomics` package because of
-size constraints, and includes data from four omics datasets.
+size constraints, and includes data from three omics datasets.
 
 # 9 Acknowledgements
 
