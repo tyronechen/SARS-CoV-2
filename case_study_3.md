@@ -961,11 +961,18 @@ limited applicability given the specific context of the method. The
 underlying method already internally specifies the prediction cutoff to
 achieve maximal sensitivity and specificity.
 
+<details>
+<summary>
+Click to expand code block
+</summary>
+
 ``` r
 # roc curves are automatically generated for each data block and component
 mixOmics::auroc(diablo)
 # this also applies to plsda and splsda
 ```
+
+</details>
 
 ### 7.3.6 Arrow plots
 
