@@ -97,7 +97,15 @@ jobs:
           BiocManager::install('mixOmicsTeam/mixOmics', Ncpus=2)
           # remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories(), Ncpus=2)
           # remotes::install_local(dependencies = FALSE, upgrade = FALSE)
-          remotes::install_gitlab("tyagilab/sars-cov-2", subdir = "multiomics", dependencies = TRUE, Ncpus=2)
+          # remotes::install_gitlab("tyagilab/sars-cov-2", subdir = "multiomics", dependencies = TRUE, Ncpus=2, INSTALL_opts="--no-multiarch", build_vignettes=FALSE)
+          remotes::install_git(
+            "https://github.com/tyronechen/SARS-CoV-2.git", 
+            subdir = "multiomics", 
+            dependencies = TRUE, 
+            Ncpus=2, 
+            INSTALL_opts="--no-multiarch", 
+            build_vignettes=FALSE
+            )
           # remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
@@ -119,7 +127,13 @@ jobs:
         run: |
           sh inst/scripts/casestudy2.sh
 
-      # - name: Check ✅✅✅
+      - name: Run Case Study 3 ✅✅✅ 
+        if: success() || failure()
+        working-directory: ./multiomics
+        run: |
+          sh inst/scripts/casestudy3.sh
+
+      # - name: Check ✅✅✅✅
       #   working-directory: ./multiomics
       #   run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "warning", check_dir = "check")
       #   shell: Rscript {0}
@@ -132,7 +146,6 @@ jobs:
           path: |
             results
             !results/data
-
 
       # - name: Notify Slack 📣
       #   uses: 8398a7/action-slack@v3
