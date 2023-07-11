@@ -21,4 +21,4 @@
 #'
 #' @examples
 #' data(BPH2819)
-"two_omics"
+"BPH2819"
