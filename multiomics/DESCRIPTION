@@ -25,7 +25,7 @@ Authors@R: c(
 Description: Contains a pipeline for running a set of multi-omics analyses from end to end. Takes quantitative multi-omics data as input in tab separated format. All samples must be matched. <20% missing values are allowed, these values will be imputed. Generates a series of quality control plots and tables showing highly scoring features within omics and across omics. Uses functions from the mixOmics software package, more information available at (www.mixomics.org). This pipeline is also available on gitlab at (https://github.com/tyronechen/SARS-CoV-2).
 biocViews:
 Depends:
-	R (>= 4.2.3),
+	R (>= 4.1.0),
 Imports:
 	argparser (>= 0.7.1),
 	BiocParallel (>= 1.32.5),
