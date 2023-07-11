@@ -1,6 +1,6 @@
 Package: multiomics
 Title: Takes quantitative multi-omics data as matrices and identifies correlating features of interest
-Version: 1.2.1
+Version: 1.2.2
 Authors@R: c(
     person(given = "Tyrone",
            family = "Chen",
@@ -40,7 +40,7 @@ Imports:
 	igraph (>= 1.4.1),
 	isoband (>= 0.2.7),
 	matrixStats (>= 0.63.0),
-	mixOmics (>= 6.3.2),
+	mixOmics (>= 6.23.4),
 	plyr (>= 1.8.8),
 	rARPACK (>= 0.11.0),
 	Rcpp (>= 1.0.10),
