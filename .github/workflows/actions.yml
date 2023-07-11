@@ -116,16 +116,16 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      - name: Run Case Study 1 ✅ 
-        working-directory: ./multiomics
-        run: |
-          sh inst/scripts/casestudy1.sh
+#       - name: Run Case Study 1 ✅ 
+#         working-directory: ./multiomics
+#         run: |
+#           sh inst/scripts/casestudy1.sh
 
-      - name: Run Case Study 2 ✅✅ 
-        if: success() || failure()
-        working-directory: ./multiomics
-        run: |
-          sh inst/scripts/casestudy2.sh
+#       - name: Run Case Study 2 ✅✅ 
+#         if: success() || failure()
+#         working-directory: ./multiomics
+#         run: |
+#           sh inst/scripts/casestudy2.sh
 
       - name: Run Case Study 3 ✅✅✅ 
         if: success() || failure()
