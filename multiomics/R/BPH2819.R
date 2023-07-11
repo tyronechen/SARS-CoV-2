@@ -2,7 +2,7 @@
 #'
 #' Data from a sepsis study. 12 samples of Staphylococcus aureus strain BPH2819.
 #' Divided into two categories, bacteria grown on RPMI media and from human sera.
-#' Three omics datasets are featured - metabolome, proteome, translatome.
+#' Three omics datasets are featured - metabolome, proteome, transcriptome.
 #' Original data had a small amount of missing values.
 #' Missing values were filled in with data imputation.
 #' For convenience and reproducibility this data object contains the imputed data.

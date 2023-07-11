@@ -1,4 +1,4 @@
-Rscript  inst/scripts/run_pipeline.R --tune_off \
+Rscript  inst/scripts/run_pipeline.R \
   --classes ../data/case_study_2/classes_diablo.tsv \
   --dropna_classes FALSE \
   --dropna_prop 0.3 \

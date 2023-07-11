@@ -1,7 +1,7 @@
 #!/bin/sh
 Rscript -e 'library(multiomics); data(BPH2819); export <- function(name, data) {write.table(data.frame(data), paste(name, ".tsv", sep=""), quote=FALSE, sep="\t", row.names=TRUE, col.names=NA)}; mapply(export, names(BPH2819), BPH2819, SIMPLIFY=FALSE)'
 
-Rscript run_pipeline.R \
+Rscript inst/scripts/run_pipeline.R \
   --classes classes.tsv \
   --data metabolome.tsv \
          proteome.tsv \

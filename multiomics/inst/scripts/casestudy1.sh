@@ -1,4 +1,4 @@
-Rscript  inst/scripts/run_pipeline.R --tune_off --low_var \
+Rscript  inst/scripts/run_pipeline.R --low_var \
   --classes ../data/case_study_1/classes_diablo.txt \
   --classes_secondary ../data/case_study_1/pch.txt \
   --dropna_classes TRUE \
