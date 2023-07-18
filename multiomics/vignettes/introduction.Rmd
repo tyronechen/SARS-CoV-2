@@ -50,6 +50,8 @@ Code in this package and git repository [https://gitlab.com/tyagilab/sars-cov-2/
 
 ## Quick
 
+> **NOTE**: This version of the pipeline is compatible with `R` version `4.2.3`.
+
 You can install this directly as an R package from gitlab:
 
 ```

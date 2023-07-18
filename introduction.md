@@ -51,6 +51,8 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 You can install this directly as an R package from gitlab. Note that you may get errors if you don't have `libgit2` and `freetype` libraries installed (these are not R packages).
 
+> **NOTE**: This version of the pipeline is compatible with `R` version `4.2.3`.
+
 ```
     install.packages("devtools")
     library("devtools")
