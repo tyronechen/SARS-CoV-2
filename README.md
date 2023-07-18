@@ -98,7 +98,7 @@ A visual summary of the pipeline is below:
 
 ### [Introduction and install instructions](introduction.md)
 
-> **NOTE**: This version of the pipeline is compatible with `R` version `4.2.3`.
+> **NOTE**: This version of the pipeline is compatible with `R` version `4.2.3` on linux.
 
 > **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper, please use the specific version of the pipeline available on zenodo for case studies 1 and 2 only.
 
