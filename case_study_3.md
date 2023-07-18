@@ -1,7 +1,7 @@
 Case study 3
 ================
 
-> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only. Please refer to case study 3 for latest usage.
 
 -   [1 Index](#index)
 -   [2 Running the script](#running-the-script)

@@ -1,7 +1,7 @@
 Case study 2
 ================
 
-> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only. Please refer to case study 3 for latest usage.
 
 -   [1 Index](#index)
 -   [2 Running the script](#running-the-script)
@@ -49,10 +49,10 @@ Contact Sonika Tyagi at <sonika.tyagi@monash.edu>.
 
 # 1 Index
 
--   [Introduction](introduction.html)
--   [Case study 1](case_study_1.html)
--   [Case study 2](case_study_2.html)
--   [Case study 3](case_study_3.html)
+-   [Introduction](introduction.md)
+-   [Case study 1](case_study_1.md)
+-   [Case study 2](case_study_2.md)
+-   [Case study 3](case_study_3.md)
 
 # 2 Running the script
 

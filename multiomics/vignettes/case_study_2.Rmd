@@ -19,8 +19,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper for case study 1 and 2, please use the specific version of the pipeline available on zenodo only.
-
+> **NOTE**: The pipeline API has changed since the original publication. To reproduce the results in the original COVID-19 paper, please use the specific version of the pipeline available on zenodo. Please refer to case study 3 for latest usage.
 ```{r init, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
